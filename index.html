@@ -1,320 +1,833 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>La Vida Control Pro</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --blue: #004085; --dark: #001a33; --light: #f4f7f9; --green: #28a745; --gray: #6c757d; --red: #dc3545; --gold: #d4af37; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--light); margin: 0; padding: 0; color: var(--dark); }
-        
-        /* Sticky Hero Header */
-        .header { 
-            background: var(--dark); color: white; padding: 15px; border-bottom: 5px solid var(--blue);
-            position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        :root {
+            --blue: #004085;
+            --dark: #001a33;
+            --light: #f0f4f8;
+            --green: #28a745;
+            --gray: #6c757d;
+            --red: #dc3545;
+            --gold: #d4af37;
         }
-        .header h1 { margin: 0; font-size: 1.3rem; letter-spacing: 2px; color: var(--gold); text-align: center; }
-        .today-panel { 
-            background: rgba(255,255,255,0.05); margin-top: 10px; padding: 10px; border-radius: 12px; 
-            display: flex; justify-content: space-between; border: 1px solid rgba(212,175,55,0.2); 
-        }
-        .today-stat h4 { margin: 0; font-size: 0.55rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; }
-        .today-stat p { margin: 4px 0 0; font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; gap: 4px; }
-        
-        .trend-badge { font-size: 0.6rem; padding: 1px 4px; border-radius: 4px; font-weight: 800; display: none; }
-        .trend-up { background: rgba(40, 167, 69, 0.2); color: #4ade80; display: inline-block; }
-        .trend-down { background: rgba(220, 53, 69, 0.2); color: #f87171; display: inline-block; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        body { background: var(--light); font-family: 'DM Sans', system-ui, sans-serif; color: var(--dark); }
 
-        #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; position: fixed; width: 100%; top:0; z-index: 5000; }
-        .login-card { background: white; width: 100%; max-width: 340px; padding: 40px 25px; border-radius: 24px; text-align: center; }
-        #mainApp { display: none; }
-        
-        .container { padding: 15px; max-width: 480px; margin: auto; }
-        .primary-cta { background: var(--blue); color: white; width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,64,133,0.3); }
-        
-        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: white; padding: 15px; border-radius: 16px; border-left: 4px solid var(--blue); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-        .stat-card h4 { margin: 0; font-size: 0.6rem; color: var(--gray); text-transform: uppercase; }
-        .stat-card p { margin: 6px 0 0; font-size: 0.8rem; font-weight: bold; }
+```
+    /* ── LOGIN ── */
+    #loginPage {
+        display: flex; justify-content: center; align-items: center;
+        height: 100vh; background: var(--dark); padding: 20px;
+    }
+    .login-card {
+        background: white; width: 100%; max-width: 340px;
+        padding: 44px 28px; border-radius: 28px; text-align: center;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+    }
+    .login-logo {
+        font-family: 'Syne', sans-serif; font-size: 2rem;
+        letter-spacing: 6px; color: var(--dark); margin-bottom: 4px;
+    }
+    .login-sub { color: var(--gray); font-size: 0.75rem; margin-bottom: 32px; }
+    .pin-dots {
+        display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; height: 14px;
+    }
+    .pin-dot {
+        width: 12px; height: 12px; border-radius: 50%;
+        border: 2px solid #ccc; background: transparent; transition: 0.2s;
+    }
+    .pin-dot.filled { background: var(--blue); border-color: var(--blue); }
+    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+    .num-btn {
+        padding: 18px; border: 1px solid #eee; border-radius: 16px; background: #fafafa;
+        font-size: 1.2rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif;
+        transition: 0.15s;
+    }
+    .num-btn:active { background: var(--blue); color: white; }
+    .num-btn.del { font-size: 1rem; color: var(--red); }
+    .num-btn.enter { background: var(--blue); color: white; font-size: 0.8rem; letter-spacing: 1px; }
+    .num-btn.enter:active { background: #002d5e; }
+    #pinError { color: var(--red); font-size: 0.8rem; min-height: 20px; }
 
-        /* BACKDROP & MODAL */
-        .modal-overlay { display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1999; backdrop-filter: blur(2px); }
-        .modal { 
-            display: none; background: white; padding: 20px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); 
-            border-top: 6px solid var(--blue); position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            width: 92%; max-height: 85vh; overflow-y: auto; z-index: 2000; 
-        }
-        
-        .field-group { margin-bottom: 12px; }
-        .field-label { font-size: 0.7rem; font-weight: 800; color: var(--blue); text-transform: uppercase; display: block; margin-bottom: 4px; }
-        input, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; background: #fafafa; outline: none; }
-        
-        .entry-item { background: white; padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ddd; }
-        .entry-item.is-today { border-left-color: var(--gold); background: #fffdf5; }
-        .note-text { font-size: 0.7rem; color: var(--gray); font-style: italic; display: block; margin-top: 4px; }
-        
-        .btn-circle { border: none; background: #f0f2f5; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .secondary-actions { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-sec { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; background: white; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
-        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; color:white; }
-    </style>
+    /* ── MAIN APP ── */
+    #mainApp { display: none; }
+
+    /* ── STICKY HEADER ── */
+    .header {
+        background: var(--dark); color: white;
+        padding: 14px 16px 16px;
+        border-bottom: 4px solid var(--gold);
+        position: sticky; top: 0; z-index: 500;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .header-top {
+        display: flex; justify-content: space-between;
+        align-items: center; margin-bottom: 12px;
+    }
+    .header-logo {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.3rem; letter-spacing: 4px; color: var(--gold);
+    }
+    .header-date { font-size: 0.65rem; color: rgba(255,255,255,0.5); text-align: right; }
+
+    .today-panel {
+        display: grid; grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px; background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(212,175,55,0.2);
+        border-radius: 14px; padding: 10px 12px;
+    }
+    .today-stat h4 {
+        font-size: 0.5rem; color: var(--gold);
+        text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;
+    }
+    .today-stat p { font-size: 0.82rem; font-weight: 700; color: white; }
+    .today-stat.right { text-align: right; }
+    .today-stat.center { text-align: center; }
+
+    .trend-badge {
+        display: inline-block; font-size: 0.55rem;
+        padding: 1px 5px; border-radius: 4px; font-weight: 800;
+    }
+    .trend-up { background: rgba(40,167,69,0.25); color: #4ade80; }
+    .trend-down { background: rgba(220,53,69,0.25); color: #f87171; }
+
+    /* ── CONTAINER ── */
+    .container { padding: 16px; max-width: 480px; margin: auto; }
+
+    /* ── PRIMARY CTA ── */
+    .primary-cta {
+        background: var(--blue); color: white; width: 100%;
+        padding: 17px; border: none; border-radius: 16px;
+        font-size: 1rem; font-weight: 800; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 20px rgba(0,64,133,0.3);
+        font-family: 'Syne', sans-serif; letter-spacing: 1px;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .primary-cta:active { transform: scale(0.98); box-shadow: 0 4px 10px rgba(0,64,133,0.2); }
+
+    /* ── SUMMARY GRID ── */
+    .summary-grid {
+        display: grid; grid-template-columns: 1fr 1fr;
+        gap: 10px; margin-bottom: 16px;
+    }
+    .stat-card {
+        background: white; padding: 14px; border-radius: 16px;
+        border-left: 4px solid var(--blue);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .stat-card h4 {
+        font-size: 0.58rem; color: var(--gray);
+        text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+    .stat-card p { font-size: 0.88rem; font-weight: 700; }
+    .stat-card.balance-card {
+        grid-column: 1 / -1;
+        background: linear-gradient(135deg, #e8f0fe, #dbeafe);
+        border-left-color: var(--green);
+    }
+    .stat-card.balance-card p { font-size: 1rem; color: #1a5c2a; }
+
+    /* ── SECONDARY ACTIONS ── */
+    .secondary-actions { display: flex; gap: 10px; margin-bottom: 18px; }
+    .btn-sec {
+        flex: 1; padding: 12px; border-radius: 12px;
+        border: 1px solid #dde3ea; background: white;
+        font-weight: 700; cursor: pointer;
+        font-size: 0.75rem; font-family: 'DM Sans', sans-serif;
+        transition: background 0.15s;
+    }
+    .btn-sec:active { background: #f0f0f0; }
+
+    /* ── TRANSACTION HISTORY ── */
+    .section-label {
+        font-size: 0.65rem; font-weight: 700; color: var(--gray);
+        text-transform: uppercase; letter-spacing: 1px;
+        display: block; margin-bottom: 10px;
+    }
+    .entry-item {
+        background: white; padding: 14px 14px 14px 16px;
+        border-radius: 16px; margin-bottom: 10px;
+        display: flex; justify-content: space-between; align-items: center;
+        border-left: 4px solid #e0e6ef;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .entry-item.is-today {
+        border-left-color: var(--gold);
+        background: #fffdf5;
+    }
+    .entry-date { font-size: 0.88rem; font-weight: 700; }
+    .entry-meta { font-size: 0.72rem; color: var(--gray); margin-top: 3px; }
+    .entry-note { font-size: 0.68rem; color: var(--gray); font-style: italic; margin-top: 4px; }
+    .tag-today {
+        display: inline-block; background: var(--gold); color: var(--dark);
+        font-size: 0.45rem; padding: 2px 6px; border-radius: 4px;
+        font-weight: 900; margin-left: 6px; vertical-align: middle;
+        letter-spacing: 0.5px;
+    }
+    .entry-net {
+        font-size: 0.75rem; font-weight: 700; margin-top: 3px;
+    }
+    .entry-net.pos { color: var(--green); }
+    .entry-net.neg { color: var(--red); }
+
+    .action-btns { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-circle {
+        border: none; background: #f0f3f6;
+        width: 38px; height: 38px; border-radius: 50%;
+        cursor: pointer; display: flex;
+        align-items: center; justify-content: center;
+        font-size: 0.95rem; transition: background 0.15s;
+    }
+    .btn-circle:active { background: #e0e3e6; }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.55); z-index: 1500;
+        backdrop-filter: blur(3px);
+        justify-content: center; align-items: flex-end;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+        background: white; width: 100%; max-width: 480px;
+        border-radius: 28px 28px 0 0;
+        border-top: 5px solid var(--blue);
+        padding: 24px 20px 36px;
+        max-height: 92vh; overflow-y: auto;
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+        animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp {
+        from { transform: translateY(40px); opacity: 0; }
+        to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal-handle {
+        width: 36px; height: 4px; border-radius: 2px;
+        background: #ddd; margin: 0 auto 20px;
+    }
+    .modal-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.1rem; text-align: center;
+        margin-bottom: 20px; color: var(--dark);
+    }
+
+    .field-group { margin-bottom: 14px; }
+    .field-label {
+        font-size: 0.65rem; font-weight: 700; color: var(--blue);
+        text-transform: uppercase; letter-spacing: 0.5px;
+        margin-bottom: 6px; display: block;
+    }
+    input[type=date], input[type=number], input[type=month], input[type=text], textarea {
+        width: 100%; padding: 13px; border: 1.5px solid #e0e6ef;
+        border-radius: 12px; font-size: 0.95rem;
+        background: #fafbfc; outline: none;
+        font-family: 'DM Sans', sans-serif;
+        transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus { border-color: var(--blue); background: white; }
+    textarea { height: 64px; resize: none; }
+
+    .save-bar {
+        position: sticky; bottom: 0;
+        background: white; padding-top: 12px;
+        margin-top: 6px;
+    }
+
+    /* ── LOADING OVERLAY ── */
+    .loading-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,26,51,0.8); z-index: 9999;
+        justify-content: center; align-items: center;
+        flex-direction: column; gap: 14px; color: white;
+    }
+    .spinner {
+        width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.2);
+        border-top-color: var(--gold); border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 0.8rem; letter-spacing: 2px; opacity: 0.7; }
+
+    /* ── TOAST ── */
+    .toast {
+        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+        background: var(--dark); color: white; padding: 12px 24px;
+        border-radius: 12px; font-size: 0.82rem; font-weight: 600;
+        z-index: 9998; opacity: 0; transition: opacity 0.3s;
+        pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+        text-align: center; padding: 32px 20px;
+        color: var(--gray); font-size: 0.85rem;
+    }
+    .empty-state .icon { font-size: 2rem; margin-bottom: 10px; }
+</style>
+```
+
 </head>
 <body>
 
-<div id="loadingOverlay" class="loading-overlay"><b>⏳ SYNCING DATA...</b></div>
-<div id="modalOverlay" class="modal-overlay" onclick="closeModals()"></div>
+<!-- Loading Overlay -->
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text">SYNCING...</div>
+</div>
+
+<!-- Toast -->
+
+<div id="toast" class="toast"></div>
+
+<!-- LOGIN PAGE -->
 
 <div id="loginPage">
     <div class="login-card">
-        <h1 style="margin:0; letter-spacing:3px;">LA VIDA</h1>
-        <p style="color:var(--gray); font-size:0.8rem; margin-bottom:30px;">Security Verification</p>
-        <input type="password" id="passInput" inputmode="numeric" placeholder="••••••" style="text-align:center; letter-spacing:10px; font-size:1.5rem;">
-        <button class="primary-cta" style="margin-top:20px;" onclick="checkLogin()">UNLOCK</button>
+        <div class="login-logo">LA VIDA</div>
+        <div class="login-sub">Authorized Access Only</div>
+        <div class="pin-dots" id="pinDots">
+            <div class="pin-dot" id="dot0"></div>
+            <div class="pin-dot" id="dot1"></div>
+            <div class="pin-dot" id="dot2"></div>
+            <div class="pin-dot" id="dot3"></div>
+            <div class="pin-dot" id="dot4"></div>
+            <div class="pin-dot" id="dot5"></div>
+        </div>
+        <div class="numpad">
+            <button class="num-btn" onclick="pinPress('1')">1</button>
+            <button class="num-btn" onclick="pinPress('2')">2</button>
+            <button class="num-btn" onclick="pinPress('3')">3</button>
+            <button class="num-btn" onclick="pinPress('4')">4</button>
+            <button class="num-btn" onclick="pinPress('5')">5</button>
+            <button class="num-btn" onclick="pinPress('6')">6</button>
+            <button class="num-btn" onclick="pinPress('7')">7</button>
+            <button class="num-btn" onclick="pinPress('8')">8</button>
+            <button class="num-btn" onclick="pinPress('9')">9</button>
+            <button class="num-btn del" onclick="pinDel()">⌫</button>
+            <button class="num-btn" onclick="pinPress('0')">0</button>
+            <button class="num-btn enter" onclick="checkLogin()">OK</button>
+        </div>
+        <div id="pinError"></div>
     </div>
 </div>
+
+<!-- MAIN APP -->
 
 <div id="mainApp">
-    <div class="header">
-        <h1>LA VIDA</h1>
-        <div class="today-panel">
-            <div class="today-stat">
-                <h4>Today Sales</h4>
-                <p><span id="daySales">0 TZS</span> <span id="salesTrend" class="trend-badge"></span></p>
-            </div>
-            <div class="today-stat" style="text-align: right;">
-                <h4>Net Balance</h4>
-                <p><span id="balTrend" class="trend-badge"></span> <span id="topBalance" style="color:var(--gold)">0 TZS</span></p>
-            </div>
+
+```
+<!-- Sticky Header -->
+<div class="header">
+    <div class="header-top">
+        <div class="header-logo">LA VIDA</div>
+        <div class="header-date" id="headerDate"></div>
+    </div>
+    <div class="today-panel">
+        <div class="today-stat">
+            <h4>Today Sales</h4>
+            <p id="daySales">— TZS</p>
         </div>
-    </div>
-
-    <div class="container">
-        <button class="primary-cta" onclick="openForm('new')" style="margin-top:10px;"><span>➕</span> ADD DAILY ENTRY</button>
-        <div class="summary-grid">
-            <div class="stat-card"><h4>Stock Value</h4><p id="totalStock">...</p></div>
-            <div class="stat-card"><h4>Other Exp</h4><p id="totalOther">...</p></div>
-            <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
-            <div class="stat-card"><h4>Savings</h4><p id="totalSavings">...</p></div>
+        <div class="today-stat center">
+            <h4>Today Net</h4>
+            <p id="dayNet">—</p>
         </div>
-        <div class="secondary-actions">
-            <button class="btn-sec" onclick="openForm('search')">🔍 FIND DATE</button>
-            <button class="btn-sec" onclick="openForm('report')">📄 REPORTS</button>
+        <div class="today-stat right">
+            <h4>All Balance</h4>
+            <p id="topBalance" style="color:var(--gold)">— TZS</p>
         </div>
-        <div id="entryList"></div>
-        <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:10px; display:none;" onclick="loadMore()">VIEW MORE</button>
-    </div>
-
-    <div id="entryModal" class="modal">
-        <h3 id="formTitle" style="margin:0 0 15px 0; text-align: center;">Entry</h3>
-        <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
-        <div class="field-group"><span class="field-label">Sales (TZS)</span><input type="number" id="sales" placeholder="0" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Stocking</span><input type="number" id="stock" placeholder="0" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Other Exp</span><input type="number" id="other" placeholder="0" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Savings</span><input type="number" id="savings" placeholder="0" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Note</span><textarea id="note" style="height:50px;"></textarea></div>
-        <button class="primary-cta" onclick="saveRecord()">SAVE DATA</button>
-        <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
-    </div>
-
-    <div id="searchModal" class="modal">
-        <h3 style="margin:0 0 15px 0; text-align: center;">Find Record</h3>
-        <input type="date" id="searchDate" style="margin-bottom:15px;">
-        <button class="primary-cta" onclick="findDate()">SEARCH</button>
-        <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
-    </div>
-
-    <div id="reportModal" class="modal">
-        <h3 style="margin:0 0 15px 0; text-align: center;">Generate Report</h3>
-        <p style="font-size:0.8rem; text-align:center; color:var(--gray);">Export entire history to PDF</p>
-        <button class="primary-cta" onclick="generatePDF()">DOWNLOAD PDF</button>
-        <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
     </div>
 </div>
 
+<div class="container">
+
+    <!-- Primary Action -->
+    <button class="primary-cta" onclick="openModal('entry')" style="margin-top:14px;">
+        ➕ ADD DAILY ENTRY
+    </button>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+        <div class="stat-card">
+            <h4>Total Sales</h4>
+            <p id="totalSales">...</p>
+        </div>
+        <div class="stat-card">
+            <h4>Stock Value</h4>
+            <p id="totalStock">...</p>
+        </div>
+        <div class="stat-card">
+            <h4>Other Expenses</h4>
+            <p id="totalOther">...</p>
+        </div>
+        <div class="stat-card">
+            <h4>Total Savings</h4>
+            <p id="totalSavings">...</p>
+        </div>
+        <div class="stat-card balance-card">
+            <h4>Current Cash Balance</h4>
+            <p id="totalBalance">...</p>
+        </div>
+    </div>
+
+    <!-- Secondary Actions -->
+    <div class="secondary-actions">
+        <button class="btn-sec" onclick="openModal('search')">🔍 FIND DATE</button>
+        <button class="btn-sec" onclick="openModal('report')">📄 REPORTS</button>
+    </div>
+
+    <!-- Transaction History -->
+    <span class="section-label">Transaction History</span>
+    <div id="entryList"></div>
+    <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:4px; display:none;" onclick="loadMore()">VIEW MORE</button>
+
+</div>
+```
+
+</div>
+
+<!-- ── MODAL: ENTRY FORM ── -->
+
+<div class="modal-overlay" id="overlayEntry" onclick="overlayClose(event,'overlayEntry')">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title" id="formTitle">New Entry</div>
+        <div class="field-group">
+            <span class="field-label">Date</span>
+            <input type="date" id="date">
+        </div>
+        <div class="field-group">
+            <span class="field-label">Sales (TZS)</span>
+            <input type="number" id="sales" placeholder="0" inputmode="decimal">
+        </div>
+        <div class="field-group">
+            <span class="field-label">Stocking (TZS)</span>
+            <input type="number" id="stock" placeholder="0" inputmode="decimal">
+        </div>
+        <div class="field-group">
+            <span class="field-label">Other Expenses (TZS)</span>
+            <input type="number" id="other" placeholder="0" inputmode="decimal">
+        </div>
+        <div class="field-group">
+            <span class="field-label">Savings (TZS)</span>
+            <input type="number" id="savings" placeholder="0" inputmode="decimal">
+        </div>
+        <div class="field-group">
+            <span class="field-label">Note (optional)</span>
+            <textarea id="note" placeholder="e.g. slow day, public holiday..."></textarea>
+        </div>
+        <div class="save-bar">
+            <button class="primary-cta" style="margin-bottom:10px;" onclick="saveRecord()">SAVE RECORD</button>
+            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: SEARCH / FIND DATE ── -->
+
+<div class="modal-overlay" id="overlaySearch" onclick="overlayClose(event,'overlaySearch')">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Find a Date</div>
+        <div class="field-group">
+            <span class="field-label">Select Date</span>
+            <input type="date" id="searchDate">
+        </div>
+        <button class="primary-cta" style="margin-top:6px;" onclick="executeSearch()">SEARCH</button>
+        <button class="btn-sec" style="width:100%; border:none; margin-top:8px;" onclick="closeModals()">CLOSE</button>
+    </div>
+</div>
+
+<!-- ── MODAL: REPORTS ── -->
+
+<div class="modal-overlay" id="overlayReport" onclick="overlayClose(event,'overlayReport')">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Monthly Report</div>
+        <div class="field-group">
+            <span class="field-label">Select Month</span>
+            <input type="month" id="reportMonth">
+        </div>
+        <button class="primary-cta" style="margin-top:6px;" onclick="generatePDF()">DOWNLOAD PDF</button>
+        <button class="btn-sec" style="width:100%; border:none; margin-top:8px;" onclick="closeModals()">CLOSE</button>
+    </div>
+</div>
+
+<!-- jsPDF -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
 <script>
+// ── CONFIG ──────────────────────────────────────────────
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDqLcc9kqXA8sH1cfdZ17asFXBXfZ8mwVpXXiPeZV-uesUw_KlIfquwZJsx2Q7pq00/exec";
+const PIN = "112511"; // ⚠️ Move this to server-side when possible
+
 let data = [];
 let displayLimit = 5;
+let pinBuffer = "";
 
-const getLocStr = (d = new Date()) => d.toLocaleDateString('sv-SE');
+// ── HELPERS ─────────────────────────────────────────────
+function getLocalDateStr(d = new Date()) {
+    return d.toLocaleDateString('sv-SE'); // YYYY-MM-DD using local time
+}
+
+function fmt(n) { return Number(n).toLocaleString() + " TZS"; }
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showLoader(on) {
+    document.getElementById('loadingOverlay').style.display = on ? 'flex' : 'none';
+}
+
+// ── PIN / LOGIN ──────────────────────────────────────────
+function pinPress(d) {
+    if (pinBuffer.length >= 6) return;
+    pinBuffer += d;
+    updateDots();
+    if (pinBuffer.length === 6) setTimeout(checkLogin, 150);
+}
+
+function pinDel() {
+    pinBuffer = pinBuffer.slice(0, -1);
+    updateDots();
+}
+
+function updateDots() {
+    for (let i = 0; i < 6; i++) {
+        document.getElementById('dot' + i).classList.toggle('filled', i < pinBuffer.length);
+    }
+}
 
 function checkLogin() {
-    if (document.getElementById('passInput').value === "112511") {
+    if (pinBuffer === PIN) {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
+        setHeaderDate();
         fetchData();
-    } else { alert("Wrong Code"); }
+    } else {
+        document.getElementById('pinError').innerText = "Incorrect PIN. Try again.";
+        pinBuffer = "";
+        updateDots();
+        setTimeout(() => document.getElementById('pinError').innerText = "", 2000);
+    }
 }
 
+// Keyboard PIN support
+document.addEventListener('keydown', e => {
+    if (document.getElementById('loginPage').style.display === 'none') return;
+    if (e.key >= '0' && e.key <= '9') pinPress(e.key);
+    if (e.key === 'Backspace') pinDel();
+    if (e.key === 'Enter') checkLogin();
+});
+
+// ── HEADER DATE ─────────────────────────────────────────
+function setHeaderDate() {
+    const now = new Date();
+    document.getElementById('headerDate').innerHTML =
+        now.toLocaleDateString('en-TZ', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+}
+
+// ── DATA ────────────────────────────────────────────────
 async function fetchData() {
-    document.getElementById('loadingOverlay').style.display = 'flex';
+    showLoader(true);
     try {
-        const res = await fetch(SCRIPT_URL);
+        const res = await fetch(SCRIPT_URL + '?t=' + Date.now()); // cache-bust
         data = await res.json();
         render();
-    } catch (e) { console.error(e); }
-    document.getElementById('loadingOverlay').style.display = 'none';
+    } catch (e) {
+        console.error(e);
+        showToast("⚠️ Could not load data. Check connection.");
+    }
+    showLoader(false);
 }
 
+// ── RENDER ───────────────────────────────────────────────
 function render() {
     const list = document.getElementById('entryList');
     list.innerHTML = '';
+
     let totalSales = 0, totalStock = 0, totalOther = 0, totalSavings = 0;
-    let dayS = 0, yesterdayS = 0;
-    let runningBalance = 0, yesterdayBalanceTotal = 0;
+    let dayS = null, dayStock = 0, dayOther = 0, daySavings = 0;
+    let runningBalance = 0;
 
-    const todayStr = getLocStr();
-    const yest = new Date(); yest.setDate(yest.getDate() - 1);
-    const yesterdayStr = getLocStr(yest);
+    const todayStr = getLocalDateStr();
 
-    data.sort((a,b) => new Date(a.date) - new Date(b.date));
-    
+    // Sort ascending for running balance
+    data.sort((a, b) => new Date(a.date) - new Date(b.date));
+
     data.forEach(row => {
-        const rowDate = row.date.split('T')[0];
-        const rowNet = row.sales - row.stocking - row.other - row.savings;
-        runningBalance += rowNet;
-        
-        totalSales += row.sales; totalStock += row.stocking; 
-        totalOther += row.other; totalSavings += row.savings;
+        const rowDate = (row.date || '').split('T')[0];
+        totalSales    += Number(row.sales)    || 0;
+        totalStock    += Number(row.stocking) || 0;
+        totalOther    += Number(row.other)    || 0;
+        totalSavings  += Number(row.savings)  || 0;
+        runningBalance = totalSales - totalStock - totalOther - totalSavings;
 
-        if(rowDate === todayStr) dayS = row.sales;
-        if(rowDate === yesterdayStr) {
-            yesterdayS = row.sales;
-            yesterdayBalanceTotal = runningBalance;
+        if (rowDate === todayStr) {
+            dayS        = Number(row.sales)    || 0;
+            dayStock    = Number(row.stocking) || 0;
+            dayOther    = Number(row.other)    || 0;
+            daySavings  = Number(row.savings)  || 0;
         }
     });
 
-    const sBadge = document.getElementById('salesTrend');
-    if(dayS > 0 && yesterdayS > 0) {
-        const sDiff = ((dayS - yesterdayS) / yesterdayS) * 100;
-        sBadge.innerText = (sDiff >= 0 ? "↑ " : "↓ ") + Math.abs(sDiff).toFixed(0) + "%";
-        sBadge.style.display = "inline-block";
-        sBadge.className = "trend-badge " + (sDiff >= 0 ? "trend-up" : "trend-down");
-    } else { sBadge.style.display = "none"; }
+    // Today panel
+    if (dayS !== null) {
+        const dayNet = dayS - dayStock - dayOther - daySavings;
+        document.getElementById('daySales').innerText = fmt(dayS);
+        document.getElementById('dayNet').innerText   = fmt(dayNet);
+        document.getElementById('dayNet').style.color = dayNet >= 0 ? '#4ade80' : '#f87171';
+    } else {
+        document.getElementById('daySales').innerText = '— TZS';
+        document.getElementById('dayNet').innerText   = 'No entry';
+        document.getElementById('dayNet').style.color = 'rgba(255,255,255,0.5)';
+    }
+    document.getElementById('topBalance').innerText = fmt(runningBalance);
 
-    const bBadge = document.getElementById('balTrend');
-    if(yesterdayBalanceTotal !== 0) {
-        const bDiff = ((runningBalance - yesterdayBalanceTotal) / Math.abs(yesterdayBalanceTotal)) * 100;
-        bBadge.innerText = (bDiff >= 0 ? "↑ " : "↓ ") + Math.abs(bDiff).toFixed(0) + "%";
-        bBadge.style.display = "inline-block";
-        bBadge.className = "trend-badge " + (bDiff >= 0 ? "trend-up" : "trend-down");
-    } else { bBadge.style.display = "none"; }
+    // Summary cards
+    document.getElementById('totalSales').innerText   = fmt(totalSales);
+    document.getElementById('totalStock').innerText   = fmt(totalStock);
+    document.getElementById('totalOther').innerText   = fmt(totalOther);
+    document.getElementById('totalSavings').innerText = fmt(totalSavings);
+    document.getElementById('totalBalance').innerText = fmt(runningBalance);
 
-    document.getElementById('daySales').innerText = dayS.toLocaleString() + " TZS";
-    document.getElementById('topBalance').innerText = runningBalance.toLocaleString() + " TZS";
-    document.getElementById('totalSales').innerText = totalSales.toLocaleString() + " TZS";
-    document.getElementById('totalStock').innerText = totalStock.toLocaleString() + " TZS";
-    document.getElementById('totalOther').innerText = totalOther.toLocaleString() + " TZS";
-    document.getElementById('totalSavings').innerText = totalSavings.toLocaleString() + " TZS";
+    // Transaction list (most recent first)
+    const sorted = [...data].reverse();
+    const visible = sorted.slice(0, displayLimit);
 
-    const visible = [...data].reverse().slice(0, displayLimit);
-    visible.forEach(row => {
-        const rowDate = row.date.split('T')[0];
-        list.innerHTML += `
-            <div class="entry-item ${rowDate === todayStr ? 'is-today' : ''}">
-                <div style="max-width: 65%;">
-                    <b style="font-size:0.9rem;">${rowDate}</b><br>
-                    <small style="color:var(--gray)">Sales: ${row.sales.toLocaleString()} TZS</small>
+    if (visible.length === 0) {
+        list.innerHTML = `<div class="empty-state"><div class="icon">📋</div>No records yet.<br>Tap ADD DAILY ENTRY to get started.</div>`;
+    } else {
+        const fragment = document.createDocumentFragment();
+        visible.forEach(row => {
+            const rowDate = (row.date || '').split('T')[0];
+            const isToday = rowDate === todayStr;
+            const sales   = Number(row.sales)    || 0;
+            const stk     = Number(row.stocking) || 0;
+            const oth     = Number(row.other)    || 0;
+            const sav     = Number(row.savings)  || 0;
+            const net     = sales - stk - oth - sav;
+            const netCls  = net >= 0 ? 'pos' : 'neg';
+            const netSign = net >= 0 ? '+' : '';
+
+            const div = document.createElement('div');
+            div.className = 'entry-item' + (isToday ? ' is-today' : '');
+            div.innerHTML = `
+                <div style="min-width:0; flex:1;">
+                    <div class="entry-date">
+                        ${rowDate}${isToday ? '<span class="tag-today">TODAY</span>' : ''}
+                    </div>
+                    <div class="entry-meta">Sales: ${sales.toLocaleString()} | Exp: ${(stk+oth).toLocaleString()}</div>
+                    <div class="entry-net ${netCls}">Net: ${netSign}${net.toLocaleString()} TZS</div>
+                    ${row.note ? `<div class="entry-note">"${row.note}"</div>` : ''}
                 </div>
                 <div class="action-btns">
-                    <button class="btn-circle" onclick="editRow('${rowDate}')">✏️</button>
-                    <button class="btn-circle" style="color:var(--red)" onclick="deleteRow('${rowDate}')">🗑️</button>
-                </div>
-            </div>`;
-    });
+                    <button class="btn-circle" title="Edit" onclick="editRow('${rowDate}')">✏️</button>
+                    <button class="btn-circle" title="Delete" style="color:var(--red)" onclick="deleteRow('${rowDate}')">🗑️</button>
+                </div>`;
+            fragment.appendChild(div);
+        });
+        list.appendChild(fragment);
+    }
+
     document.getElementById('loadMoreBtn').style.display = data.length > displayLimit ? 'block' : 'none';
 }
 
-function openForm(type) {
+function loadMore() { displayLimit += 5; render(); }
+
+// ── MODALS ───────────────────────────────────────────────
+function openModal(type) {
     closeModals();
-    document.getElementById('modalOverlay').style.display = 'block';
-    if(type === 'new') {
-        document.getElementById('formTitle').innerText = "New Record";
-        document.querySelectorAll('#entryModal input, #entryModal textarea').forEach(i => i.value = '');
-        document.getElementById('date').value = getLocStr();
-        document.getElementById('entryModal').style.display = 'block';
-    } else if(type === 'search') {
-        document.getElementById('searchModal').style.display = 'block';
-    } else if(type === 'report') {
-        document.getElementById('reportModal').style.display = 'block';
+    if (type === 'entry') {
+        document.getElementById('formTitle').innerText = "New Entry";
+        document.querySelectorAll('#overlayEntry input, #overlayEntry textarea').forEach(i => i.value = '');
+        document.getElementById('date').value = getLocalDateStr();
+        document.getElementById('overlayEntry').classList.add('active');
+    } else if (type === 'search') {
+        document.getElementById('overlaySearch').classList.add('active');
+    } else if (type === 'report') {
+        const now = new Date();
+        document.getElementById('reportMonth').value = getLocalDateStr(now).slice(0, 7);
+        document.getElementById('overlayReport').classList.add('active');
     }
 }
 
 function closeModals() {
-    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-    document.getElementById('modalOverlay').style.display = 'none';
+    document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('active'));
 }
 
-function findDate() {
-    const sDate = document.getElementById('searchDate').value;
-    if(!sDate) return;
-    const found = data.find(d => d.date.split('T')[0] === sDate);
-    if(found) { editRow(sDate); } else { alert("No entry found for " + sDate); }
+function overlayClose(e, id) {
+    // Close when tapping the dark backdrop (not the modal card itself)
+    if (e.target.id === id) closeModals();
 }
 
+// ── SAVE ─────────────────────────────────────────────────
 async function saveRecord() {
+    const dateVal = document.getElementById('date').value;
+    if (!dateVal) { showToast("⚠️ Please select a date."); return; }
+
     const record = {
-        date: document.getElementById('date').value,
-        sales: parseFloat(document.getElementById('sales').value) || 0,
-        stocking: parseFloat(document.getElementById('stock').value) || 0,
-        other: parseFloat(document.getElementById('other').value) || 0,
-        savings: parseFloat(document.getElementById('savings').value) || 0,
-        note: document.getElementById('note').value || ""
+        date:     dateVal,
+        sales:    parseFloat(document.getElementById('sales').value)   || 0,
+        stocking: parseFloat(document.getElementById('stock').value)   || 0,
+        other:    parseFloat(document.getElementById('other').value)   || 0,
+        savings:  parseFloat(document.getElementById('savings').value) || 0,
+        note:     document.getElementById('note').value.trim() || ""
     };
-    if(!record.date) return alert("Date is required!");
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
+
     closeModals();
-    setTimeout(fetchData, 1200);
+    showLoader(true);
+    try {
+        await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
+        showToast("✅ Record saved!");
+    } catch (e) {
+        showToast("⚠️ Save may have failed. Check your connection.");
+    }
+    setTimeout(fetchData, 1400);
 }
 
+// ── EDIT ─────────────────────────────────────────────────
 function editRow(date) {
-    const found = data.find(d => d.date.split('T')[0] === date);
-    if(found) {
-        openForm('none'); // Just opens overlay
-        document.getElementById('formTitle').innerText = "Edit: " + date;
-        document.getElementById('date').value = date;
-        document.getElementById('sales').value = found.sales;
-        document.getElementById('stock').value = found.stocking;
-        document.getElementById('other').value = found.other;
-        document.getElementById('savings').value = found.savings;
-        document.getElementById('note').value = found.note || "";
-        document.getElementById('entryModal').style.display = 'block';
-        document.getElementById('modalOverlay').style.display = 'block';
+    const found = data.find(d => (d.date || '').split('T')[0] === date);
+    if (!found) { showToast("Record not found."); return; }
+    document.getElementById('formTitle').innerText  = "Editing: " + date;
+    document.getElementById('date').value           = date;
+    document.getElementById('sales').value          = found.sales    || '';
+    document.getElementById('stock').value          = found.stocking || '';
+    document.getElementById('other').value          = found.other    || '';
+    document.getElementById('savings').value        = found.savings  || '';
+    document.getElementById('note').value           = found.note     || '';
+    document.getElementById('overlayEntry').classList.add('active');
+}
+
+// ── SEARCH ───────────────────────────────────────────────
+function executeSearch() {
+    const d = document.getElementById('searchDate').value;
+    if (!d) { showToast("Select a date first."); return; }
+    const found = data.some(row => (row.date || '').split('T')[0] === d);
+    if (found) {
+        closeModals();
+        editRow(d);
+    } else {
+        showToast("No record found for " + d);
     }
 }
 
+// ── DELETE ───────────────────────────────────────────────
 async function deleteRow(d) {
-    if(!confirm("Archive " + d + "?")) return;
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({action:"archive", date:d}) });
-    setTimeout(fetchData, 1200);
+    if (!confirm("Delete record for " + d + "?\n\nThis cannot be undone.")) return;
+    showLoader(true);
+    try {
+        await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", date: d }) });
+        showToast("🗑️ Record deleted.");
+    } catch (e) {
+        showToast("⚠️ Delete may have failed.");
+    }
+    setTimeout(fetchData, 1400);
 }
 
+// ── PDF REPORT ───────────────────────────────────────────
 function generatePDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.text("LA VIDA SALES REPORT", 14, 15);
-    const tableData = data.map(r => [
-        r.date.split('T')[0],
-        r.sales.toLocaleString(),
-        r.stocking.toLocaleString(),
-        r.other.toLocaleString(),
-        r.savings.toLocaleString(),
-        (r.sales - r.stocking - r.other - r.savings).toLocaleString()
-    ]);
-    doc.autoTable({
-        startY: 20,
-        head: [['Date', 'Sales', 'Stock', 'Exp', 'Save', 'Net']],
-        body: tableData,
-    });
-    doc.save(`La_Vida_Report_${getLocStr()}.pdf`);
-}
+    const m = document.getElementById('reportMonth').value;
+    if (!m) { showToast("Select a month first."); return; }
 
-function loadMore() { displayLimit += 5; render(); }
+    const filtered = data.filter(d => (d.date || '').startsWith(m));
+    if (filtered.length === 0) { showToast("No records for " + m); return; }
+
+    filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    // Header
+    doc.setFillColor(0, 26, 51);
+    doc.rect(0, 0, 210, 30, 'F');
+    doc.setTextColor(212, 175, 55);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('LA VIDA MINIMART', 14, 13);
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Monthly Report — ' + m, 14, 22);
+    doc.text('Generated: ' + new Date().toLocaleDateString(), 150, 22);
+
+    // Totals summary
+    let totSales = 0, totStock = 0, totOther = 0, totSav = 0;
+    filtered.forEach(r => {
+        totSales += Number(r.sales)    || 0;
+        totStock += Number(r.stocking) || 0;
+        totOther += Number(r.other)    || 0;
+        totSav   += Number(r.savings)  || 0;
+    });
+    const totNet = totSales - totStock - totOther - totSav;
+
+    doc.setTextColor(0, 26, 51);
+    doc.setFontSize(8);
+    const summaryY = 38;
+    const summaries = [
+        ['Total Sales', totSales.toLocaleString() + ' TZS'],
+        ['Total Stock', totStock.toLocaleString() + ' TZS'],
+        ['Other Exp',   totOther.toLocaleString() + ' TZS'],
+        ['Savings',     totSav.toLocaleString()   + ' TZS'],
+        ['Net Balance', totNet.toLocaleString()   + ' TZS'],
+    ];
+    summaries.forEach((s, i) => {
+        const x = 14 + (i * 38);
+        doc.setFont('helvetica', 'bold');
+        doc.text(s[0], x, summaryY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(s[1], x, summaryY + 5);
+    });
+
+    // Table
+    const rows = filtered.map(r => {
+        const s  = Number(r.sales)    || 0;
+        const st = Number(r.stocking) || 0;
+        const o  = Number(r.other)    || 0;
+        const sv = Number(r.savings)  || 0;
+        return [
+            (r.date || '').split('T')[0],
+            s.toLocaleString(),
+            st.toLocaleString(),
+            o.toLocaleString(),
+            sv.toLocaleString(),
+            (s - st - o - sv).toLocaleString(),
+            r.note || ''
+        ];
+    });
+
+    doc.autoTable({
+        startY: summaryY + 14,
+        head: [['Date', 'Sales', 'Stock', 'Expenses', 'Savings', 'Net', 'Note']],
+        body: rows,
+        styles: { fontSize: 7.5, cellPadding: 3 },
+        headStyles: { fillColor: [0, 64, 133], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 248, 252] },
+        columnStyles: { 6: { cellWidth: 40 } }
+    });
+
+    doc.save('LaVida_Report_' + m + '.pdf');
+    showToast("📄 PDF downloaded!");
+}
 </script>
+
 </body>
 </html>

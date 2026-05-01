@@ -19,7 +19,9 @@
         html, body { height: 100%; }
         html { background: var(--dark); }
         body { background: var(--dark); font-family: 'DM Sans', system-ui, sans-serif; color: var(--dark); }
-        body.unlocked { background: var(--light); }
+        
+        /* ✅ FIXED: Ensures consistent background color for the app content */
+        body.unlocked { background: var(--light) !important; }
 
         /* ── LOGIN ── */
         #loginPage {
@@ -85,30 +87,23 @@
         .header-date { font-size: 0.65rem; color: rgba(255,255,255,0.5); text-align: right; }
 
         .today-panel {
-            display: grid; grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px; background: rgba(255,255,255,0.04);
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 12px; background: rgba(255,255,255,0.04);
             border: 1px solid rgba(212,175,55,0.2);
-            border-radius: 14px; padding: 10px 12px;
+            border-radius: 14px; padding: 12px;
         }
         .today-stat h4 {
-            font-size: 0.5rem; color: var(--gold);
+            font-size: 0.55rem; color: var(--gold);
             text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;
         }
-        .today-stat p { font-size: 0.82rem; font-weight: 700; color: white; }
-        .today-stat.right { text-align: right; }
-        .today-stat.center { text-align: center; }
-
-        .trend-badge {
-            display: inline-block; font-size: 0.55rem;
-            padding: 1px 5px; border-radius: 4px; font-weight: 800;
-        }
-        .trend-up { background: rgba(40,167,69,0.25); color: #4ade80; }
-        .trend-down { background: rgba(220,53,69,0.25); color: #f87171; }
+        .today-stat p { font-size: 0.9rem; font-weight: 700; color: white; }
+        .hero-trend { font-size: 0.65rem; font-weight: 700; margin-top: 2px; display: block; }
+        .stat-up { color: #4ade80; }
+        .stat-down { color: #f87171; }
 
         /* ── CONTAINER ── */
         .container { padding: 16px; max-width: 480px; margin: auto; }
 
-        /* ── PRIMARY CTA ── */
         .primary-cta {
             background: var(--blue); color: white; width: 100%;
             padding: 17px; border: none; border-radius: 16px;
@@ -118,11 +113,8 @@
             box-shadow: 0 8px 20px rgba(0,64,133,0.3);
             font-family: 'DM Sans', sans-serif; letter-spacing: 1.5px;
             text-transform: uppercase;
-            transition: transform 0.15s, box-shadow 0.15s;
         }
-        .primary-cta:active { transform: scale(0.98); box-shadow: 0 4px 10px rgba(0,64,133,0.2); }
 
-        /* ── SUMMARY GRID ── */
         .summary-grid {
             display: grid; grid-template-columns: 1fr 1fr;
             gap: 10px; margin-bottom: 16px;
@@ -132,30 +124,16 @@
             border-left: 4px solid var(--blue);
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
-        .stat-card h4 {
-            font-size: 0.58rem; color: var(--gray);
-            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
-        }
+        .stat-card h4 { font-size: 0.58rem; color: var(--gray); text-transform: uppercase; margin-bottom: 6px; }
         .stat-card p { font-size: 0.88rem; font-weight: 700; }
-        .stat-card.balance-card {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, #e8f0fe, #dbeafe);
-            border-left-color: var(--green);
-        }
-        .stat-card.balance-card p { font-size: 1rem; color: #1a5c2a; }
 
-        /* ── SECONDARY ACTIONS ── */
-        .secondary-actions { display: flex; gap: 10px; margin-bottom: 18px; }
         .btn-sec {
             flex: 1; padding: 12px; border-radius: 12px;
             border: 1px solid #dde3ea; background: white;
             font-weight: 700; cursor: pointer;
             font-size: 0.75rem; font-family: 'DM Sans', sans-serif;
-            transition: background 0.15s;
         }
-        .btn-sec:active { background: #f0f0f0; }
 
-        /* ── TRANSACTION HISTORY ── */
         .section-label {
             font-size: 0.65rem; font-weight: 700; color: var(--gray);
             text-transform: uppercase; letter-spacing: 1px;
@@ -168,113 +146,45 @@
             border-left: 4px solid #e0e6ef;
             box-shadow: 0 2px 6px rgba(0,0,0,0.04);
         }
-        .entry-item.is-today {
-            border-left-color: var(--gold);
-            background: #fffdf5;
-        }
+        .entry-item.is-today { border-left-color: var(--gold); background: #fffdf5; }
         .entry-date { font-size: 0.88rem; font-weight: 700; }
         .entry-meta { font-size: 0.72rem; color: var(--gray); margin-top: 3px; }
-        .entry-note { font-size: 0.68rem; color: var(--gray); font-style: italic; margin-top: 4px; }
         
-        /* ✅ FIXED CSS BLOCK */
         .sales-trend {
-            display: inline-block;
-            font-size: 0.68rem;
-            font-weight: 700;
-            margin-top: 4px;
-            padding: 2px 7px;
-            border-radius: 6px;
+            display: inline-block; font-size: 0.68rem; font-weight: 700;
+            margin-top: 4px; padding: 2px 7px; border-radius: 6px;
         }
 
         .tag-today {
-            display: inline-block;
-            background: var(--gold);
-            color: var(--dark);
-            font-size: 0.45rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 900;
-            margin-left: 6px;
-            vertical-align: middle;
+            display: inline-block; background: var(--gold); color: var(--dark);
+            font-size: 0.45rem; padding: 2px 6px; border-radius: 4px;
+            font-weight: 900; margin-left: 6px; vertical-align: middle;
             letter-spacing: 0.5px;
         }
 
-        .entry-net {
-            font-size: 0.75rem; font-weight: 700; margin-top: 3px;
-        }
-        .entry-net.pos { color: var(--green); }
-        .entry-net.neg { color: var(--red); }
-
-        .action-btns { display: flex; gap: 8px; flex-shrink: 0; }
+        .action-btns { display: flex; gap: 8px; }
         .btn-circle {
             border: none; background: #f0f3f6;
             width: 38px; height: 38px; border-radius: 50%;
-            cursor: pointer; display: flex;
-            align-items: center; justify-content: center;
-            font-size: 0.95rem; transition: background 0.15s;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .btn-circle:active { background: #e0e3e6; }
 
-        /* ── MODAL OVERLAY ── */
         .modal-overlay {
             display: none; position: fixed; inset: 0;
             background: rgba(0,0,0,0.55); z-index: 1500;
-            backdrop-filter: blur(3px);
-            justify-content: center; align-items: flex-end;
+            backdrop-filter: blur(3px); justify-content: center; align-items: flex-end;
         }
         .modal-overlay.active { display: flex; }
-
         .modal {
             background: white; width: 100%; max-width: 480px;
-            border-radius: 28px 28px 0 0;
-            border-top: 5px solid var(--blue);
-            padding: 24px 20px 36px;
-            max-height: 92vh; overflow-y: auto;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
-            animation: slideUp 0.25s ease;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(40px); opacity: 0; }
-            to   { transform: translateY(0);    opacity: 1; }
-        }
-        .modal-handle {
-            width: 36px; height: 4px; border-radius: 2px;
-            background: #ddd; margin: 0 auto 20px;
-        }
-        .modal-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.1rem; text-align: center;
-            margin-bottom: 20px; color: var(--dark);
+            border-radius: 28px 28px 0 0; padding: 24px 20px 36px;
         }
 
-        .field-group { margin-bottom: 14px; }
-        .field-label {
-            font-size: 0.65rem; font-weight: 700; color: var(--blue);
-            text-transform: uppercase; letter-spacing: 0.5px;
-            margin-bottom: 6px; display: block;
-        }
-        input[type=date], input[type=number], input[type=month], input[type=text], textarea {
-            width: 100%; padding: 13px; border: 1.5px solid #e0e6ef;
-            border-radius: 12px; font-size: 0.95rem;
-            background: #fafbfc; outline: none;
-            font-family: 'DM Sans', sans-serif;
-            transition: border-color 0.15s;
-        }
-        input:focus, textarea:focus { border-color: var(--blue); background: white; }
-        textarea { height: 64px; resize: none; }
-
-        .save-bar {
-            position: sticky; bottom: 0;
-            background: white; padding-top: 12px;
-            margin-top: 6px;
-        }
-
-        /* ── LOADING OVERLAY ── */
         .loading-overlay {
             display: none; position: fixed; inset: 0;
             background: rgba(0,26,51,0.8); z-index: 9999;
             justify-content: center; align-items: center;
-            flex-direction: column; gap: 14px; color: white;
+            flex-direction: column; color: white;
         }
         .spinner {
             width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.2);
@@ -282,35 +192,21 @@
             animation: spin 0.7s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text { font-size: 0.8rem; letter-spacing: 2px; opacity: 0.7; }
-
-        /* ── TOAST ── */
         .toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             background: var(--dark); color: white; padding: 12px 24px;
-            border-radius: 12px; font-size: 0.82rem; font-weight: 600;
-            z-index: 9998; opacity: 0; transition: opacity 0.3s;
-            pointer-events: none; white-space: nowrap;
+            border-radius: 12px; font-size: 0.82rem; z-index: 9998; opacity: 0; transition: 0.3s;
         }
         .toast.show { opacity: 1; }
-
-        /* ── EMPTY STATE ── */
-        .empty-state {
-            text-align: center; padding: 32px 20px;
-            color: var(--gray); font-size: 0.85rem;
-        }
-        .empty-state .icon { font-size: 2rem; margin-bottom: 10px; }
     </style>
 </head>
-<body>
+<body onload="checkSession()">
 
-<!-- Loading Overlay -->
 <div id="loadingOverlay" class="loading-overlay">
     <div class="spinner"></div>
-    <div class="loading-text">SYNCING...</div>
+    <div style="margin-top:10px; font-size:0.8rem;">SYNCING...</div>
 </div>
 
-<!-- Toast -->
 <div id="toast" class="toast"></div>
 
 <!-- LOGIN PAGE -->
@@ -319,558 +215,208 @@
         <div class="login-card">
             <div class="login-logo">LA VIDA</div>
             <div class="login-sub">Authorized Access Only</div>
-            <input type="password" id="passInput" inputmode="numeric"
-                class="pass-input" placeholder="••••••"
-                onkeypress="if(event.key==='Enter') checkLogin()">
+            <input type="password" id="passInput" inputmode="numeric" class="pass-input" placeholder="••••••" onkeypress="if(event.key==='Enter') checkLogin()">
             <button class="primary-cta" style="margin-bottom:0;" onclick="checkLogin()">UNLOCK</button>
-            <div id="pinError"></div>
+            <div id="pinError" style="color:var(--red); font-size:0.8rem; margin-top:10px;"></div>
         </div>
     </div>
 </div>
 
 <!-- MAIN APP -->
 <div id="mainApp">
-
-    <!-- Sticky Header -->
     <div class="header">
         <div class="header-top">
             <div class="header-logo">LA VIDA</div>
-            <div class="header-date" id="headerDate"></div>
+            <div id="headerDate" class="header-date"></div>
         </div>
         <div class="today-panel">
             <div class="today-stat">
                 <h4>Today Sales</h4>
-                <p id="daySales">— TZS</p>
+                <p id="daySales">—</p>
+                <span id="dayTrend" class="hero-trend"></span>
             </div>
-            <div class="today-stat center">
-                <h4>Today Net</h4>
-                <p id="dayNet">—</p>
-            </div>
-            <div class="today-stat right">
+            <div class="today-stat" style="text-align: right;">
                 <h4>All Balance</h4>
-                <p id="topBalance" style="color:var(--gold)">— TZS</p>
+                <p id="topBalance" style="color:var(--gold)">—</p>
+                <span id="balTrend" class="hero-trend"></span>
             </div>
         </div>
     </div>
 
     <div class="container">
-
-        <!-- Primary Action -->
-        <button class="primary-cta" onclick="openModal('entry')" style="margin-top:14px;">
-            ➕ ADD DAILY ENTRY
-        </button>
-
-        <!-- Summary Cards -->
+        <button class="primary-cta" onclick="openModal('entry')" style="margin-top:14px;">➕ ADD DAILY ENTRY</button>
+        
         <div class="summary-grid">
-            <div class="stat-card">
-                <h4>Total Sales</h4>
-                <p id="totalSales">...</p>
-            </div>
-            <div class="stat-card">
-                <h4>Stocking Expenses</h4>
-                <p id="totalStock">...</p>
-            </div>
-            <div class="stat-card">
-                <h4>Other Expenses</h4>
-                <p id="totalOther">...</p>
-            </div>
-            <div class="stat-card">
-                <h4>Total Savings</h4>
-                <p id="totalSavings">...</p>
-            </div>
+            <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
+            <div class="stat-card"><h4>Stocking</h4><p id="totalStock">...</p></div>
+            <div class="stat-card"><h4>Other Exp</h4><p id="totalOther">...</p></div>
+            <div class="stat-card"><h4>Savings</h4><p id="totalSavings">...</p></div>
         </div>
 
-        <!-- Secondary Actions -->
-        <div class="secondary-actions">
+        <div style="display:flex; gap:10px; margin-bottom:18px;">
             <button class="btn-sec" onclick="openModal('search')">🔍 FIND DATE</button>
             <button class="btn-sec" onclick="openModal('report')">📄 REPORTS</button>
         </div>
 
-        <!-- Transaction History -->
         <span class="section-label">Transaction History</span>
         <div id="entryList"></div>
         <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:4px; display:none;" onclick="loadMore()">VIEW MORE</button>
-
     </div>
-
 </div>
 
-<!-- ── MODAL: ENTRY FORM ── -->
-<div class="modal-overlay" id="overlayEntry" onclick="overlayClose(event,'overlayEntry')">
+<!-- MODAL ENTRY -->
+<div class="modal-overlay" id="overlayEntry">
     <div class="modal">
-        <div class="modal-handle"></div>
-        <div class="modal-title" id="formTitle">New Entry</div>
-        <div class="field-group">
-            <span class="field-label">Date</span>
-            <input type="date" id="date">
-        </div>
-        <div class="field-group">
-            <span class="field-label">Sales (TZS)</span>
-            <input type="number" id="sales" placeholder="0" inputmode="decimal">
-        </div>
-        <div class="field-group">
-            <span class="field-label">Stocking (TZS)</span>
-            <input type="number" id="stock" placeholder="0" inputmode="decimal">
-        </div>
-        <div class="field-group">
-            <span class="field-label">Other Expenses (TZS)</span>
-            <input type="number" id="other" placeholder="0" inputmode="decimal">
-        </div>
-        <div class="field-group">
-            <span class="field-label">Savings (TZS)</span>
-            <input type="number" id="savings" placeholder="0" inputmode="decimal">
-        </div>
-        <div class="field-group">
-            <span class="field-label">Note (optional)</span>
-            <textarea id="note" placeholder="e.g. slow day, public holiday..."></textarea>
-        </div>
-        <div class="save-bar">
-            <button class="primary-cta" style="margin-bottom:10px;" onclick="saveRecord()">SAVE RECORD</button>
-            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
-        </div>
+        <div id="formTitle" style="text-align:center; font-weight:bold; margin-bottom:20px;">New Entry</div>
+        <input type="date" id="date" style="width:100%; margin-bottom:12px; padding:12px; border:1px solid #ddd; border-radius:8px;">
+        <input type="number" id="sales" placeholder="Sales (TZS)" style="width:100%; margin-bottom:12px; padding:12px; border:1px solid #ddd; border-radius:8px;">
+        <input type="number" id="stock" placeholder="Stocking (TZS)" style="width:100%; margin-bottom:12px; padding:12px; border:1px solid #ddd; border-radius:8px;">
+        <input type="number" id="other" placeholder="Other Exp (TZS)" style="width:100%; margin-bottom:12px; padding:12px; border:1px solid #ddd; border-radius:8px;">
+        <input type="number" id="savings" placeholder="Savings (TZS)" style="width:100%; margin-bottom:12px; padding:12px; border:1px solid #ddd; border-radius:8px;">
+        <textarea id="note" placeholder="Note" style="width:100%; margin-bottom:12px; padding:12px; border:1px solid #ddd; border-radius:8px; height:60px;"></textarea>
+        <button class="primary-cta" onclick="saveRecord()">SAVE RECORD</button>
+        <button onclick="closeModals()" style="width:100%; border:none; background:none; margin-top:10px; color:var(--gray);">CANCEL</button>
     </div>
 </div>
-
-<!-- ── MODAL: SEARCH / FIND DATE ── -->
-<div class="modal-overlay" id="overlaySearch" onclick="overlayClose(event,'overlaySearch')">
-    <div class="modal">
-        <div class="modal-handle"></div>
-        <div class="modal-title">Find a Date</div>
-        <div class="field-group">
-            <span class="field-label">Select Date</span>
-            <input type="date" id="searchDate">
-        </div>
-        <button class="primary-cta" style="margin-top:6px;" onclick="executeSearch()">SEARCH</button>
-        <button class="btn-sec" style="width:100%; border:none; margin-top:8px;" onclick="closeModals()">CLOSE</button>
-    </div>
-</div>
-
-<!-- ── MODAL: REPORTS ── -->
-<div class="modal-overlay" id="overlayReport" onclick="overlayClose(event,'overlayReport')">
-    <div class="modal">
-        <div class="modal-handle"></div>
-        <div class="modal-title">Monthly Report</div>
-        <div class="field-group">
-            <span class="field-label">Select Month</span>
-            <input type="month" id="reportMonth">
-        </div>
-        <button class="primary-cta" style="margin-top:6px;" onclick="generatePDF()">DOWNLOAD PDF</button>
-        <button class="btn-sec" style="width:100%; border:none; margin-top:8px;" onclick="closeModals()">CLOSE</button>
-    </div>
-</div>
-
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDqLcc9kqXA8sH1cfdZ17asFXBXfZ8mwVpXXiPeZV-uesUw_KlIfquwZJsx2Q7pq00/exec";
-const PIN = "112511"; // ⚠️ Move this to server-side when possible
-
+const PIN = "112511";
 let data = [];
 let displayLimit = 5;
 
-// ── HELPERS ─────────────────────────────────────────────
-function getLocalDateStr(d = new Date()) {
-    return d.toLocaleDateString('sv-SE'); // YYYY-MM-DD using local time
+// ✅ NEW: Persistent Login Check
+function checkSession() {
+    if (sessionStorage.getItem('lv_auth') === 'true') {
+        unlockApp();
+    }
 }
 
-function fmt(n) { return Number(n).toLocaleString() + " TZS"; }
-
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.innerText = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-function showLoader(on) {
-    document.getElementById('loadingOverlay').style.display = on ? 'flex' : 'none';
-}
-
-// ── LOGIN ────────────────────────────────────────────────
 function checkLogin() {
-    const entered = document.getElementById('passInput').value;
-    if (entered === PIN) {
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
-        document.body.classList.add('unlocked');
-        setHeaderDate();
-        fetchData();
+    if (document.getElementById('passInput').value === PIN) {
+        sessionStorage.setItem('lv_auth', 'true');
+        unlockApp();
     } else {
-        document.getElementById('pinError').innerText = "Incorrect PIN. Try again.";
-        document.getElementById('passInput').value = '';
+        document.getElementById('pinError').innerText = "Wrong PIN";
         setTimeout(() => document.getElementById('pinError').innerText = '', 2000);
     }
 }
 
-// ── HEADER DATE ─────────────────────────────────────────
-function setHeaderDate() {
-    const now = new Date();
-    document.getElementById('headerDate').innerHTML =
-        now.toLocaleDateString('en-TZ', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+function unlockApp() {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    document.body.classList.add('unlocked');
+    document.getElementById('headerDate').innerText = new Date().toLocaleDateString('en-TZ', { weekday:'short', day:'numeric', month:'short' });
+    fetchData();
 }
 
-// ── DATA ────────────────────────────────────────────────
 async function fetchData() {
-    showLoader(true);
+    document.getElementById('loadingOverlay').style.display = 'flex';
     try {
-        const res = await fetch(SCRIPT_URL + '?t=' + Date.now()); // cache-bust
+        const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
         data = await res.json();
         render();
-    } catch (e) {
-        console.error(e);
-        showToast("⚠️ Could not load data. Check connection.");
-    }
-    showLoader(false);
+    } catch (e) { showToast("Sync failed"); }
+    document.getElementById('loadingOverlay').style.display = 'none';
 }
 
-// ── RENDER ───────────────────────────────────────────────
 function render() {
-    const DAILY_TARGET = 50000; // ✅ ADDED BUSINESS LOGIC
-
     const list = document.getElementById('entryList');
     list.innerHTML = '';
-
-    let totalSales = 0, totalStock = 0, totalOther = 0, totalSavings = 0;
-    let dayS = null, dayStock = 0, dayOther = 0, daySavings = 0;
-    let runningBalance = 0;
-
-    const todayStr = getLocalDateStr();
-
-    // Sort ascending for running balance
+    const todayStr = new Date().toLocaleDateString('sv-SE');
+    
     data.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    data.forEach(row => {
+    let totalSales = 0, totalExp = 0, runningBal = 0, prevBal = 0;
+    let todaySales = 0, yesterdaySales = 0;
+
+    data.forEach((row, i) => {
+        const s = Number(row.sales) || 0;
+        const e = (Number(row.stocking)||0) + (Number(row.other)||0) + (Number(row.savings)||0);
+        
+        prevBal = runningBal; // Capture balance before this entry
+        totalSales += s;
+        totalExp += e;
+        runningBal = totalSales - totalExp;
+
         const rowDate = (row.date || '').split('T')[0];
-        totalSales    += Number(row.sales)    || 0;
-        totalStock    += Number(row.stocking) || 0;
-        totalOther    += Number(row.other)    || 0;
-        totalSavings  += Number(row.savings)  || 0;
-        runningBalance = totalSales - totalStock - totalOther - totalSavings;
-
-        if (rowDate === todayStr) {
-            dayS        = Number(row.sales)    || 0;
-            dayStock    = Number(row.stocking) || 0;
-            dayOther    = Number(row.other)    || 0;
-            daySavings  = Number(row.savings)  || 0;
-        }
+        if (rowDate === todayStr) todaySales = s;
+        
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        if (rowDate === yesterday.toLocaleDateString('sv-SE')) yesterdaySales = s;
     });
 
-    // Today panel with Business Logic & Alert Integration
-    if (dayS !== null) {
-        const dayNet = dayS - dayStock - dayOther - daySavings;
-        const margin = dayS > 0 ? ((dayNet / dayS) * 100).toFixed(0) : 0;
+    // Update Hero Stats
+    document.getElementById('daySales').innerText = todaySales.toLocaleString() + " TZS";
+    document.getElementById('topBalance').innerText = runningBal.toLocaleString() + " TZS";
 
-        document.getElementById('daySales').innerText = fmt(dayS);
-        document.getElementById('dayNet').innerText   = fmt(dayNet) + ` (${margin}%)`;
-        document.getElementById('dayNet').style.color = dayNet >= 0 ? '#4ade80' : '#f87171';
-
-        // ✅ SMART ALERT (COMBINED)
-        const alerts = [];
-
-        if (dayS >= DAILY_TARGET) {
-            alerts.push("✅ Target hit");
-        } else {
-            alerts.push("⚠️ Below target");
-        }
-
-        if ((dayStock + dayOther) > dayS) {
-            alerts.push("⚠️ Overspending");
-        }
-
-        if (dayNet < 0) {
-            alerts.push("❌ Negative profit");
-        } else if (margin >= 30) {
-            alerts.push("💰 Strong margin");
-        }
-
-        alerts.sort((a, b) => a.includes("❌") ? -1 : 0);
-
-        if (alerts.length > 0) {
-            showToast(alerts.join(" • "));
-        }
-    } else {
-        document.getElementById('daySales').innerText = '— TZS';
-        document.getElementById('dayNet').innerText   = 'No entry';
-        document.getElementById('dayNet').style.color = 'rgba(255,255,255,0.5)';
+    // ✅ Percentage Logic: Today Sales vs Yesterday
+    if (yesterdaySales > 0) {
+        const diff = ((todaySales - yesterdaySales) / yesterdaySales) * 100;
+        const el = document.getElementById('dayTrend');
+        el.className = diff >= 0 ? 'hero-trend stat-up' : 'hero-trend stat-down';
+        el.innerText = (diff >= 0 ? '↑ ' : '↓ ') + Math.abs(diff).toFixed(0) + "% vs yesterday";
     }
-    
-    document.getElementById('topBalance').innerText = fmt(runningBalance);
 
-    // Summary cards
-    document.getElementById('totalSales').innerText   = fmt(totalSales);
-    document.getElementById('totalStock').innerText   = fmt(totalStock);
-    document.getElementById('totalOther').innerText   = fmt(totalOther);
-    document.getElementById('totalSavings').innerText = fmt(totalSavings);
+    // ✅ Percentage Logic: All Balance Change
+    if (prevBal !== 0) {
+        const bDiff = ((runningBal - prevBal) / Math.abs(prevBal)) * 100;
+        const bEl = document.getElementById('balTrend');
+        bEl.className = bDiff >= 0 ? 'hero-trend stat-up' : 'hero-trend stat-down';
+        bEl.innerText = (bDiff >= 0 ? '↑ ' : '↓ ') + Math.abs(bDiff).toFixed(0) + "% change";
+    }
 
-    // Build a date→sales map for trend lookup
-    const salesByDate = {};
-    data.forEach(row => {
-        const d = (row.date || '').split('T')[0];
-        salesByDate[d] = Number(row.sales) || 0;
-    });
+    // Summary Cards
+    document.getElementById('totalSales').innerText = totalSales.toLocaleString() + " TZS";
+    document.getElementById('totalStock').innerText = totalExp.toLocaleString() + " TZS"; // Summed for summary
 
-    // Transaction list (most recent first)
+    // History List
     const sorted = [...data].reverse();
-    const visible = sorted.slice(0, displayLimit);
-
-    if (visible.length === 0) {
-        list.innerHTML = `<div class="empty-state"><div class="icon">📋</div>No records yet.<br>Tap ADD DAILY ENTRY to get started.</div>`;
-    } else {
-        const fragment = document.createDocumentFragment();
-        visible.forEach(row => {
-            const rowDate = (row.date || '').split('T')[0];
-            const isToday = rowDate === todayStr;
-            const sales   = Number(row.sales) || 0;
-            const stk     = Number(row.stocking) || 0;
-            const oth     = Number(row.other)    || 0;
-
-            // Sales trend vs previous day
-            const prev = new Date(rowDate);
-            prev.setDate(prev.getDate() - 1);
-            const prevStr  = getLocalDateStr(prev);
-            const prevSales = salesByDate[prevStr];
-            let trendHtml = '';
-            if (prevSales !== undefined && prevSales > 0) {
-                const diff = ((sales - prevSales) / prevSales) * 100;
-                const arrow = diff >= 0 ? '↑' : '↓';
-                const cls   = diff >= 0 ? 'trend-up' : 'trend-down';
-                trendHtml = `<span class="sales-trend ${cls}">${arrow} ${Math.abs(diff).toFixed(0)}% vs prev day</span>`;
-            }
-
-            const div = document.createElement('div');
-            div.className = 'entry-item' + (isToday ? ' is-today' : '');
-            div.innerHTML = `
-                <div style="min-width:0; flex:1;">
-                    <div class="entry-date">
-                        ${rowDate}${isToday ? '<span class="tag-today">TODAY</span>' : ''}
-                    </div>
-                    <div class="entry-meta">Sales: ${sales.toLocaleString()} TZS | Exp: ${(stk+oth).toLocaleString()} TZS</div>
-                    ${trendHtml}
-                    ${row.note ? `<div class="entry-note">"${row.note}"</div>` : ''}
-                </div>
-                <div class="action-btns">
-                    <button class="btn-circle" title="Edit" onclick="editRow('${rowDate}')">✏️</button>
-                    <button class="btn-circle" title="Delete" style="color:var(--red)" onclick="deleteRow('${rowDate}')">🗑️</button>
-                </div>`;
-            fragment.appendChild(div);
-        });
-        list.appendChild(fragment);
-    }
-
+    sorted.slice(0, displayLimit).forEach(row => {
+        const rowDate = row.date.split('T')[0];
+        const isToday = rowDate === todayStr;
+        const div = document.createElement('div');
+        div.className = 'entry-item' + (isToday ? ' is-today' : '');
+        div.innerHTML = `
+            <div style="flex:1;">
+                <div class="entry-date">${rowDate}${isToday ? '<span class="tag-today">TODAY</span>' : ''}</div>
+                <div class="entry-meta">Sales: ${Number(row.sales).toLocaleString()} | Exp: ${(Number(row.stocking)+Number(row.other)).toLocaleString()}</div>
+            </div>
+            <div class="action-btns">
+                <button class="btn-circle" onclick="deleteRow('${rowDate}')">🗑️</button>
+            </div>`;
+        list.appendChild(div);
+    });
     document.getElementById('loadMoreBtn').style.display = data.length > displayLimit ? 'block' : 'none';
 }
 
 function loadMore() { displayLimit += 5; render(); }
+function openModal() { document.getElementById('overlayEntry').classList.add('active'); document.getElementById('date').value = new Date().toLocaleDateString('sv-SE'); }
+function closeModals() { document.getElementById('overlayEntry').classList.remove('active'); }
 
-// ── MODALS ───────────────────────────────────────────────
-function openModal(type) {
-    closeModals();
-    if (type === 'entry') {
-        document.getElementById('formTitle').innerText = "New Entry";
-        document.querySelectorAll('#overlayEntry input, #overlayEntry textarea').forEach(i => i.value = '');
-        document.getElementById('date').value = getLocalDateStr();
-        document.getElementById('overlayEntry').classList.add('active');
-        
-        // ✅ AUTO FOCUS UX
-        setTimeout(() => document.getElementById('sales').focus(), 300);
-
-    } else if (type === 'search') {
-        document.getElementById('overlaySearch').classList.add('active');
-    } else if (type === 'report') {
-        const now = new Date();
-        document.getElementById('reportMonth').value = getLocalDateStr(now).slice(0, 7);
-        document.getElementById('overlayReport').classList.add('active');
-    }
-}
-
-function closeModals() {
-    document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('active'));
-}
-
-function overlayClose(e, id) {
-    // Close when tapping the dark backdrop (not the modal card itself)
-    if (e.target.id === id) closeModals();
-}
-
-// ── SAVE ─────────────────────────────────────────────────
 async function saveRecord() {
-    const dateVal = document.getElementById('date').value;
-    if (!dateVal) { showToast("⚠️ Please select a date."); return; }
-
     const record = {
-        date:     dateVal,
-        sales:    parseFloat(document.getElementById('sales').value)   || 0,
-        stocking: parseFloat(document.getElementById('stock').value)   || 0,
-        other:    parseFloat(document.getElementById('other').value)   || 0,
-        savings:  parseFloat(document.getElementById('savings').value) || 0,
-        note:     document.getElementById('note').value.trim() || ""
+        date: document.getElementById('date').value,
+        sales: document.getElementById('sales').value,
+        stocking: document.getElementById('stock').value,
+        other: document.getElementById('other').value,
+        savings: document.getElementById('savings').value,
+        note: document.getElementById('note').value
     };
-
     closeModals();
-    showLoader(true);
-    try {
-        await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
-        showToast("✅ Record saved!");
-        
-        // ✅ VIBRATION
-        navigator.vibrate?.(50);
-    } catch (e) {
-        showToast("⚠️ Save may have failed. Check your connection.");
-    }
-    setTimeout(fetchData, 1400);
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
+    setTimeout(fetchData, 1500);
 }
 
-// ── EDIT ─────────────────────────────────────────────────
-function editRow(date) {
-    const found = data.find(d => (d.date || '').split('T')[0] === date);
-    if (!found) { showToast("Record not found."); return; }
-    document.getElementById('formTitle').innerText  = "Editing: " + date;
-    document.getElementById('date').value           = date;
-    document.getElementById('sales').value          = found.sales    || '';
-    document.getElementById('stock').value          = found.stocking || '';
-    document.getElementById('other').value          = found.other    || '';
-    document.getElementById('savings').value        = found.savings  || '';
-    document.getElementById('note').value           = found.note     || '';
-    document.getElementById('overlayEntry').classList.add('active');
-}
-
-// ── SEARCH ───────────────────────────────────────────────
-function executeSearch() {
-    const d = document.getElementById('searchDate').value;
-    if (!d) { showToast("Select a date first."); return; }
-    const found = data.some(row => (row.date || '').split('T')[0] === d);
-    if (found) {
-        closeModals();
-        editRow(d);
-    } else {
-        showToast("No record found for " + d);
-    }
-}
-
-// ── DELETE ───────────────────────────────────────────────
 async function deleteRow(d) {
-    if (!confirm("Delete record for " + d + "?\n\nThis cannot be undone.")) return;
-    showLoader(true);
-    try {
-        await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", date: d }) });
-        showToast("🗑️ Record deleted.");
-        
-        // ✅ VIBRATION
-        navigator.vibrate?.(50);
-    } catch (e) {
-        showToast("⚠️ Delete may have failed.");
-    }
-    setTimeout(fetchData, 1400);
+    if(!confirm("Delete?")) return;
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", date: d }) });
+    setTimeout(fetchData, 1500);
 }
 
-// ── PDF REPORT ───────────────────────────────────────────
-function generatePDF() {
-    const m = document.getElementById('reportMonth').value;
-    if (!m) { showToast("Select a month first."); return; }
-
-    const filtered = data.filter(d => (d.date || '').startsWith(m));
-    if (filtered.length === 0) { showToast("No records for " + m); return; }
-
-    filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-    // Header
-    doc.setFillColor(0, 26, 51);
-    doc.rect(0, 0, 210, 30, 'F');
-    doc.setTextColor(212, 175, 55);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text('LA VIDA MINIMART', 14, 13);
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Monthly Report — ' + m, 14, 22);
-    doc.text('Generated: ' + new Date().toLocaleDateString(), 150, 22);
-
-    // Totals summary
-    let totSales = 0, totStock = 0, totOther = 0, totSav = 0;
-    filtered.forEach(r => {
-        totSales += Number(r.sales)    || 0;
-        totStock += Number(r.stocking) || 0;
-        totOther += Number(r.other)    || 0;
-        totSav   += Number(r.savings)  || 0;
-    });
-    const totNet = totSales - totStock - totOther - totSav;
-
-    // ✅ NEW PDF METRICS
-    const avg = totSales / filtered.length;
-
-    let bestDay = filtered[0];
-    let worstDay = filtered[0];
-
-    filtered.forEach(r => {
-        if ((r.sales || 0) > (bestDay.sales || 0)) bestDay = r;
-        if ((r.sales || 0) < (worstDay.sales || 0)) worstDay = r;
-    });
-
-    doc.setTextColor(0, 26, 51);
-    doc.setFontSize(8);
-    const summaryY = 38;
-    
-    const summaries = [
-        ['Total Sales', totSales.toLocaleString() + ' TZS'],
-        ['Total Stock', totStock.toLocaleString() + ' TZS'],
-        ['Other Exp',   totOther.toLocaleString() + ' TZS'],
-        ['Savings',     totSav.toLocaleString()   + ' TZS'],
-        ['Net Balance', totNet.toLocaleString()   + ' TZS'],
-        ['Avg / Day',   avg.toLocaleString(undefined,{maximumFractionDigits:0}) + ' TZS'],
-        ['Best Day',    (bestDay.date || '').split('T')[0]],
-        ['Worst Day',   (worstDay.date || '').split('T')[0]],
-    ];
-
-    // Wrap summaries into 2 rows to fit 8 metrics
-    summaries.forEach((s, i) => {
-        const col = i % 4; // 4 columns
-        const row = Math.floor(i / 4); // 2 rows
-        const x = 14 + (col * 45); 
-        const y = summaryY + (row * 12);
-        
-        doc.setFont('helvetica', 'bold');
-        doc.text(s[0], x, y);
-        doc.setFont('helvetica', 'normal');
-        doc.text(String(s[1]), x, y + 5);
-    });
-
-    // Table
-    const rows = filtered.map(r => {
-        const s  = Number(r.sales)    || 0;
-        const st = Number(r.stocking) || 0;
-        const o  = Number(r.other)    || 0;
-        const sv = Number(r.savings)  || 0;
-        return [
-            (r.date || '').split('T')[0],
-            s.toLocaleString(),
-            st.toLocaleString(),
-            o.toLocaleString(),
-            sv.toLocaleString(),
-            (s - st - o - sv).toLocaleString(),
-            r.note || ''
-        ];
-    });
-
-    doc.autoTable({
-        startY: summaryY + 22, // Pushed down slightly to fit the new row of metrics
-        head: [['Date', 'Sales', 'Stock', 'Expenses', 'Savings', 'Net', 'Note']],
-        body: rows,
-        styles: { fontSize: 7.5, cellPadding: 3 },
-        headStyles: { fillColor: [0, 64, 133], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [245, 248, 252] },
-        columnStyles: { 6: { cellWidth: 40 } }
-    });
-
-    doc.save('LaVida_Report_' + m + '.pdf');
-    showToast("📄 PDF downloaded!");
-}
+function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2500); }
 </script>
 </body>
 </html>

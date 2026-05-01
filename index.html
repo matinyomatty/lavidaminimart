@@ -3,63 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>La Vida Minimart - Cloud Tracker</title>
+    <title>La Vida Minimart</title>
     <style>
-        :root { --blue: #0056b3; --dark: #002b5c; --light: #f8fbff; --green: #28a745; --gray: #6c757d; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+        :root { --blue: #004085; --dark: #001a33; --light: #f8fbff; --green: #28a745; --gray: #6c757d; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f0f2f5; margin: 0; padding: 0; }
         
+        /* New Text Banner */
+        .brand-header { background: var(--dark); color: white; padding: 40px 10px; text-align: center; border-bottom: 6px solid var(--blue); }
+        .brand-header h1 { margin: 0; font-size: 2.4rem; letter-spacing: 3px; text-transform: uppercase; font-weight: 900; }
+        .brand-header p { margin: 5px 0 0; font-size: 0.8rem; opacity: 0.7; letter-spacing: 1px; }
+
         /* Login Screen */
         #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; }
-        .login-card { background: white; width: 100%; max-width: 350px; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .login-card { background: white; width: 100%; max-width: 350px; padding: 40px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         
-        /* Main App */
-        #mainApp { display: none; padding-bottom: 30px; }
-        .header { background: white; text-align: center; border-bottom: 1px solid #ddd; padding: 10px; }
-        .header img { width: 100%; max-width: 350px; height: auto; border-radius: 10px; }
+        /* Main Content */
+        #mainApp { display: none; }
         .container { padding: 15px; max-width: 500px; margin: auto; }
         
         /* Summary Dashboard */
-        .summary-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 15px; scrollbar-width: none; }
+        .summary-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+        .summary-scroll::-webkit-scrollbar { display: none; }
         .stat-card { min-width: 130px; background: white; padding: 12px; border-radius: 12px; border-bottom: 4px solid var(--blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .stat-card h4 { margin: 0; font-size: 0.65rem; color: var(--gray); text-transform: uppercase; }
         .stat-card p { margin: 5px 0 0; font-size: 1rem; font-weight: bold; color: var(--dark); }
-        .stat-card.balance { border-bottom-color: var(--green); }
+        .stat-card.balance { border-bottom-color: var(--green); background: #fafffa; }
 
-        /* Form Styling */
-        .section-label { font-size: 0.9rem; font-weight: bold; color: var(--dark); margin: 20px 0 10px; display: block; }
-        .input-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .form-row { margin-bottom: 12px; }
-        label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--gray); }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; background: #fafafa; }
-        .btn-add { width: 100%; background: var(--blue); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 1rem; margin-top: 10px; cursor: pointer; }
+        /* Input Areas */
+        .section-label { font-size: 0.85rem; font-weight: bold; color: var(--dark); margin: 20px 0 8px; display: block; text-transform: uppercase; }
+        .input-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
         
-        /* Search Box */
-        .search-box { background: var(--light); border: 1px solid #cfe2ff; margin-bottom: 15px; }
+        /* Search Box Row */
+        .search-row { display: flex; gap: 10px; align-items: center; }
+        .search-row input { flex: 1; }
+        .btn-search { background: var(--blue); color: white; border: none; height: 48px; width: 55px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+        
+        .form-row { margin-bottom: 12px; }
+        label { display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; color: var(--gray); }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; background: #fafafa; }
+        input:focus { outline: none; border-color: var(--blue); background: #fff; }
 
-        /* Log History */
-        .entry-item { background: white; padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--blue); }
-        .entry-amt { text-align: right; font-weight: bold; font-size: 0.9rem; }
+        .btn-add { width: 100%; background: var(--blue); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 5px; }
 
-        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:1000; justify-content:center; align-items:center; font-weight:bold; }
+        /* Recent Entries List */
+        .entry-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--blue); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .entry-date { font-weight: bold; color: var(--dark); font-size: 0.95rem; }
+        .entry-sub { font-size: 0.75rem; color: var(--gray); margin-top: 2px; }
+        .entry-bal { text-align: right; font-weight: 800; color: var(--dark); font-size: 0.9rem; }
+
+        .loading { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; flex-direction:column; justify-content:center; align-items:center; }
     </style>
 </head>
 <body>
 
-<div id="loading" class="loading-overlay">Syncing with Cloud...</div>
+<div id="loading" class="loading"><b>Syncing Data...</b></div>
 
 <div id="loginPage">
     <div class="login-card">
-        <h2 style="color:var(--dark)">La Vida Login</h2>
-        <input type="password" id="passInput" placeholder="Passcode" style="text-align:center; letter-spacing: 5px;">
-        <button class="btn-add" onclick="checkLogin()">ENTER</button>
+        <h1 style="color:var(--dark); margin:0 0 10px;">LA VIDA</h1>
+        <p style="color:var(--gray); margin-bottom:25px;">Daily Management Tracker</p>
+        <input type="password" id="passInput" placeholder="Passcode" style="text-align:center; letter-spacing: 4px;">
+        <button class="btn-add" onclick="checkLogin()">UNLOCK SYSTEM</button>
     </div>
 </div>
 
 <div id="mainApp">
-    <div class="header"><img src="LA VIDA MINIMART 3.jpg" alt="La Vida Banner"></div>
+    <div class="brand-header">
+        <h1>La Vida Minimart</h1>
+        <p>RELIABLE DAILY TRACKER</p>
+    </div>
+
     <div class="container">
-        
         <div class="summary-scroll">
             <div class="stat-card"><h4>Sales</h4><p id="totalSales">0</p></div>
             <div class="stat-card"><h4>Stock</h4><p id="totalStock">0</p></div>
@@ -68,63 +83,82 @@
             <div class="stat-card balance"><h4>Balance</h4><p id="balance">0</p></div>
         </div>
 
-        <span class="section-label">🔍 REVIEW OR EDIT RECORD</span>
-        <div class="input-card search-box">
-            <label>Go to Date</label>
-            <input type="date" id="searchDate" onchange="searchByDate()">
-            <div id="searchMsg" style="font-size: 0.75rem; margin-top: 5px; color: var(--blue);">Select a date to see historical data</div>
+        <span class="section-label">🔍 Go to Date / Edit</span>
+        <div class="input-card">
+            <div class="search-row">
+                <input type="date" id="searchDate">
+                <button class="btn-search" onclick="searchByDate()">🔍</button>
+            </div>
+            <div id="searchMsg" style="font-size: 0.7rem; margin-top: 8px; color: var(--blue);">Search for existing records to review or edit</div>
         </div>
 
-        <span class="section-label">📝 DAILY ENTRY</span>
+        <span class="section-label">📝 Daily Entry</span>
         <div class="input-card">
             <div class="form-row"><label>Date</label><input type="date" id="date"></div>
-            <div class="form-row"><label>Sales</label><input type="number" id="sales"></div>
-            <div class="form-row"><label>Stocking</label><input type="number" id="stock"></div>
-            <div class="form-row"><label>Other</label><input type="number" id="other"></div>
-            <div class="form-row"><label>Savings</label><input type="number" id="savings"></div>
-            <button class="btn-add" onclick="addRecord()">SAVE RECORD</button>
+            <div class="form-row"><label>Sales Amount</label><input type="number" id="sales" placeholder="0.00"></div>
+            <div class="form-row"><label>Stocking/Supplies</label><input type="number" id="stock" placeholder="0.00"></div>
+            <div class="form-row"><label>Other Expenses</label><input type="number" id="other" placeholder="0.00"></div>
+            <div class="form-row"><label>Savings</label><input type="number" id="savings" placeholder="0.00"></div>
+            <button class="btn-add" onclick="addRecord()">SAVE TO CLOUD</button>
         </div>
 
-        <span class="section-label">📑 RECENT LOGS</span>
+        <span class="section-label">📑 Recent Logs</span>
         <div id="entryList"></div>
     </div>
 </div>
 
 <script>
-// UPDATED SCRIPT URL
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxujGHSVSPCM6UyobjgdJ30-6Jj5NbMPsd3-gPZVCszszXavQwoELpCGcLHnH4bK6G6/exec";
+// UPDATED URL
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNHsXIl0a7pHG-jfor1yo-NE2zcHw213wnXyeEUvwcD9rIe5uzPtt9aVSXuInp3ntD/exec";
 let data = [];
 let logoutTimer;
 
-// Inactivity Logout logic (5 mins)
-function resetTimer() { clearTimeout(logoutTimer); logoutTimer = setTimeout(() => { location.reload(); }, 300000); }
-['mousemove', 'mousedown', 'touchstart', 'keydown'].forEach(e => window.addEventListener(e, resetTimer));
+// Persistence: Keeps you logged in during refreshes
+window.onload = () => {
+    if (sessionStorage.getItem('la_vida_session') === 'active') {
+        showApp();
+    }
+};
+
+function resetTimer() { 
+    clearTimeout(logoutTimer); 
+    logoutTimer = setTimeout(() => { 
+        sessionStorage.removeItem('la_vida_session');
+        location.reload(); 
+    }, 300000); // 5 Minutes
+}
+['mousedown', 'touchstart', 'keydown'].forEach(e => window.addEventListener(e, resetTimer));
 
 function checkLogin() {
     if (document.getElementById('passInput').value === "112511") {
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
-        fetchFromCloud();
+        sessionStorage.setItem('la_vida_session', 'active');
+        showApp();
     } else { alert("Incorrect Passcode"); }
+}
+
+function showApp() {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    fetchFromCloud();
+    resetTimer();
 }
 
 async function fetchFromCloud() {
     document.getElementById('loading').style.display = 'flex';
     try {
-        const response = await fetch(SCRIPT_URL);
-        data = await response.json();
+        const res = await fetch(SCRIPT_URL);
+        data = await res.json();
         render();
-    } catch (e) { console.log("Cloud sync failed"); }
+    } catch (e) { console.error("Sync Error", e); }
     document.getElementById('loading').style.display = 'none';
 }
 
 function searchByDate() {
     const sDate = document.getElementById('searchDate').value;
-    // Find entry in local data fetched from cloud
-    const found = data.find(item => {
-        let entryDate = new Date(item.date).toISOString().split('T')[0];
-        return entryDate === sDate;
-    });
+    if(!sDate) return;
+    
+    // Find entry comparing standard YYYY-MM-DD strings
+    const found = data.find(item => item.date === sDate);
     
     if (found) {
         document.getElementById('date').value = sDate;
@@ -132,9 +166,9 @@ function searchByDate() {
         document.getElementById('stock').value = found.stocking;
         document.getElementById('other').value = found.other;
         document.getElementById('savings').value = found.savings;
-        document.getElementById('searchMsg').innerText = "✅ Found entry. You can update it now.";
+        document.getElementById('searchMsg').innerText = "✅ Record found for " + sDate + ". Edit details below.";
     } else {
-        document.getElementById('searchMsg').innerText = "❓ No entry for this date. Creating new entry.";
+        document.getElementById('searchMsg').innerText = "❓ No record found for " + sDate + ". You can start a new entry.";
         document.getElementById('date').value = sDate;
         document.querySelectorAll('.input-card input:not([type="date"])').forEach(i => i.value = '');
     }
@@ -149,15 +183,15 @@ async function addRecord() {
         savings: parseFloat(document.getElementById('savings').value) || 0
     };
 
-    if (!record.date) return alert("Select Date");
+    if (!record.date) return alert("Select a date first.");
     document.getElementById('loading').style.display = 'flex';
     
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
-        await fetchFromCloud(); 
-        document.getElementById('searchMsg').innerText = "Select a date to see historical data";
+        await fetchFromCloud(); // Refresh history and summaries
+        document.getElementById('searchMsg').innerText = "Last Saved: " + record.date;
         document.querySelectorAll('input:not([type="date"])').forEach(i => i.value = '');
-    } catch (e) { alert("Error saving data"); }
+    } catch (e) { alert("Network Error. Check internet."); }
     document.getElementById('loading').style.display = 'none';
 }
 
@@ -166,23 +200,24 @@ function render() {
     list.innerHTML = '';
     let runBal = 0, totals = {s:0, st:0, o:0, sv:0};
 
-    // Sort data by date ascending for balance calculation
-    data.sort((a, b) => new Date(a.date) - new Date(b.date));
+    // Sort ascending for correct running balance calculation
+    data.sort((a,b) => new Date(a.date) - new Date(b.date));
 
     data.forEach((row) => {
-        const itemBal = (row.sales - row.stocking - row.other - row.savings);
-        runBal += itemBal;
+        const dailyBal = (row.sales - row.stocking - row.other - row.savings);
+        runBal += dailyBal;
         totals.s += row.sales; totals.st += row.stocking; totals.o += row.other; totals.sv += row.savings;
 
-        // Add to list (newest at top)
+        // Push to top of list for UI
         list.innerHTML = `
             <div class="entry-item">
                 <div>
-                    <div style="font-weight:bold; font-size:0.9rem">${new Date(row.date).toLocaleDateString()}</div>
-                    <span style="font-size:0.75rem; color:var(--gray)">Sales: ${row.sales.toLocaleString()}</span>
+                    <div class="entry-date">${row.date}</div>
+                    <div class="entry-sub">Sales: ${row.sales.toLocaleString()} | Exp: ${(row.stocking + row.other).toLocaleString()}</div>
                 </div>
-                <div class="entry-amt">
-                    Bal: ${runBal.toLocaleString()}
+                <div class="entry-bal">
+                    <span style="font-size:0.6rem; color:var(--gray)">RUNNING BAL</span><br>
+                    ${runBal.toLocaleString()}
                 </div>
             </div>
         ` + list.innerHTML;

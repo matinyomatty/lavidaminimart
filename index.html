@@ -7,67 +7,74 @@
     <style>
         :root { --blue: #004085; --dark: #001a33; --light: #f4f7f9; --green: #28a745; --gray: #6c757d; --red: #dc3545; --gold: #d4af37; }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--light); margin: 0; padding: 0; color: var(--dark); overflow-x: hidden; }
+        body { background: var(--light); margin: 0; padding: 0; color: var(--dark); }
         
-        /* LOGIN PAGE */
-        #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; background: var(--dark); position: fixed; top: 0; left: 0; z-index: 9999; }
-        .login-card { background: white; width: 90%; max-width: 340px; padding: 40px 25px; border-radius: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .pass-input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1.5rem; text-align: center; letter-spacing: 8px; background: #fafafa; margin-bottom: 20px; outline: none; }
-
-        /* MAIN APP */
-        #mainApp { display: none; padding-bottom: 30px; }
-        
-        /* STICKY HEADER */
+        /* Sticky Hero Header */
         .header { 
-            background: var(--dark); color: white; padding: 15px; 
-            border-bottom: 4px solid var(--blue); position: sticky; 
-            top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            background: var(--dark); 
+            color: white; 
+            padding: 15px; 
+            border-bottom: 5px solid var(--blue);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        .header h1 { margin: 0 0 10px; font-size: 1.2rem; letter-spacing: 2px; color: var(--gold); text-align: center; }
+        .header h1 { margin: 0; font-size: 1.3rem; letter-spacing: 2px; color: var(--gold); text-align: center; }
         
         .today-panel { 
-            background: rgba(255,255,255,0.08); padding: 12px; border-radius: 12px; 
-            display: flex; justify-content: space-between; border: 1px solid rgba(212,175,55,0.2); 
+            background: rgba(255,255,255,0.05); 
+            margin-top: 10px; 
+            padding: 10px; 
+            border-radius: 12px; 
+            display: flex; 
+            justify-content: space-between; 
+            border: 1px solid rgba(212,175,55,0.2); 
         }
-        .today-stat h4 { margin: 0; font-size: 0.55rem; color: var(--gold); text-transform: uppercase; }
-        .today-stat p { margin: 4px 0 0; font-size: 0.9rem; font-weight: bold; }
+        .today-stat h4 { margin: 0; font-size: 0.55rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; }
+        .today-stat p { margin: 4px 0 0; font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; gap: 4px; }
         
-        /* TREND BADGES */
-        .trend-badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: 800; display: none; margin-left: 4px; }
-        .trend-up { background: #28a745; color: white; display: inline-block; }
-        .trend-down { background: #dc3545; color: white; display: inline-block; }
+        .trend-badge { font-size: 0.6rem; padding: 1px 4px; border-radius: 4px; font-weight: 800; }
+        .trend-up { background: rgba(40, 167, 69, 0.2); color: #4ade80; }
+        .trend-down { background: rgba(220, 53, 69, 0.2); color: #f87171; }
 
+        #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; }
+        .login-card { background: white; width: 100%; max-width: 340px; padding: 40px 25px; border-radius: 24px; text-align: center; }
+        #mainApp { display: none; }
         .container { padding: 15px; max-width: 480px; margin: auto; }
+        .primary-cta { background: var(--blue); color: white; width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,64,133,0.3); transition: 0.2s; }
         
-        /* BUTTONS & CARDS */
-        .primary-cta { background: var(--blue); color: white; width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,64,133,0.3); }
         .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: white; padding: 12px; border-radius: 14px; border-left: 4px solid var(--blue); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .stat-card { background: white; padding: 15px; border-radius: 16px; border-left: 4px solid var(--blue); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .stat-card h4 { margin: 0; font-size: 0.6rem; color: var(--gray); text-transform: uppercase; }
-        .stat-card p { margin: 5px 0 0; font-size: 0.8rem; font-weight: bold; }
+        .stat-card p { margin: 6px 0 0; font-size: 0.8rem; font-weight: bold; }
 
-        /* ENTRY LIST */
-        .entry-item { background: white; padding: 15px; border-radius: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
-        .entry-item.is-today { border-left: 4px solid var(--gold); background: #fffdf0; }
-        .btn-circle { border: none; background: #f0f2f5; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
-
-        /* MODAL */
-        .modal { display: none; background: white; padding: 20px; border-radius: 20px; position: fixed; top: 10%; left: 5%; width: 90%; z-index: 2000; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border-top: 5px solid var(--blue); }
-        .modal input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #ddd; }
-
-        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; justify-content:center; align-items:center; color:white; font-weight:bold; }
+        .modal { display: none; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); margin-bottom: 20px; border-top: 6px solid var(--blue); position: fixed; top: 10%; left: 5%; width: 90%; z-index: 2000; }
+        .field-group { margin-bottom: 15px; }
+        .field-label { font-size: 0.7rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 6px; display: block; }
+        input, textarea { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; background: #fafafa; outline: none; }
+        
+        .entry-item { background: white; padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ddd; }
+        .entry-item.is-today { border-left-color: var(--gold); background: #fffdf5; }
+        .note-text { font-size: 0.7rem; color: var(--gray); font-style: italic; display: block; margin-top: 4px; }
+        
+        .action-btns { display: flex; gap: 8px; }
+        .btn-circle { border: none; background: #f0f2f5; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .secondary-actions { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-sec { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; background: white; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
+        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center; color:white; }
     </style>
 </head>
 <body>
 
-<div id="loadingOverlay" class="loading-overlay">SYNCING DATA...</div>
+<div id="loadingOverlay" class="loading-overlay"><b>⏳ SYNCING...</b></div>
 
 <div id="loginPage">
     <div class="login-card">
-        <h1 style="margin:0; letter-spacing:2px; color:var(--dark);">LA VIDA</h1>
-        <p style="color:var(--gray); font-size:0.8rem; margin-bottom:25px;">Enter Access Code</p>
-        <input type="password" id="passInput" inputmode="numeric" class="pass-input" placeholder="••••">
-        <button class="primary-cta" onclick="checkLogin()">UNLOCK SYSTEM</button>
+        <h1 style="margin:0; letter-spacing:3px;">LA VIDA</h1>
+        <p style="color:var(--gray); font-size:0.8rem; margin-bottom:30px;">Security Verification</p>
+        <input type="password" id="passInput" inputmode="numeric" placeholder="••••••" style="text-align:center; letter-spacing:10px; font-size:1.5rem;">
+        <button class="primary-cta" style="margin-top:20px;" onclick="checkLogin()">UNLOCK</button>
     </div>
 </div>
 
@@ -77,7 +84,7 @@
         <div class="today-panel">
             <div class="today-stat">
                 <h4>Today Sales</h4>
-                <p><span id="daySales">0 TZS</span><span id="salesTrend" class="trend-badge"></span></p>
+                <p><span id="daySales">0 TZS</span> <span id="salesTrend" class="trend-badge"></span></p>
             </div>
             <div class="today-stat" style="text-align: right;">
                 <h4>Net Balance</h4>
@@ -87,37 +94,42 @@
     </div>
 
     <div class="container">
-        <button class="primary-cta" onclick="openForm()">➕ ADD ENTRY</button>
-
+        <button class="primary-cta" onclick="openForm('new')" style="margin-top:10px;"><span>➕</span> ADD DAILY ENTRY</button>
         <div class="summary-grid">
-            <div class="stat-card"><h4>Stock Value</h4><p id="totalStock">0 TZS</p></div>
-            <div class="stat-card"><h4>Expenses</h4><p id="totalOther">0 TZS</p></div>
-            <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">0 TZS</p></div>
-            <div class="stat-card"><h4>Savings</h4><p id="totalSavings">0 TZS</p></div>
+            <div class="stat-card"><h4>Stock Value</h4><p id="totalStock">...</p></div>
+            <div class="stat-card"><h4>Other Exp</h4><p id="totalOther">...</p></div>
+            <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
+            <div class="stat-card"><h4>Savings</h4><p id="totalSavings">...</p></div>
         </div>
-
-        <h5 style="text-transform:uppercase; color:var(--gray); font-size:0.65rem; margin: 20px 0 10px;">Recent History</h5>
+        <div class="secondary-actions">
+            <button class="btn-sec" onclick="openForm('search')">🔍 FIND DATE</button>
+            <button class="btn-sec" onclick="openForm('report')">📄 REPORTS</button>
+        </div>
         <div id="entryList"></div>
+        <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:10px; display:none;" onclick="loadMore()">VIEW MORE</button>
     </div>
 
     <div id="entryModal" class="modal">
-        <h3 id="formTitle">New Entry</h3>
-        <input type="date" id="date">
-        <input type="number" id="sales" placeholder="Sales (TZS)">
-        <input type="number" id="stock" placeholder="Stocking Cost">
-        <input type="number" id="other" placeholder="Other Expenses">
-        <input type="number" id="savings" placeholder="Savings">
+        <h3 id="formTitle" style="margin:0 0 15px 0;">Entry</h3>
+        <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
+        <div class="field-group"><span class="field-label">Sales (TZS)</span><input type="number" id="sales" placeholder="0"></div>
+        <div class="field-group"><span class="field-label">Stocking</span><input type="number" id="stock" placeholder="0"></div>
+        <div class="field-group"><span class="field-label">Other Exp</span><input type="number" id="other" placeholder="0"></div>
+        <div class="field-group"><span class="field-label">Savings</span><input type="number" id="savings" placeholder="0"></div>
+        <div class="field-group"><span class="field-label">Note</span><textarea id="note" style="height:50px;"></textarea></div>
         <button class="primary-cta" onclick="saveRecord()">SAVE DATA</button>
-        <button onclick="closeModals()" style="width:100%; border:none; background:none; color:var(--gray); cursor:pointer;">CANCEL</button>
+        <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
     </div>
 </div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDqLcc9kqXA8sH1cfdZ17asFXBXfZ8mwVpXXiPeZV-uesUw_KlIfquwZJsx2Q7pq00/exec";
 let data = [];
+let displayLimit = 5;
 
-// Get local YYYY-MM-DD
-const getToday = () => new Date().toLocaleDateString('sv-SE');
+function getLocalDateString(dateObj = new Date()) {
+    return dateObj.toLocaleDateString('sv-SE');
+}
 
 function checkLogin() {
     if (document.getElementById('passInput').value === "112511") {
@@ -133,82 +145,93 @@ async function fetchData() {
         const res = await fetch(SCRIPT_URL);
         data = await res.json();
         render();
-    } catch (e) { alert("Error connecting to sheet"); }
+    } catch (e) { console.error(e); }
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
 function render() {
     const list = document.getElementById('entryList');
     list.innerHTML = '';
-    
-    let totals = { s: 0, st: 0, o: 0, sv: 0 };
-    let daySales = 0, yestSales = 0;
-    let runningBal = 0, yestBalTotal = 0;
+    let totalSales = 0, totalStock = 0, totalOther = 0, totalSavings = 0;
+    let dayS = 0, yesterdayS = 0;
+    let runningBalance = 0, yesterdayBalanceTotal = 0;
 
-    const today = getToday();
-    const yDay = new Date(); yDay.setDate(yDay.getDate() - 1);
-    const yesterday = getToday(yDay);
+    const todayStr = getLocalDateString();
+    const yest = new Date(); yest.setDate(yest.getDate() - 1);
+    const yesterdayStr = getLocalDateString(yest);
 
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
-
+    
     data.forEach(row => {
-        const d = row.date.split('T')[0];
-        const net = row.sales - row.stocking - row.other - row.savings;
-        runningBal += net;
+        const rowDate = row.date.split('T')[0];
+        const rowNet = row.sales - row.stocking - row.other - row.savings;
+        runningBalance += rowNet;
         
-        totals.s += row.sales; totals.st += row.stocking;
-        totals.o += row.other; totals.sv += row.savings;
+        totalSales += row.sales; totalStock += row.stocking; 
+        totalOther += row.other; totalSavings += row.savings;
 
-        if(d === today) daySales = row.sales;
-        if(d === yesterday) {
-            yestSales = row.sales;
-            yestBalTotal = runningBal;
+        if(rowDate === todayStr) dayS = row.sales;
+        if(rowDate === yesterdayStr) {
+            yesterdayS = row.sales;
+            yesterdayBalanceTotal = runningBalance;
         }
     });
 
-    // Update UI
-    document.getElementById('daySales').innerText = daySales.toLocaleString() + " TZS";
-    document.getElementById('topBalance').innerText = runningBal.toLocaleString() + " TZS";
-    document.getElementById('totalSales').innerText = totals.s.toLocaleString() + " TZS";
-    document.getElementById('totalStock').innerText = totals.st.toLocaleString() + " TZS";
-    document.getElementById('totalOther').innerText = totals.o.toLocaleString() + " TZS";
-    document.getElementById('totalSavings').innerText = totals.sv.toLocaleString() + " TZS";
-
-    // Strict Trend Check
-    const hasToday = data.some(x => x.date.split('T')[0] === today);
-    const hasYest = data.some(x => x.date.split('T')[0] === yesterday);
-
-    if(hasToday && hasYest) {
-        setTrend('salesTrend', daySales, yestSales);
-        setTrend('balTrend', runningBal, yestBalTotal);
+    // SALES TREND FIX: Only show if BOTH today and yesterday have sales > 0
+    const salesBadge = document.getElementById('salesTrend');
+    if(dayS > 0 && yesterdayS > 0) {
+        const sDiff = ((dayS - yesterdayS) / yesterdayS) * 100;
+        salesBadge.innerText = (sDiff >= 0 ? "↑ " : "↓ ") + Math.abs(sDiff).toFixed(0) + "%";
+        salesBadge.className = "trend-badge " + (sDiff >= 0 ? "trend-up" : "trend-down");
+    } else { 
+        salesBadge.innerText = ""; 
+        salesBadge.className = "trend-badge";
     }
 
-    data.slice().reverse().slice(0, 10).forEach(row => {
-        const d = row.date.split('T')[0];
+    // Balance Trend
+    const balBadge = document.getElementById('balTrend');
+    if(yesterdayBalanceTotal !== 0) {
+        const bDiff = ((runningBalance - yesterdayBalanceTotal) / Math.abs(yesterdayBalanceTotal)) * 100;
+        balBadge.innerText = (bDiff >= 0 ? "↑ " : "↓ ") + Math.abs(bDiff).toFixed(0) + "%";
+        balBadge.className = "trend-badge " + (bDiff >= 0 ? "trend-up" : "trend-down");
+    } else { balBadge.innerText = ""; }
+
+    document.getElementById('daySales').innerText = dayS.toLocaleString() + " TZS";
+    document.getElementById('topBalance').innerText = runningBalance.toLocaleString() + " TZS";
+    document.getElementById('totalSales').innerText = totalSales.toLocaleString() + " TZS";
+    document.getElementById('totalStock').innerText = totalStock.toLocaleString() + " TZS";
+    document.getElementById('totalOther').innerText = totalOther.toLocaleString() + " TZS";
+    document.getElementById('totalSavings').innerText = totalSavings.toLocaleString() + " TZS";
+
+    const visible = [...data].reverse().slice(0, displayLimit);
+    visible.forEach(row => {
+        const rowDate = row.date.split('T')[0];
         list.innerHTML += `
-            <div class="entry-item ${d === today ? 'is-today' : ''}">
-                <div><b>${d}</b><br><small>${row.sales.toLocaleString()} TZS</small></div>
-                <button class="btn-circle" onclick="editRow('${d}')">✏️</button>
+            <div class="entry-item ${rowDate === todayStr ? 'is-today' : ''}">
+                <div style="max-width: 65%;">
+                    <b style="font-size:0.9rem;">${rowDate}</b><br>
+                    <small style="color:var(--gray)">Sales: ${row.sales.toLocaleString()} TZS</small>
+                    ${row.note ? `<span class="note-text">"${row.note}"</span>` : ''}
+                </div>
+                <div class="action-btns">
+                    <button class="btn-circle" onclick="editRow('${rowDate}')">✏️</button>
+                    <button class="btn-circle" style="color:var(--red)" onclick="deleteRow('${rowDate}')">🗑️</button>
+                </div>
             </div>`;
     });
+    document.getElementById('loadMoreBtn').style.display = data.length > displayLimit ? 'block' : 'none';
 }
 
-function setTrend(id, curr, prev) {
-    const el = document.getElementById(id);
-    const diff = ((curr - prev) / (prev || 1)) * 100;
-    el.innerText = (diff >= 0 ? "↑" : "↓") + Math.abs(diff).toFixed(0) + "%";
-    el.style.display = "inline-block";
-    el.className = "trend-badge " + (diff >= 0 ? "trend-up" : "trend-down");
+function openForm(type) {
+    if(type === 'new') {
+        document.getElementById('formTitle').innerText = "New Record";
+        document.querySelectorAll('#entryModal input, #entryModal textarea').forEach(i => i.value = '');
+        document.getElementById('date').value = getLocalDateString();
+        document.getElementById('entryModal').style.display = 'block';
+    }
 }
-
-function openForm() {
-    document.getElementById('formTitle').innerText = "New Entry";
-    document.querySelectorAll('.modal input').forEach(i => i.value = '');
-    document.getElementById('date').value = getToday();
-    document.getElementById('entryModal').style.display = 'block';
-}
-
-function closeModals() { document.getElementById('entryModal').style.display = 'none'; }
+function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+function loadMore() { displayLimit += 5; render(); }
 
 async function saveRecord() {
     const record = {
@@ -216,24 +239,33 @@ async function saveRecord() {
         sales: parseFloat(document.getElementById('sales').value) || 0,
         stocking: parseFloat(document.getElementById('stock').value) || 0,
         other: parseFloat(document.getElementById('other').value) || 0,
-        savings: parseFloat(document.getElementById('savings').value) || 0
+        savings: parseFloat(document.getElementById('savings').value) || 0,
+        note: document.getElementById('note').value || ""
     };
     document.getElementById('loadingOverlay').style.display = 'flex';
     await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
     closeModals();
-    setTimeout(fetchData, 1000);
+    setTimeout(fetchData, 1200);
 }
 
-function editRow(d) {
-    const found = data.find(x => x.date.split('T')[0] === d);
+function editRow(date) {
+    const found = data.find(d => d.date.split('T')[0] === date);
     if(found) {
-        document.getElementById('date').value = d;
+        document.getElementById('date').value = date;
         document.getElementById('sales').value = found.sales;
         document.getElementById('stock').value = found.stocking;
         document.getElementById('other').value = found.other;
         document.getElementById('savings').value = found.savings;
+        document.getElementById('note').value = found.note || "";
         document.getElementById('entryModal').style.display = 'block';
     }
+}
+
+async function deleteRow(d) {
+    if(!confirm("Archive " + d + "?")) return;
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({action:"archive", date:d}) });
+    setTimeout(fetchData, 1200);
 }
 </script>
 </body>

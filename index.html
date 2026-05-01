@@ -6,106 +6,120 @@
     <title>La Vida Minimart</title>
     <style>
         :root { --blue: #004085; --dark: #001a33; --light: #f8fbff; --green: #28a745; --gray: #6c757d; --red: #dc3545; --gold: #d4af37; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f0f2f5; margin: 0; padding: 0; }
-        .brand-header { background: var(--dark); color: white; padding: 25px 10px; text-align: center; border-bottom: 6px solid var(--blue); }
-        .brand-header h1 { margin: 0; font-size: 2rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: #f4f7f9; margin: 0; padding: 0; color: #333; }
+        
+        /* Skeleton Animation */
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .loading-text { animation: pulse 1.5s infinite; color: var(--gray); font-style: italic; font-size: 0.8rem; }
+
+        .brand-header { background: var(--dark); color: white; padding: 25px 10px; text-align: center; border-bottom: 6px solid var(--blue); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .brand-header h1 { margin: 0; font-size: 1.8rem; letter-spacing: 3px; text-transform: uppercase; font-weight: 900; color: var(--gold); }
+        .store-status { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-top: 5px; }
+
         #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; }
-        .login-card { background: white; width: 100%; max-width: 350px; padding: 40px 20px; border-radius: 20px; text-align: center; }
+        .login-card { background: white; width: 100%; max-width: 350px; padding: 40px 20px; border-radius: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        
         #mainApp { display: none; }
         .container { padding: 15px; max-width: 500px; margin: auto; }
         
         /* Summary Grid */
         .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-card { background: white; padding: 12px; border-radius: 12px; border-left: 4px solid var(--blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .stat-card h4 { margin: 0; font-size: 0.6rem; color: var(--gray); text-transform: uppercase; }
-        .stat-card p { margin: 5px 0 0; font-size: 0.85rem; font-weight: bold; color: var(--dark); }
-        .full-width-card { grid-column: span 2; border-left-color: var(--green); background: #fafffa; }
+        .stat-card { background: white; padding: 15px; border-radius: 16px; border-left: 4px solid var(--blue); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .stat-card h4 { margin: 0; font-size: 0.6rem; color: var(--gray); text-transform: uppercase; font-weight: 800; }
+        .stat-card p { margin: 8px 0 0; font-size: 0.95rem; font-weight: 700; color: var(--dark); }
+        .full-width-card { grid-column: span 2; border-left-color: var(--green); background: #f0fff4; }
 
         /* Navigation Menu */
-        .nav-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .nav-btn { height: 80px; border: none; border-radius: 15px; font-weight: bold; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .nav-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .nav-btn { height: 85px; border: none; border-radius: 18px; font-weight: bold; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 6px 15px rgba(0,0,0,0.08); transition: transform 0.2s; }
+        .nav-btn:active { transform: scale(0.95); }
         .btn-new { background: var(--blue); color: white; }
         .btn-goto { background: white; color: var(--blue); border: 2px solid var(--blue); }
-        .nav-btn span { font-size: 1.5rem; margin-bottom: 5px; }
+        .nav-btn span { font-size: 1.6rem; margin-bottom: 4px; }
 
-        /* Pop-up Cards */
-        .card-box { display: none; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 5px solid var(--blue); }
-        .field-group { margin-bottom: 12px; }
-        .field-label { font-size: 0.65rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 4px; display: block; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; background: #fafafa; }
-        .btn-save { width: 100%; background: var(--blue); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; }
-        .btn-close { width: 100%; background: #eee; color: #555; border: none; padding: 10px; border-radius: 10px; margin-top: 10px; cursor: pointer; font-weight: bold; }
+        /* Floating Forms */
+        .card-box { display: none; background: white; padding: 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 20px; border: 1px solid #eee; }
+        .field-group { margin-bottom: 15px; }
+        .field-label { font-size: 0.65rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 6px; display: block; }
+        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; background: #fcfcfc; }
+        
+        .btn-save { width: 100%; background: var(--blue); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .btn-close { width: 100%; background: #f0f0f0; color: #666; border: none; padding: 12px; border-radius: 12px; margin-top: 10px; cursor: pointer; font-weight: bold; }
 
         /* History Items */
-        .entry-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--blue); }
-        .entry-actions { display: flex; gap: 5px; }
-        .action-icon { border: none; background: #f0f2f5; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+        .entry-item { background: white; padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--blue); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .entry-actions { display: flex; gap: 8px; }
+        .action-icon { border: none; background: #f8f9fa; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; }
         
-        .load-more-btn { width: 100%; padding: 12px; background: none; border: 2px dashed var(--gray); color: var(--gray); border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .load-more-btn { width: 100%; padding: 14px; background: white; border: 2px solid var(--blue); color: var(--blue); border-radius: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; display: none; }
         
-        .loading { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; justify-content:center; align-items:center; }
+        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; color:white; font-weight:bold; }
     </style>
 </head>
 <body>
 
-<div id="loading" class="loading"><b>🔄 Updating La Vida...</b></div>
+<div id="loadingOverlay" class="loading-overlay">⌛ Processing...</div>
 
 <div id="loginPage">
     <div class="login-card">
-        <h1>LA VIDA</h1>
-        <input type="password" id="passInput" placeholder="Passcode" style="text-align:center; letter-spacing: 5px; margin-bottom:10px;">
-        <button class="btn-save" onclick="checkLogin()">UNLOCK</button>
+        <h1 style="color:var(--dark); margin:0; letter-spacing:2px;">LA VIDA</h1>
+        <p style="color:var(--gray); font-size:0.7rem; margin-bottom:30px;">BUSINESS MANAGEMENT</p>
+        <input type="password" id="passInput" placeholder="Enter Passcode" style="text-align:center; letter-spacing: 8px; margin-bottom:15px;">
+        <button class="btn-save" onclick="checkLogin()">UNLOCK SYSTEM</button>
     </div>
 </div>
 
 <div id="mainApp">
-    <div class="brand-header"><h1>La Vida Minimart</h1></div>
+    <div class="brand-header">
+        <h1>LA VIDA</h1>
+        <div class="store-status">● System Active</div>
+    </div>
 
     <div class="container">
         <div class="summary-grid">
-            <div class="stat-card"><h4>Sales</h4><p id="totalSales">0</p></div>
-            <div class="stat-card"><h4>Stock</h4><p id="totalStock">0</p></div>
-            <div class="stat-card"><h4>Other</h4><p id="totalOther">0</p></div>
-            <div class="stat-card"><h4>Savings</h4><p id="totalSavings">0</p></div>
-            <div class="stat-card full-width-card"><h4>Balance</h4><p id="balance">0</p></div>
+            <div class="stat-card"><h4>Sales</h4><p id="totalSales" class="loading-text">Fetching...</p></div>
+            <div class="stat-card"><h4>Stock</h4><p id="totalStock" class="loading-text">Fetching...</p></div>
+            <div class="stat-card"><h4>Other</h4><p id="totalOther" class="loading-text">Fetching...</p></div>
+            <div class="stat-card"><h4>Savings</h4><p id="totalSavings" class="loading-text">Fetching...</p></div>
+            <div class="stat-card full-width-card"><h4>Net Balance</h4><p id="balance" class="loading-text">Calculating...</p></div>
         </div>
 
         <div class="nav-menu">
             <button class="nav-btn btn-new" onclick="openNewEntry()"><span>➕</span> NEW ENTRY</button>
-            <button class="nav-btn btn-goto" onclick="toggleCard('searchCard')"><span>📅</span> GO TO DATE</button>
+            <button class="nav-btn btn-goto" onclick="toggleCard('searchCard')"><span>🔍</span> GO TO DATE</button>
         </div>
 
         <div id="searchCard" class="card-box">
-            <span class="field-label" style="font-size:0.8rem; margin-bottom:10px;">Find Date to Edit</span>
-            <div style="display:flex; gap:10px;">
+            <span class="field-label">Search Date to View/Edit</span>
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
                 <input type="date" id="searchDate">
-                <button onclick="searchByDate()" style="background:var(--blue); color:white; border:none; padding:0 15px; border-radius:10px;">🔍</button>
+                <button onclick="searchByDate()" style="background:var(--blue); color:white; border:none; padding:0 20px; border-radius:12px;">🔍</button>
             </div>
             <button class="btn-close" onclick="toggleCard('searchCard')">CLOSE</button>
         </div>
 
         <div id="entryFormCard" class="card-box">
-            <span class="field-label" id="formTitle" style="font-size: 0.8rem; margin-bottom: 15px;">Add Daily Record</span>
-            <div class="field-group"><span class="field-label">📅 Date</span><input type="date" id="date"></div>
-            <div class="field-group"><span class="field-label">💰 Sales (TZS)</span><input type="number" id="sales"></div>
-            <div class="field-group"><span class="field-label">📦 Stocking (TZS)</span><input type="number" id="stock"></div>
-            <div class="field-group"><span class="field-label">💸 Other Expenses (TZS)</span><input type="number" id="other"></div>
-            <div class="field-group"><span class="field-label">🏦 Savings (TZS)</span><input type="number" id="savings"></div>
-            <button class="btn-save" onclick="addRecord()">SAVE RECORD</button>
+            <span class="field-label" id="formTitle" style="font-size: 0.8rem; margin-bottom: 15px; color:var(--dark)">New Entry</span>
+            <div class="field-group"><span class="field-label">📅 Record Date</span><input type="date" id="date"></div>
+            <div class="field-group"><span class="field-label">💰 Sales (TZS)</span><input type="number" id="sales" placeholder="0.00"></div>
+            <div class="field-group"><span class="field-label">📦 Stocking (TZS)</span><input type="number" id="stock" placeholder="0.00"></div>
+            <div class="field-group"><span class="field-label">💸 Other Exp (TZS)</span><input type="number" id="other" placeholder="0.00"></div>
+            <div class="field-group"><span class="field-label">🏦 Savings (TZS)</span><input type="number" id="savings" placeholder="0.00"></div>
+            <button class="btn-save" onclick="addRecord()">SAVE TO CLOUD</button>
             <button class="btn-close" onclick="toggleCard('entryFormCard')">CANCEL</button>
         </div>
 
-        <label style="margin-bottom: 10px; display: block; font-size: 0.7rem; font-weight: bold; color: var(--gray);">📑 TRANSACTION HISTORY</label>
+        <label style="margin-bottom: 12px; display: block; font-size: 0.75rem; font-weight: 800; color: var(--gray); text-transform: uppercase; letter-spacing: 1px;">Recent Transactions</label>
         <div id="entryList"></div>
-        <button id="loadMoreBtn" class="load-more-btn" onclick="loadMore()">VIEW MORE ENTRIES</button>
+        <button id="loadMoreBtn" class="load-more-btn" onclick="loadMore()">LOAD PREVIOUS RECORDS</button>
 
-        <br><hr style="opacity: 0.2;"><br>
-        
-        <div style="background:white; padding:15px; border-radius:15px; border: 1px solid #ddd;">
-            <span class="field-label">📅 Export Monthly Report</span>
-            <input type="month" id="reportMonth" style="margin-top:5px; margin-bottom:10px;">
-            <button class="btn-save" style="padding:10px; font-size:0.8rem;" onclick="generatePDF()">DOWNLOAD PDF</button>
+        <br><hr style="border: 0; border-top: 1px solid #ddd;"><br>
+
+        <div style="background:white; padding:20px; border-radius:20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <span class="field-label">Generate Monthly Report</span>
+            <input type="month" id="reportMonth" style="margin: 10px 0;">
+            <button class="btn-save" style="padding:12px; font-size:0.85rem;" onclick="generatePDF()">📥 EXPORT PDF REPORT</button>
         </div>
     </div>
 </div>
@@ -122,7 +136,7 @@ function checkLogin() {
     if (document.getElementById('passInput').value === "112511") {
         sessionStorage.setItem('la_vida_session', 'active');
         showApp();
-    } else { alert("Incorrect Passcode"); }
+    } else { alert("❌ Incorrect Passcode"); }
 }
 
 function showApp() {
@@ -140,19 +154,20 @@ function toggleCard(cardId) {
 }
 
 function openNewEntry() {
-    document.getElementById('formTitle').innerText = "Add Daily Record";
+    document.getElementById('formTitle').innerText = "Create New Entry";
     document.querySelectorAll('#entryFormCard input').forEach(i => i.value = '');
+    document.getElementById('date').valueAsDate = new Date();
     toggleCard('entryFormCard');
 }
 
 async function fetchFromCloud() {
-    document.getElementById('loading').style.display = 'flex';
+    // Show skeleton text
+    document.querySelectorAll('.stat-card p').forEach(p => p.classList.add('loading-text'));
     try {
         const res = await fetch(SCRIPT_URL);
         data = await res.json();
         render();
-    } catch (e) { console.error(e); }
-    document.getElementById('loading').style.display = 'none';
+    } catch (e) { alert("Connection Error. Please check internet."); }
 }
 
 function render() {
@@ -166,26 +181,35 @@ function render() {
         totals.s += row.sales; totals.st += row.stocking; totals.o += row.other; totals.sv += row.savings;
     });
 
-    document.getElementById('totalSales').innerText = totals.s.toLocaleString() + " TZS";
-    document.getElementById('totalStock').innerText = totals.st.toLocaleString() + " TZS";
-    document.getElementById('totalOther').innerText = totals.o.toLocaleString() + " TZS";
-    document.getElementById('totalSavings').innerText = totals.sv.toLocaleString() + " TZS";
-    document.getElementById('balance').innerText = runBal.toLocaleString() + " TZS";
+    const elements = {
+        totalSales: totals.s, totalStock: totals.st, totalOther: totals.o, 
+        totalSavings: totals.sv, balance: runBal
+    };
+
+    for (let id in elements) {
+        const el = document.getElementById(id);
+        el.innerText = elements[id].toLocaleString() + " TZS";
+        el.classList.remove('loading-text');
+    }
 
     const visibleData = [...data].reverse().slice(0, displayLimit);
-    visibleData.forEach(row => {
-        list.innerHTML += `
-            <div class="entry-item">
-                <div style="flex-grow:1">
-                    <b>${row.date}</b><br>
-                    <small>S: ${row.sales.toLocaleString()} | E: ${(row.stocking+row.other).toLocaleString()} TZS</small>
-                </div>
-                <div class="entry-actions">
-                    <button class="action-icon" onclick="editFromList('${row.date}')">✏️</button>
-                    <button class="action-icon" style="color:var(--red)" onclick="deleteEntry('${row.date}')">🗑️</button>
-                </div>
-            </div>`;
-    });
+    if(visibleData.length === 0) {
+        list.innerHTML = "<p style='text-align:center; color:var(--gray); font-size:0.8rem;'>No records found.</p>";
+    } else {
+        visibleData.forEach(row => {
+            list.innerHTML += `
+                <div class="entry-item">
+                    <div style="flex-grow:1">
+                        <b style="font-size:0.9rem;">${row.date}</b><br>
+                        <small style="color:var(--gray)">Sales: ${row.sales.toLocaleString()} | Exp: ${(row.stocking+row.other).toLocaleString()}</small>
+                    </div>
+                    <div class="entry-actions">
+                        <button class="action-icon" onclick="editFromList('${row.date}')">✏️</button>
+                        <button class="action-icon" style="color:var(--red)" onclick="deleteEntry('${row.date}')">🗑️</button>
+                    </div>
+                </div>`;
+        });
+    }
     
     document.getElementById('loadMoreBtn').style.display = data.length > displayLimit ? 'block' : 'none';
 }
@@ -203,7 +227,7 @@ function editFromList(dateStr) {
         document.getElementById('stock').value = found.stocking;
         document.getElementById('other').value = found.other;
         document.getElementById('savings').value = found.savings;
-        document.getElementById('formTitle').innerText = "Editing: " + dateStr;
+        document.getElementById('formTitle').innerText = "Edit Entry: " + dateStr;
         toggleCard('entryFormCard');
     }
 }
@@ -213,7 +237,7 @@ function searchByDate() {
     const found = data.find(item => item.date === sDate);
     if (found) {
         editFromList(sDate);
-    } else { alert("No record found."); }
+    } else { alert("No record for this date."); }
 }
 
 async function addRecord() {
@@ -224,34 +248,46 @@ async function addRecord() {
         other: parseFloat(document.getElementById('other').value) || 0,
         savings: parseFloat(document.getElementById('savings').value) || 0
     };
-    if (!record.date) return alert("Select date.");
-    document.getElementById('loading').style.display = 'flex';
+    if (!record.date) return alert("Please select a date.");
+    document.getElementById('loadingOverlay').style.display = 'flex';
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
         document.getElementById('entryFormCard').style.display = 'none';
-        setTimeout(fetchFromCloud, 1000);
-    } catch (e) { alert("Error"); }
+        setTimeout(() => { 
+            fetchFromCloud(); 
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }, 1200);
+    } catch (e) { alert("Cloud Sync Failed"); }
 }
 
 async function deleteEntry(dateToDelete) {
-    if(!confirm("Permanently delete " + dateToDelete + "?")) return;
-    document.getElementById('loading').style.display = 'flex';
+    if(!confirm("Delete record for " + dateToDelete + "?")) return;
+    document.getElementById('loadingOverlay').style.display = 'flex';
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({action: "delete", date: dateToDelete}) });
-        setTimeout(fetchFromCloud, 1000);
+        setTimeout(() => { 
+            fetchFromCloud(); 
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }, 1200);
     } catch (e) {}
 }
 
 function generatePDF() {
     const monthVal = document.getElementById('reportMonth').value;
-    if (!monthVal) return alert("Select month.");
+    if (!monthVal) return alert("Select a month first.");
     const filtered = data.filter(d => d.date.startsWith(monthVal));
+    if(filtered.length === 0) return alert("No data for this month.");
+    
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text("La Vida Report - " + monthVal, 14, 20);
+    doc.setFontSize(18);
+    doc.text("LA VIDA MINIMART REPORT", 14, 20);
+    doc.setFontSize(11);
+    doc.text("Period: " + monthVal, 14, 30);
+    
     const tableData = filtered.map(d => [d.date, d.sales.toLocaleString(), d.stocking.toLocaleString(), d.other.toLocaleString(), d.savings.toLocaleString()]);
-    doc.autoTable({ startY: 30, head: [['Date', 'Sales', 'Stock', 'Other', 'Savings']], body: tableData });
-    doc.save(`LaVida_${monthVal}.pdf`);
+    doc.autoTable({ startY: 40, head: [['Date', 'Sales (TZS)', 'Stock', 'Expenses', 'Savings']], body: tableData, theme: 'grid' });
+    doc.save(`LaVida_Report_${monthVal}.pdf`);
 }
 </script>
 </body>

@@ -38,16 +38,13 @@
         .trend-up { background: rgba(40, 167, 69, 0.2); color: #4ade80; }
         .trend-down { background: rgba(220, 53, 69, 0.2); color: #f87171; }
 
-        /* App Container Layout */
         #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; }
         .login-card { background: white; width: 100%; max-width: 340px; padding: 40px 25px; border-radius: 24px; text-align: center; }
         
         #mainApp { display: none; }
         .container { padding: 15px; max-width: 480px; margin: auto; }
         
-        /* Controls */
         .primary-cta { background: var(--blue); color: white; width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,64,133,0.3); transition: 0.2s; }
-        .primary-cta:active { transform: scale(0.98); }
         
         .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 15px; border-radius: 16px; border-left: 4px solid var(--blue); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
@@ -59,7 +56,6 @@
         .field-label { font-size: 0.7rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 6px; display: block; }
         input, textarea { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; background: #fafafa; outline: none; }
         
-        /* History Items */
         .entry-item { background: white; padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ddd; }
         .entry-item.is-today { border-left-color: var(--gold); background: #fffdf5; }
         .note-text { font-size: 0.7rem; color: var(--gray); font-style: italic; display: block; margin-top: 4px; }
@@ -92,11 +88,11 @@
         <div class="today-panel">
             <div class="today-stat">
                 <h4>Today Sales</h4>
-                <p><span id="daySales">0</span> <span id="salesTrend" class="trend-badge"></span></p>
+                <p><span id="daySales">0 TZS</span> <span id="salesTrend" class="trend-badge"></span></p>
             </div>
             <div class="today-stat" style="text-align: right;">
                 <h4>Net Balance</h4>
-                <p><span id="balTrend" class="trend-badge"></span> <span id="topBalance" style="color:var(--gold)">0</span></p>
+                <p><span id="balTrend" class="trend-badge"></span> <span id="topBalance" style="color:var(--gold)">0 TZS</span></p>
             </div>
         </div>
     </div>
@@ -194,44 +190,50 @@ function render() {
     list.innerHTML = '';
     let totalSales = 0, totalStock = 0, totalOther = 0, totalSavings = 0;
     let dayS = 0, yesterdayS = 0;
-    let runningBalance = 0, yesterdayBalance = 0;
+    let runningBalance = 0, yesterdayBalanceTotal = 0;
 
+    // Get strictly Today and Yesterday based on user's system time
     const todayStr = new Date().toISOString().split('T')[0];
-    const yesterdayObj = new Date();
-    yesterdayObj.setDate(yesterdayObj.getDate() - 1);
-    const yesterdayStr = yesterdayObj.toISOString().split('T')[0];
+    const yest = new Date();
+    yest.setDate(yest.getDate() - 1);
+    const yesterdayStr = yest.toISOString().split('T')[0];
 
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
     
     data.forEach(row => {
         const rowNet = row.sales - row.stocking - row.other - row.savings;
         runningBalance += rowNet;
-        totalSales += row.sales; totalStock += row.stocking; 
-        totalOther += row.other; totalSavings += row.savings;
+        
+        totalSales += row.sales; 
+        totalStock += row.stocking; 
+        totalOther += row.other; 
+        totalSavings += row.savings;
 
-        if(row.date === todayStr) dayS = row.sales;
+        if(row.date === todayStr) {
+            dayS = row.sales;
+        }
         if(row.date === yesterdayStr) {
             yesterdayS = row.sales;
-            yesterdayBalance = runningBalance; 
+            yesterdayBalanceTotal = runningBalance;
         }
     });
 
-    // Trends
+    // Sales Trend: Today vs Yesterday
     const salesBadge = document.getElementById('salesTrend');
-    if(dayS > 0 && yesterdayS > 0) {
+    if(dayS >= 0 && yesterdayS > 0) {
         const sDiff = ((dayS - yesterdayS) / yesterdayS) * 100;
         salesBadge.innerText = (sDiff >= 0 ? "↑ " : "↓ ") + Math.abs(sDiff).toFixed(0) + "%";
         salesBadge.className = "trend-badge " + (sDiff >= 0 ? "trend-up" : "trend-down");
     } else { salesBadge.innerText = ""; }
 
+    // Balance Trend: Current Total vs Yesterday's Final Total
     const balBadge = document.getElementById('balTrend');
-    if(runningBalance !== 0 && yesterdayBalance !== 0) {
-        const bDiff = ((runningBalance - yesterdayBalance) / Math.abs(yesterdayBalance)) * 100;
+    if(yesterdayBalanceTotal !== 0) {
+        const bDiff = ((runningBalance - yesterdayBalanceTotal) / Math.abs(yesterdayBalanceTotal)) * 100;
         balBadge.innerText = (bDiff >= 0 ? "↑ " : "↓ ") + Math.abs(bDiff).toFixed(0) + "%";
         balBadge.className = "trend-badge " + (bDiff >= 0 ? "trend-up" : "trend-down");
     } else { balBadge.innerText = ""; }
 
-    // Units added back (TZS)
     document.getElementById('daySales').innerText = dayS.toLocaleString() + " TZS";
     document.getElementById('topBalance').innerText = runningBalance.toLocaleString() + " TZS";
     document.getElementById('totalSales').innerText = totalSales.toLocaleString() + " TZS";

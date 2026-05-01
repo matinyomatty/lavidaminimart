@@ -20,12 +20,12 @@
             z-index: 1000;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        .header h1 { margin: 0; font-size: 1.3rem; letter-spacing: 2px; color: var(--gold); text-align: center; }
+        .header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 2px; color: var(--gold); text-align: center; }
         
         .today-panel { 
             background: rgba(255,255,255,0.05); 
             margin-top: 10px; 
-            padding: 10px; 
+            padding: 12px; 
             border-radius: 12px; 
             display: flex; 
             justify-content: space-between; 
@@ -34,9 +34,9 @@
         .today-stat h4 { margin: 0; font-size: 0.55rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; }
         .today-stat p { margin: 4px 0 0; font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; gap: 4px; }
         
-        .trend-badge { font-size: 0.6rem; padding: 1px 4px; border-radius: 4px; font-weight: 800; }
-        .trend-up { background: rgba(40, 167, 69, 0.2); color: #4ade80; }
-        .trend-down { background: rgba(220, 53, 69, 0.2); color: #f87171; }
+        .trend-badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: 800; display: none; }
+        .trend-up { background: rgba(40, 167, 69, 0.2); color: #4ade80; display: inline-block; }
+        .trend-down { background: rgba(220, 53, 69, 0.2); color: #f87171; display: inline-block; }
 
         #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; }
         .login-card { background: white; width: 100%; max-width: 340px; padding: 40px 25px; border-radius: 24px; text-align: center; }
@@ -50,24 +50,14 @@
         .stat-card p { margin: 6px 0 0; font-size: 0.8rem; font-weight: bold; }
 
         .modal { display: none; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); margin-bottom: 20px; border-top: 6px solid var(--blue); position: fixed; top: 10%; left: 5%; width: 90%; z-index: 2000; }
-        .field-group { margin-bottom: 15px; }
-        .field-label { font-size: 0.7rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 6px; display: block; }
-        input, textarea { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; background: #fafafa; outline: none; }
-        
         .entry-item { background: white; padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ddd; }
         .entry-item.is-today { border-left-color: var(--gold); background: #fffdf5; }
-        .note-text { font-size: 0.7rem; color: var(--gray); font-style: italic; display: block; margin-top: 4px; }
-        
-        .action-btns { display: flex; gap: 8px; }
-        .btn-circle { border: none; background: #f0f2f5; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-        .secondary-actions { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-sec { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; background: white; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
         .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center; color:white; }
     </style>
 </head>
 <body>
 
-<div id="loadingOverlay" class="loading-overlay"><b>⏳ SYNCING...</b></div>
+<div id="loadingOverlay" class="loading-overlay"><b>⏳ SYNCING LA VIDA...</b></div>
 
 <div id="loginPage">
     <div class="login-card">
@@ -101,24 +91,20 @@
             <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
             <div class="stat-card"><h4>Savings</h4><p id="totalSavings">...</p></div>
         </div>
-        <div class="secondary-actions">
-            <button class="btn-sec" onclick="openForm('search')">🔍 FIND DATE</button>
-            <button class="btn-sec" onclick="openForm('report')">📄 REPORTS</button>
-        </div>
         <div id="entryList"></div>
-        <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:10px; display:none;" onclick="loadMore()">VIEW MORE</button>
+        <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:10px; display:none; padding:12px; border-radius:12px; border:1px solid #ddd; background:white; font-weight:bold;" onclick="loadMore()">VIEW MORE</button>
     </div>
 
     <div id="entryModal" class="modal">
-        <h3 id="formTitle" style="margin:0 0 15px 0;">Entry</h3>
-        <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
-        <div class="field-group"><span class="field-label">Sales (TZS)</span><input type="number" id="sales" placeholder="0"></div>
-        <div class="field-group"><span class="field-label">Stocking</span><input type="number" id="stock" placeholder="0"></div>
-        <div class="field-group"><span class="field-label">Other Exp</span><input type="number" id="other" placeholder="0"></div>
-        <div class="field-group"><span class="field-label">Savings</span><input type="number" id="savings" placeholder="0"></div>
-        <div class="field-group"><span class="field-label">Note</span><textarea id="note" style="height:50px;"></textarea></div>
+        <h3 id="formTitle" style="margin:0 0 15px 0;">Daily Entry</h3>
+        <input type="date" id="date" style="width:100%; padding:15px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd;">
+        <input type="number" id="sales" placeholder="Sales (TZS)" style="width:100%; padding:15px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd;">
+        <input type="number" id="stock" placeholder="Stocking Cost" style="width:100%; padding:15px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd;">
+        <input type="number" id="other" placeholder="Other Expenses" style="width:100%; padding:15px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd;">
+        <input type="number" id="savings" placeholder="Savings" style="width:100%; padding:15px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd;">
+        <textarea id="note" placeholder="Notes..." style="width:100%; padding:15px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd; height:60px;"></textarea>
         <button class="primary-cta" onclick="saveRecord()">SAVE DATA</button>
-        <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
+        <button onclick="closeModals()" style="width:100%; background:none; border:none; color:var(--gray); font-weight:bold; cursor:pointer;">CANCEL</button>
     </div>
 </div>
 
@@ -127,17 +113,14 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDqLcc9kqXA8sH1cfdZ
 let data = [];
 let displayLimit = 5;
 
-// Helper to get local date string YYYY-MM-DD
-function getLocalDateString(dateObj = new Date()) {
-    return dateObj.toLocaleDateString('sv-SE'); // sv-SE gives YYYY-MM-DD format
-}
+const getLocDate = (d = new Date()) => d.toLocaleDateString('sv-SE');
 
 function checkLogin() {
     if (document.getElementById('passInput').value === "112511") {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
         fetchData();
-    } else { alert("Wrong Code"); }
+    } else { alert("Access Denied"); }
 }
 
 async function fetchData() {
@@ -153,69 +136,67 @@ async function fetchData() {
 function render() {
     const list = document.getElementById('entryList');
     list.innerHTML = '';
-    let totalSales = 0, totalStock = 0, totalOther = 0, totalSavings = 0;
-    let dayS = 0, yesterdayS = 0;
-    let runningBalance = 0, yesterdayBalanceTotal = 0;
+    let totalS = 0, totalSt = 0, totalO = 0, totalSv = 0;
+    let daySales = 0, yesterdaySales = 0;
+    let currentBal = 0, yesterdayBalTotal = 0;
 
-    const todayStr = getLocalDateString();
-    const yest = new Date(); yest.setDate(yest.getDate() - 1);
-    const yesterdayStr = getLocalDateString(yest);
+    const todayStr = getLocDate();
+    const yestDate = new Date(); yestDate.setDate(yestDate.getDate() - 1);
+    const yesterdayStr = getLocDate(yestDate);
 
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
     
     data.forEach(row => {
-        // Fix for Google Sheets date formatting
         const rowDate = row.date.split('T')[0];
-        const rowNet = row.sales - row.stocking - row.other - row.savings;
-        runningBalance += rowNet;
-        
-        totalSales += row.sales; totalStock += row.stocking; 
-        totalOther += row.other; totalSavings += row.savings;
+        const net = row.sales - row.stocking - row.other - row.savings;
+        currentBal += net;
+        totalS += row.sales; totalSt += row.stocking; 
+        totalO += row.other; totalSv += row.savings;
 
-        if(rowDate === todayStr) dayS = row.sales;
+        if(rowDate === todayStr) daySales = row.sales;
         if(rowDate === yesterdayStr) {
-            yesterdayS = row.sales;
-            yesterdayBalanceTotal = runningBalance;
+            yesterdaySales = row.sales;
+            yesterdayBalTotal = currentBal; // Capture balance as it was at end of yesterday
         }
     });
 
-    // Sales Trend
-    const salesBadge = document.getElementById('salesTrend');
-    if(dayS >= 0 && yesterdayS > 0) {
-        const sDiff = ((dayS - yesterdayS) / yesterdayS) * 100;
-        salesBadge.innerText = (sDiff >= 0 ? "↑ " : "↓ ") + Math.abs(sDiff).toFixed(0) + "%";
-        salesBadge.className = "trend-badge " + (sDiff >= 0 ? "trend-up" : "trend-down");
-    } else { salesBadge.innerText = ""; }
+    // Update Main Numbers
+    document.getElementById('daySales').innerText = daySales.toLocaleString() + " TZS";
+    document.getElementById('topBalance').innerText = currentBal.toLocaleString() + " TZS";
+    document.getElementById('totalSales').innerText = totalS.toLocaleString() + " TZS";
+    document.getElementById('totalStock').innerText = totalSt.toLocaleString() + " TZS";
+    document.getElementById('totalOther').innerText = totalO.toLocaleString() + " TZS";
+    document.getElementById('totalSavings').innerText = totalSv.toLocaleString() + " TZS";
 
-    // Balance Trend
-    const balBadge = document.getElementById('balTrend');
-    if(yesterdayBalanceTotal !== 0) {
-        const bDiff = ((runningBalance - yesterdayBalanceTotal) / Math.abs(yesterdayBalanceTotal)) * 100;
-        balBadge.innerText = (bDiff >= 0 ? "↑ " : "↓ ") + Math.abs(bDiff).toFixed(0) + "%";
-        balBadge.className = "trend-badge " + (bDiff >= 0 ? "trend-up" : "trend-down");
-    } else { balBadge.innerText = ""; }
+    // Strictly show trends ONLY if Today and Yesterday records exist
+    const sBadge = document.getElementById('salesTrend');
+    const bBadge = document.getElementById('balTrend');
+    
+    const hasToday = data.some(d => d.date.split('T')[0] === todayStr);
+    const hasYesterday = data.some(d => d.date.split('T')[0] === yesterdayStr);
 
-    document.getElementById('daySales').innerText = dayS.toLocaleString() + " TZS";
-    document.getElementById('topBalance').innerText = runningBalance.toLocaleString() + " TZS";
-    document.getElementById('totalSales').innerText = totalSales.toLocaleString() + " TZS";
-    document.getElementById('totalStock').innerText = totalStock.toLocaleString() + " TZS";
-    document.getElementById('totalOther').innerText = totalOther.toLocaleString() + " TZS";
-    document.getElementById('totalSavings').innerText = totalSavings.toLocaleString() + " TZS";
+    if(hasToday && hasYesterday) {
+        // Sales Trend
+        const sDiff = ((daySales - yesterdaySales) / (yesterdaySales || 1)) * 100;
+        sBadge.innerText = (sDiff >= 0 ? "↑ " : "↓ ") + Math.abs(sDiff).toFixed(0) + "%";
+        sBadge.className = "trend-badge " + (sDiff >= 0 ? "trend-up" : "trend-down");
+        
+        // Balance Trend (Current total vs yesterday's total)
+        const bDiff = ((currentBal - yesterdayBalTotal) / (Math.abs(yesterdayBalTotal) || 1)) * 100;
+        bBadge.innerText = (bDiff >= 0 ? "↑ " : "↓ ") + Math.abs(bDiff).toFixed(0) + "%";
+        bBadge.className = "trend-badge " + (bDiff >= 0 ? "trend-up" : "trend-down");
+    } else {
+        sBadge.className = "trend-badge";
+        bBadge.className = "trend-badge";
+    }
 
     const visible = [...data].reverse().slice(0, displayLimit);
     visible.forEach(row => {
-        const rowDate = row.date.split('T')[0];
+        const d = row.date.split('T')[0];
         list.innerHTML += `
-            <div class="entry-item ${rowDate === todayStr ? 'is-today' : ''}">
-                <div style="max-width: 65%;">
-                    <b style="font-size:0.9rem;">${rowDate}</b><br>
-                    <small style="color:var(--gray)">Sales: ${row.sales.toLocaleString()} TZS</small>
-                    ${row.note ? `<span class="note-text">"${row.note}"</span>` : ''}
-                </div>
-                <div class="action-btns">
-                    <button class="btn-circle" onclick="editRow('${rowDate}')">✏️</button>
-                    <button class="btn-circle" style="color:var(--red)" onclick="deleteRow('${rowDate}')">🗑️</button>
-                </div>
+            <div class="entry-item ${d === todayStr ? 'is-today' : ''}">
+                <div><b>${d}</b><br><small>Sales: ${row.sales.toLocaleString()} TZS</small></div>
+                <button class="btn-circle" onclick="editRow('${d}')">✏️</button>
             </div>`;
     });
     document.getElementById('loadMoreBtn').style.display = data.length > displayLimit ? 'block' : 'none';
@@ -225,7 +206,7 @@ function openForm(type) {
     if(type === 'new') {
         document.getElementById('formTitle').innerText = "New Record";
         document.querySelectorAll('#entryModal input, #entryModal textarea').forEach(i => i.value = '');
-        document.getElementById('date').value = getLocalDateString();
+        document.getElementById('date').value = getLocDate();
         document.getElementById('entryModal').style.display = 'block';
     }
 }
@@ -258,13 +239,6 @@ function editRow(date) {
         document.getElementById('note').value = found.note || "";
         document.getElementById('entryModal').style.display = 'block';
     }
-}
-
-async function deleteRow(d) {
-    if(!confirm("Archive " + d + "?")) return;
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({action:"archive", date:d}) });
-    setTimeout(fetchData, 1200);
 }
 </script>
 </body>

@@ -3,124 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>La Vida Minimart</title>
+    <title>La Vida Control</title>
     <style>
-        :root { --blue: #004085; --dark: #001a33; --light: #f8fbff; --green: #28a745; --gray: #6c757d; --red: #dc3545; --gold: #d4af37; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background: #f4f7f9; margin: 0; padding: 0; color: #333; }
+        :root { --blue: #004085; --dark: #001a33; --light: #f4f7f9; --green: #28a745; --gray: #6c757d; --red: #dc3545; --gold: #d4af37; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--light); margin: 0; padding: 0; color: var(--dark); }
         
-        /* Skeleton Animation */
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        .loading-text { animation: pulse 1.5s infinite; color: var(--gray); font-style: italic; font-size: 0.8rem; }
+        /* Branding & Today Panel */
+        .header { background: var(--dark); color: white; padding: 20px 15px; border-bottom: 5px solid var(--blue); }
+        .header h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; color: var(--gold); }
+        .today-panel { background: rgba(255,255,255,0.05); margin-top: 15px; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; border: 1px solid rgba(212,175,55,0.3); }
+        .today-stat h4 { margin: 0; font-size: 0.6rem; color: var(--gold); text-transform: uppercase; }
+        .today-stat p { margin: 5px 0 0; font-size: 1rem; font-weight: bold; }
 
-        .brand-header { background: var(--dark); color: white; padding: 25px 10px; text-align: center; border-bottom: 6px solid var(--blue); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .brand-header h1 { margin: 0; font-size: 1.8rem; letter-spacing: 3px; text-transform: uppercase; font-weight: 900; color: var(--gold); }
-        .store-status { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-top: 5px; }
-
+        /* Login */
         #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; }
-        .login-card { background: white; width: 100%; max-width: 350px; padding: 40px 20px; border-radius: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .login-card { background: white; width: 100%; max-width: 340px; padding: 40px 25px; border-radius: 24px; text-align: center; }
         
         #mainApp { display: none; }
-        .container { padding: 15px; max-width: 500px; margin: auto; }
+        .container { padding: 15px; max-width: 480px; margin: auto; }
         
-        /* Summary Grid */
-        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-card { background: white; padding: 15px; border-radius: 16px; border-left: 4px solid var(--blue); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .stat-card h4 { margin: 0; font-size: 0.6rem; color: var(--gray); text-transform: uppercase; font-weight: 800; }
-        .stat-card p { margin: 8px 0 0; font-size: 0.95rem; font-weight: 700; color: var(--dark); }
-        .full-width-card { grid-column: span 2; border-left-color: var(--green); background: #f0fff4; }
+        /* New Entry: Center of Gravity */
+        .primary-cta { background: var(--blue); color: white; width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,64,133,0.3); }
+        
+        /* Summaries - Stacked on Mobile */
+        .summary-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px; }
+        @media(min-width: 400px) { .summary-grid { grid-template-columns: 1fr 1fr; } }
+        
+        .stat-card { background: white; padding: 15px; border-radius: 16px; border-left: 4px solid var(--blue); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .stat-card h4 { margin: 0; font-size: 0.65rem; color: var(--gray); text-transform: uppercase; }
+        .stat-card p { margin: 8px 0 0; font-size: 1rem; font-weight: bold; }
+        .balance-card { grid-column: 1 / -1; background: #e7f3ff; border-left-color: var(--green); }
 
-        /* Navigation Menu */
-        .nav-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .nav-btn { height: 85px; border: none; border-radius: 18px; font-weight: bold; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 6px 15px rgba(0,0,0,0.08); transition: transform 0.2s; }
-        .nav-btn:active { transform: scale(0.95); }
-        .btn-new { background: var(--blue); color: white; }
-        .btn-goto { background: white; color: var(--blue); border: 2px solid var(--blue); }
-        .nav-btn span { font-size: 1.6rem; margin-bottom: 4px; }
-
-        /* Floating Forms */
-        .card-box { display: none; background: white; padding: 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 20px; border: 1px solid #eee; }
+        /* Pop-up Modals */
+        .modal { display: none; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); margin-bottom: 20px; border-top: 6px solid var(--blue); }
         .field-group { margin-bottom: 15px; }
-        .field-label { font-size: 0.65rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 6px; display: block; }
-        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; background: #fcfcfc; }
-        
-        .btn-save { width: 100%; background: var(--blue); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: bold; font-size: 1rem; cursor: pointer; }
-        .btn-close { width: 100%; background: #f0f0f0; color: #666; border: none; padding: 12px; border-radius: 12px; margin-top: 10px; cursor: pointer; font-weight: bold; }
+        .field-label { font-size: 0.7rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 6px; display: block; }
+        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; background: #fafafa; outline: none; }
+        input:focus { border-color: var(--blue); }
 
-        /* History Items */
-        .entry-item { background: white; padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--blue); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        .entry-actions { display: flex; gap: 8px; }
-        .action-icon { border: none; background: #f8f9fa; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; }
+        /* Transaction List */
+        .entry-item { background: white; padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ddd; }
+        .entry-item.is-today { border-left-color: var(--gold); background: #fffdf5; }
+        .tag-today { background: var(--gold); color: var(--dark); font-size: 0.5rem; padding: 2px 6px; border-radius: 4px; font-weight: 900; margin-left: 5px; vertical-align: middle; }
         
-        .load-more-btn { width: 100%; padding: 14px; background: white; border: 2px solid var(--blue); color: var(--blue); border-radius: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; display: none; }
+        .action-btns { display: flex; gap: 10px; }
+        .btn-circle { border: none; background: #f0f2f5; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
         
-        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; color:white; font-weight:bold; }
+        .secondary-actions { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-sec { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; background: white; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
+
+        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center; color:white; }
     </style>
 </head>
 <body>
 
-<div id="loadingOverlay" class="loading-overlay">⌛ Processing...</div>
+<div id="loadingOverlay" class="loading-overlay"><b>⏳ SYNCING...</b></div>
 
 <div id="loginPage">
     <div class="login-card">
-        <h1 style="color:var(--dark); margin:0; letter-spacing:2px;">LA VIDA</h1>
-        <p style="color:var(--gray); font-size:0.7rem; margin-bottom:30px;">BUSINESS MANAGEMENT</p>
-        <input type="password" id="passInput" placeholder="Enter Passcode" style="text-align:center; letter-spacing: 8px; margin-bottom:15px;">
-        <button class="btn-save" onclick="checkLogin()">UNLOCK SYSTEM</button>
+        <h1 style="margin:0; letter-spacing:3px;">LA VIDA</h1>
+        <p style="color:var(--gray); font-size:0.8rem; margin-bottom:30px;">Authorized Access Only</p>
+        <input type="password" id="passInput" inputmode="numeric" placeholder="••••••" style="text-align:center; letter-spacing:10px; font-size:1.5rem;">
+        <button class="primary-cta" style="margin-top:20px;" onclick="checkLogin()">UNLOCK SYSTEM</button>
     </div>
 </div>
 
 <div id="mainApp">
-    <div class="brand-header">
+    <div class="header">
         <h1>LA VIDA</h1>
-        <div class="store-status">● System Active</div>
+        <div class="today-panel">
+            <div class="today-stat"><h4>Today Sales</h4><p id="daySales">0</p></div>
+            <div class="today-stat"><h4>Today Net</h4><p id="dayNet" style="color:var(--green)">0</p></div>
+        </div>
     </div>
 
     <div class="container">
+        <button class="primary-cta" onclick="openForm('new')">
+            <span>➕</span> ADD DAILY ENTRY
+        </button>
+
         <div class="summary-grid">
-            <div class="stat-card"><h4>Sales</h4><p id="totalSales" class="loading-text">Fetching...</p></div>
-            <div class="stat-card"><h4>Stock</h4><p id="totalStock" class="loading-text">Fetching...</p></div>
-            <div class="stat-card"><h4>Other</h4><p id="totalOther" class="loading-text">Fetching...</p></div>
-            <div class="stat-card"><h4>Savings</h4><p id="totalSavings" class="loading-text">Fetching...</p></div>
-            <div class="stat-card full-width-card"><h4>Net Balance</h4><p id="balance" class="loading-text">Calculating...</p></div>
+            <div class="stat-card"><h4>Stock Value</h4><p id="totalStock">...</p></div>
+            <div class="stat-card"><h4>Expenses</h4><p id="totalOther">...</p></div>
+            <div class="stat-card"><h4>Savings</h4><p id="totalSavings">...</p></div>
+            <div class="stat-card balance-card"><h4>Current Cash Balance</h4><p id="balance" style="font-size:1.2rem;">...</p></div>
         </div>
 
-        <div class="nav-menu">
-            <button class="nav-btn btn-new" onclick="openNewEntry()"><span>➕</span> NEW ENTRY</button>
-            <button class="nav-btn btn-goto" onclick="toggleCard('searchCard')"><span>🔍</span> GO TO DATE</button>
+        <div class="secondary-actions">
+            <button class="btn-sec" onclick="openForm('search')">🔍 FIND DATE</button>
+            <button class="btn-sec" onclick="openForm('report')">📄 REPORTS</button>
         </div>
 
-        <div id="searchCard" class="card-box">
-            <span class="field-label">Search Date to View/Edit</span>
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <input type="date" id="searchDate">
-                <button onclick="searchByDate()" style="background:var(--blue); color:white; border:none; padding:0 20px; border-radius:12px;">🔍</button>
-            </div>
-            <button class="btn-close" onclick="toggleCard('searchCard')">CLOSE</button>
+        <div id="entryModal" class="modal">
+            <h3 id="formTitle" style="margin-top:0;">New Record</h3>
+            <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
+            <div class="field-group"><span class="field-label">Sales (TZS)</span><input type="number" id="sales" placeholder="0"></div>
+            <div class="field-group"><span class="field-label">Stocking</span><input type="number" id="stock" placeholder="0"></div>
+            <div class="field-group"><span class="field-label">Other Exp</span><input type="number" id="other" placeholder="0"></div>
+            <div class="field-group"><span class="field-label">Savings</span><input type="number" id="savings" placeholder="0"></div>
+            <button class="primary-cta" onclick="saveRecord()">SAVE DATA</button>
+            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
         </div>
 
-        <div id="entryFormCard" class="card-box">
-            <span class="field-label" id="formTitle" style="font-size: 0.8rem; margin-bottom: 15px; color:var(--dark)">New Entry</span>
-            <div class="field-group"><span class="field-label">📅 Record Date</span><input type="date" id="date"></div>
-            <div class="field-group"><span class="field-label">💰 Sales (TZS)</span><input type="number" id="sales" placeholder="0.00"></div>
-            <div class="field-group"><span class="field-label">📦 Stocking (TZS)</span><input type="number" id="stock" placeholder="0.00"></div>
-            <div class="field-group"><span class="field-label">💸 Other Exp (TZS)</span><input type="number" id="other" placeholder="0.00"></div>
-            <div class="field-group"><span class="field-label">🏦 Savings (TZS)</span><input type="number" id="savings" placeholder="0.00"></div>
-            <button class="btn-save" onclick="addRecord()">SAVE TO CLOUD</button>
-            <button class="btn-close" onclick="toggleCard('entryFormCard')">CANCEL</button>
+        <div id="searchModal" class="modal">
+            <span class="field-label">Go to Specific Date</span>
+            <input type="date" id="searchDate" style="margin-bottom:15px;">
+            <button class="primary-cta" onclick="executeSearch()">SEARCH</button>
+            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CLOSE</button>
         </div>
 
-        <label style="margin-bottom: 12px; display: block; font-size: 0.75rem; font-weight: 800; color: var(--gray); text-transform: uppercase; letter-spacing: 1px;">Recent Transactions</label>
+        <div id="reportModal" class="modal">
+            <span class="field-label">Generate PDF Report</span>
+            <input type="month" id="reportMonth" style="margin-bottom:15px;">
+            <button class="primary-cta" onclick="generatePDF()">DOWNLOAD PDF</button>
+            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CLOSE</button>
+        </div>
+
+        <label style="font-size:0.7rem; font-weight:bold; color:var(--gray); text-transform:uppercase; display:block; margin-bottom:10px;">Transaction History</label>
         <div id="entryList"></div>
-        <button id="loadMoreBtn" class="load-more-btn" onclick="loadMore()">LOAD PREVIOUS RECORDS</button>
-
-        <br><hr style="border: 0; border-top: 1px solid #ddd;"><br>
-
-        <div style="background:white; padding:20px; border-radius:20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-            <span class="field-label">Generate Monthly Report</span>
-            <input type="month" id="reportMonth" style="margin: 10px 0;">
-            <button class="btn-save" style="padding:12px; font-size:0.85rem;" onclick="generatePDF()">📥 EXPORT PDF REPORT</button>
-        </div>
+        <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:10px; display:none;" onclick="loadMore()">VIEW MORE</button>
     </div>
 </div>
 
@@ -132,115 +134,89 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDqLcc9kqXA8sH1cfdZ
 let data = [];
 let displayLimit = 5;
 
+// Password Login on Enter
+document.getElementById('passInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') checkLogin(); });
+
 function checkLogin() {
     if (document.getElementById('passInput').value === "112511") {
-        sessionStorage.setItem('la_vida_session', 'active');
-        showApp();
-    } else { alert("❌ Incorrect Passcode"); }
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        fetchData();
+    } else { alert("Wrong Passcode"); }
 }
 
-function showApp() {
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    fetchFromCloud();
+function openForm(type) {
+    closeModals();
+    if(type === 'new') {
+        document.getElementById('formTitle').innerText = "New Record";
+        document.querySelectorAll('#entryModal input').forEach(i => i.value = '');
+        document.getElementById('date').valueAsDate = new Date();
+        document.getElementById('entryModal').style.display = 'block';
+    } else if(type === 'search') {
+        document.getElementById('searchModal').style.display = 'block';
+    } else if(type === 'report') {
+        document.getElementById('reportModal').style.display = 'block';
+    }
 }
 
-function toggleCard(cardId) {
-    const card = document.getElementById(cardId);
-    const isVisible = card.style.display === 'block';
-    document.getElementById('entryFormCard').style.display = 'none';
-    document.getElementById('searchCard').style.display = 'none';
-    if (!isVisible) card.style.display = 'block';
+function closeModals() {
+    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
 }
 
-function openNewEntry() {
-    document.getElementById('formTitle').innerText = "Create New Entry";
-    document.querySelectorAll('#entryFormCard input').forEach(i => i.value = '');
-    document.getElementById('date').valueAsDate = new Date();
-    toggleCard('entryFormCard');
-}
-
-async function fetchFromCloud() {
-    // Show skeleton text
-    document.querySelectorAll('.stat-card p').forEach(p => p.classList.add('loading-text'));
+async function fetchData() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
     try {
         const res = await fetch(SCRIPT_URL);
         data = await res.json();
         render();
-    } catch (e) { alert("Connection Error. Please check internet."); }
+    } catch (e) { alert("Data fetch failed."); }
+    document.getElementById('loadingOverlay').style.display = 'none';
 }
 
 function render() {
     const list = document.getElementById('entryList');
     list.innerHTML = '';
-    let runBal = 0, totals = {s:0, st:0, o:0, sv:0};
-    
+    let totals = {s:0, st:0, o:0, sv:0}, dayS = 0, dayN = 0;
+    const todayStr = new Date().toISOString().split('T')[0];
+
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
-    data.forEach((row) => {
-        runBal += (row.sales - row.stocking - row.other - row.savings);
-        totals.s += row.sales; totals.st += row.stocking; totals.o += row.other; totals.sv += row.savings;
+    data.forEach(row => {
+        totals.s += row.sales; totals.st += row.stocking; 
+        totals.o += row.other; totals.sv += row.savings;
+        if(row.date === todayStr) {
+            dayS = row.sales;
+            dayN = row.sales - row.stocking - row.other - row.savings;
+        }
     });
 
-    const elements = {
-        totalSales: totals.s, totalStock: totals.st, totalOther: totals.o, 
-        totalSavings: totals.sv, balance: runBal
-    };
+    document.getElementById('daySales').innerText = dayS.toLocaleString();
+    document.getElementById('dayNet').innerText = dayN.toLocaleString();
+    document.getElementById('totalStock').innerText = totals.st.toLocaleString();
+    document.getElementById('totalOther').innerText = totals.o.toLocaleString();
+    document.getElementById('totalSavings').innerText = totals.sv.toLocaleString();
+    document.getElementById('balance').innerText = (totals.s - totals.st - totals.o - totals.sv).toLocaleString() + " TZS";
 
-    for (let id in elements) {
-        const el = document.getElementById(id);
-        el.innerText = elements[id].toLocaleString() + " TZS";
-        el.classList.remove('loading-text');
-    }
-
-    const visibleData = [...data].reverse().slice(0, displayLimit);
-    if(visibleData.length === 0) {
-        list.innerHTML = "<p style='text-align:center; color:var(--gray); font-size:0.8rem;'>No records found.</p>";
-    } else {
-        visibleData.forEach(row => {
-            list.innerHTML += `
-                <div class="entry-item">
-                    <div style="flex-grow:1">
-                        <b style="font-size:0.9rem;">${row.date}</b><br>
-                        <small style="color:var(--gray)">Sales: ${row.sales.toLocaleString()} | Exp: ${(row.stocking+row.other).toLocaleString()}</small>
-                    </div>
-                    <div class="entry-actions">
-                        <button class="action-icon" onclick="editFromList('${row.date}')">✏️</button>
-                        <button class="action-icon" style="color:var(--red)" onclick="deleteEntry('${row.date}')">🗑️</button>
-                    </div>
-                </div>`;
-        });
-    }
-    
+    const visible = [...data].reverse().slice(0, displayLimit);
+    visible.forEach(row => {
+        const isToday = row.date === todayStr;
+        list.innerHTML += `
+            <div class="entry-item ${isToday ? 'is-today' : ''}">
+                <div>
+                    <b>${row.date}</b>${isToday ? '<span class="tag-today">TODAY</span>' : ''}<br>
+                    <small style="color:var(--gray)">Sales: ${row.sales.toLocaleString()} | Exp: ${(row.stocking+row.other).toLocaleString()}</small>
+                </div>
+                <div class="action-btns">
+                    <button class="btn-circle" onclick="editRow('${row.date}')">✏️</button>
+                    <button class="btn-circle" style="color:var(--red)" onclick="deleteRow('${row.date}')">🗑️</button>
+                </div>
+            </div>`;
+    });
     document.getElementById('loadMoreBtn').style.display = data.length > displayLimit ? 'block' : 'none';
 }
 
-function loadMore() {
-    displayLimit += 5;
-    render();
-}
+function loadMore() { displayLimit += 5; render(); }
 
-function editFromList(dateStr) {
-    const found = data.find(item => item.date === dateStr);
-    if (found) {
-        document.getElementById('date').value = dateStr;
-        document.getElementById('sales').value = found.sales;
-        document.getElementById('stock').value = found.stocking;
-        document.getElementById('other').value = found.other;
-        document.getElementById('savings').value = found.savings;
-        document.getElementById('formTitle').innerText = "Edit Entry: " + dateStr;
-        toggleCard('entryFormCard');
-    }
-}
-
-function searchByDate() {
-    const sDate = document.getElementById('searchDate').value;
-    const found = data.find(item => item.date === sDate);
-    if (found) {
-        editFromList(sDate);
-    } else { alert("No record for this date."); }
-}
-
-async function addRecord() {
+async function saveRecord() {
     const record = {
         date: document.getElementById('date').value,
         sales: parseFloat(document.getElementById('sales').value) || 0,
@@ -248,46 +224,50 @@ async function addRecord() {
         other: parseFloat(document.getElementById('other').value) || 0,
         savings: parseFloat(document.getElementById('savings').value) || 0
     };
-    if (!record.date) return alert("Please select a date.");
+    if(!record.date) return alert("Select Date");
     document.getElementById('loadingOverlay').style.display = 'flex';
-    try {
-        await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
-        document.getElementById('entryFormCard').style.display = 'none';
-        setTimeout(() => { 
-            fetchFromCloud(); 
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }, 1200);
-    } catch (e) { alert("Cloud Sync Failed"); }
+    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
+    closeModals();
+    setTimeout(fetchData, 1200);
 }
 
-async function deleteEntry(dateToDelete) {
-    if(!confirm("Delete record for " + dateToDelete + "?")) return;
+function editRow(date) {
+    const found = data.find(d => d.date === date);
+    if(found) {
+        document.getElementById('date').value = date;
+        document.getElementById('sales').value = found.sales;
+        document.getElementById('stock').value = found.stocking;
+        document.getElementById('other').value = found.other;
+        document.getElementById('savings').value = found.savings;
+        document.getElementById('formTitle').innerText = "Editing: " + date;
+        document.getElementById('entryModal').style.display = 'block';
+    }
+}
+
+function executeSearch() {
+    const d = document.getElementById('searchDate').value;
+    if(data.some(row => row.date === d)) {
+        editRow(d);
+        document.getElementById('searchModal').style.display = 'none';
+    } else { alert("No record found."); }
+}
+
+async function deleteRow(d) {
+    if(!confirm("Delete " + d + "?")) return;
     document.getElementById('loadingOverlay').style.display = 'flex';
-    try {
-        await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({action: "delete", date: dateToDelete}) });
-        setTimeout(() => { 
-            fetchFromCloud(); 
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }, 1200);
-    } catch (e) {}
+    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({action:"delete", date:d}) });
+    setTimeout(fetchData, 1200);
 }
 
 function generatePDF() {
-    const monthVal = document.getElementById('reportMonth').value;
-    if (!monthVal) return alert("Select a month first.");
-    const filtered = data.filter(d => d.date.startsWith(monthVal));
-    if(filtered.length === 0) return alert("No data for this month.");
-    
+    const m = document.getElementById('reportMonth').value;
+    const filtered = data.filter(d => d.date.startsWith(m));
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("LA VIDA MINIMART REPORT", 14, 20);
-    doc.setFontSize(11);
-    doc.text("Period: " + monthVal, 14, 30);
-    
-    const tableData = filtered.map(d => [d.date, d.sales.toLocaleString(), d.stocking.toLocaleString(), d.other.toLocaleString(), d.savings.toLocaleString()]);
-    doc.autoTable({ startY: 40, head: [['Date', 'Sales (TZS)', 'Stock', 'Expenses', 'Savings']], body: tableData, theme: 'grid' });
-    doc.save(`LaVida_Report_${monthVal}.pdf`);
+    doc.text("LA VIDA REPORT - " + m, 14, 20);
+    const rows = filtered.map(d => [d.date, d.sales.toLocaleString(), d.stocking.toLocaleString(), d.other.toLocaleString(), d.savings.toLocaleString()]);
+    doc.autoTable({ startY: 30, head: [['Date', 'Sales', 'Stock', 'Expenses', 'Savings']], body: rows });
+    doc.save(`Report_${m}.pdf`);
 }
 </script>
 </body>

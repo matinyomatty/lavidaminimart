@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>La Vida Control</title>
+    <title>La Vida Minimart</title>
     <style>
         :root { --blue: #004085; --dark: #001a33; --light: #f4f7f9; --green: #28a745; --gray: #6c757d; --red: #dc3545; --gold: #d4af37; }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--light); margin: 0; padding: 0; color: var(--dark); }
         
-        /* --- STICKY HERO SECTION --- */
+        /* STICKY HERO SECTION */
         .sticky-header { 
             position: sticky; 
             top: 0; 
@@ -20,7 +20,7 @@
             border-bottom: 4px solid var(--blue);
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .sticky-header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 2px; color: var(--gold); text-align: center; }
+        .sticky-header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 2px; color: var(--gold); text-align: center; font-weight: 900; }
         
         .today-panel { 
             background: rgba(255,255,255,0.1); 
@@ -33,10 +33,9 @@
             backdrop-filter: blur(5px);
         }
         .today-stat { text-align: center; }
-        .today-stat h4 { margin: 0; font-size: 0.55rem; color: var(--gold); text-transform: uppercase; opacity: 0.8; }
+        .today-stat h4 { margin: 0; font-size: 0.55rem; color: var(--gold); text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
         .today-stat p { margin: 3px 0 0; font-size: 0.95rem; font-weight: bold; }
 
-        /* --- UI COMPONENTS --- */
         .container { padding: 15px; max-width: 480px; margin: auto; }
         
         #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; position: fixed; width: 100%; z-index: 2000; }
@@ -49,12 +48,14 @@
             border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; 
             display: flex; align-items: center; justify-content: center; gap: 10px; 
             margin: 10px 0 20px 0; box-shadow: 0 8px 20px rgba(0,64,133,0.2); 
+            transition: transform 0.1s;
         }
+        .primary-cta:active { transform: scale(0.98); }
         
         .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 12px; border-radius: 14px; border-left: 4px solid var(--blue); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-        .stat-card h4 { margin: 0; font-size: 0.6rem; color: var(--gray); text-transform: uppercase; }
-        .stat-card p { margin: 5px 0 0; font-size: 0.9rem; font-weight: bold; }
+        .stat-card h4 { margin: 0; font-size: 0.6rem; color: var(--gray); text-transform: uppercase; font-weight: bold; }
+        .stat-card p { margin: 5px 0 0; font-size: 0.9rem; font-weight: bold; color: var(--dark); }
         .balance-card { grid-column: 1 / -1; background: #e7f3ff; border-left-color: var(--green); padding: 15px; }
 
         /* Modals & Inputs */
@@ -79,12 +80,12 @@
 </head>
 <body>
 
-<div id="loadingOverlay" class="loading-overlay"><b>⏳ SYNCING...</b></div>
+<div id="loadingOverlay" class="loading-overlay"><b>⏳ UPDATING...</b></div>
 
 <div id="loginPage">
     <div class="login-card">
-        <h1 style="margin:0; letter-spacing:2px; font-size: 1.8rem;">LA VIDA</h1>
-        <p style="color:var(--gray); font-size:0.8rem; margin-bottom:30px;">Business Control Panel</p>
+        <h1 style="margin:0; letter-spacing:2px; font-size: 1.8rem; color: var(--dark);">LA VIDA</h1>
+        <p style="color:var(--gray); font-size:0.8rem; margin-bottom:30px;">Minimart Management</p>
         <input type="password" id="passInput" inputmode="numeric" placeholder="PASSCODE" style="text-align:center; letter-spacing:8px; font-size:1.2rem;">
         <button class="primary-cta" style="margin-top:20px;" onclick="checkLogin()">UNLOCK SYSTEM</button>
     </div>
@@ -92,7 +93,7 @@
 
 <div id="mainApp">
     <div class="sticky-header">
-        <h1>LA VIDA CONTROL</h1>
+        <h1>LA VIDA MINIMART</h1>
         <div class="today-panel">
             <div class="today-stat"><h4>Today Sales</h4><p id="daySales">0</p></div>
             <div class="today-stat"><h4>Net Profit</h4><p id="dayNet" style="color:#4dff88">0</p></div>
@@ -105,11 +106,11 @@
         </button>
 
         <div class="summary-grid">
-            <div class="stat-card"><h4>Stock Value</h4><p id="totalStock">...</p></div>
+            <div class="stat-card"><h4>Stocking Cost</h4><p id="totalStock">...</p></div>
             <div class="stat-card"><h4>Other Exp</h4><p id="totalOther">...</p></div>
             <div class="stat-card"><h4>Total Savings</h4><p id="totalSavings">...</p></div>
-            <div class="stat-card"><h4>Monthly Sales</h4><p id="totalSales">...</p></div>
-            <div class="stat-card balance-card"><h4>System Cash Balance</h4><p id="balance" style="font-size:1.1rem; color:var(--blue);">...</p></div>
+            <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
+            <div class="stat-card balance-card"><h4>Total Cash Balance</h4><p id="balance" style="font-size:1.1rem; color:var(--blue);">...</p></div>
         </div>
 
         <div class="secondary-actions">
@@ -118,35 +119,22 @@
         </div>
 
         <div id="entryModal" class="modal">
-            <h3 id="formTitle" style="margin-top:0;">New Record</h3>
+            <h3 id="formTitle" style="margin-top:0;">Record Entry</h3>
             <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
             <div class="field-group"><span class="field-label">Sales (TZS)</span><input type="number" id="sales"></div>
-            <div class="field-group"><span class="field-label">Stocking</span><input type="number" id="stock"></div>
+            <div class="field-group"><span class="field-label">Money for Stocking</span><input type="number" id="stock"></div>
             <div class="field-group"><span class="field-label">Other Exp</span><input type="number" id="other"></div>
             <div class="field-group"><span class="field-label">Savings</span><input type="number" id="savings"></div>
             <button class="primary-cta" onclick="saveRecord()">SAVE DATA</button>
             <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
         </div>
 
-        <div id="searchModal" class="modal">
-            <span class="field-label">Select Date to Edit</span>
-            <input type="date" id="searchDate" style="margin-bottom:15px;">
-            <button class="primary-cta" onclick="executeSearch()">EDIT RECORD</button>
-            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CLOSE</button>
-        </div>
-
-        <div id="reportModal" class="modal">
-            <span class="field-label">Select Month</span>
-            <input type="month" id="reportMonth" style="margin-bottom:15px;">
-            <button class="primary-cta" onclick="generatePDF()">DOWNLOAD PDF</button>
-            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CLOSE</button>
-        </div>
-
         <label style="font-size:0.7rem; font-weight:bold; color:var(--gray); text-transform:uppercase; display:block; margin-bottom:10px; letter-spacing:1px;">Log History</label>
         <div id="entryList"></div>
-        <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:10px; display:none;" onclick="loadMore()">LOAD PREVIOUS RECORDS</button>
+        <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:10px; display:none;" onclick="loadMore()">VIEW PREVIOUS</button>
         
-        <div style="height: 50px;"></div> </div>
+        <div style="height: 50px;"></div>
+    </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -157,7 +145,6 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDqLcc9kqXA8sH1cfdZ
 let data = [];
 let displayLimit = 5;
 
-// Auth with Enter Key
 document.getElementById('passInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') checkLogin(); });
 
 function checkLogin() {
@@ -165,7 +152,7 @@ function checkLogin() {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
         fetchData();
-    } else { alert("Access Denied"); }
+    } else { alert("Passcode incorrect"); }
 }
 
 function openForm(type) {
@@ -192,7 +179,7 @@ async function fetchData() {
         const res = await fetch(SCRIPT_URL);
         data = await res.json();
         render();
-    } catch (e) {}
+    } catch (e) { alert("Could not fetch data."); }
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
@@ -227,7 +214,7 @@ function render() {
             <div class="entry-item ${isToday ? 'is-today' : ''}">
                 <div>
                     <b>${row.date}</b>${isToday ? '<span class="tag-today">TODAY</span>' : ''}<br>
-                    <small style="color:var(--gray)">Sales: ${row.sales.toLocaleString()} | Exp: ${(row.stocking+row.other).toLocaleString()}</small>
+                    <small style="color:var(--gray)">S: ${row.sales.toLocaleString()} | Cost: ${(row.stocking+row.other).toLocaleString()}</small>
                 </div>
                 <div class="action-btns">
                     <button class="btn-circle" onclick="editRow('${row.date}')">✏️</button>
@@ -263,17 +250,9 @@ function editRow(date) {
         document.getElementById('stock').value = found.stocking;
         document.getElementById('other').value = found.other;
         document.getElementById('savings').value = found.savings;
-        document.getElementById('formTitle').innerText = "Edit: " + date;
+        document.getElementById('formTitle').innerText = "Update: " + date;
         document.getElementById('entryModal').style.display = 'block';
     }
-}
-
-function executeSearch() {
-    const d = document.getElementById('searchDate').value;
-    if(data.some(row => row.date === d)) {
-        editRow(d);
-        document.getElementById('searchModal').style.display = 'none';
-    } else { alert("No data found."); }
 }
 
 async function deleteRow(d) {
@@ -286,12 +265,13 @@ async function deleteRow(d) {
 function generatePDF() {
     const m = document.getElementById('reportMonth').value;
     const filtered = data.filter(d => d.date.startsWith(m));
+    if(filtered.length === 0) return alert("No data for this month.");
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text("LA VIDA MONTHLY REPORT: " + m, 14, 20);
+    doc.text("LA VIDA MINIMART REPORT: " + m, 14, 20);
     const rows = filtered.map(d => [d.date, d.sales.toLocaleString(), d.stocking.toLocaleString(), d.other.toLocaleString(), d.savings.toLocaleString()]);
-    doc.autoTable({ startY: 30, head: [['Date', 'Sales', 'Stock', 'Expenses', 'Savings']], body: rows });
-    doc.save(`Report_${m}.pdf`);
+    doc.autoTable({ startY: 30, head: [['Date', 'Sales', 'Stock Cost', 'Expenses', 'Savings']], body: rows });
+    doc.save(`LaVida_Report_${m}.pdf`);
 }
 </script>
 </body>

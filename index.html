@@ -18,8 +18,9 @@
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         html, body { height: 100%; }
-        html { background: var(--dark); } /* fixes white flash on overscroll pull-down */
-        body { background: var(--light); font-family: 'DM Sans', system-ui, sans-serif; color: var(--dark); }
+        html { background: var(--dark); }
+        body { background: var(--dark); font-family: 'DM Sans', system-ui, sans-serif; color: var(--dark); }
+        body.unlocked { background: var(--light); }
 
 ```
     /* ── LOGIN ── */
@@ -479,6 +480,7 @@ function checkLogin() {
     if (entered === PIN) {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
+        document.body.classList.add('unlocked');
         setHeaderDate();
         fetchData();
     } else {

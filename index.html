@@ -14,34 +14,44 @@
         .login-card { background: white; width: 100%; max-width: 350px; padding: 40px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         #mainApp { display: none; }
         .container { padding: 15px; max-width: 500px; margin: auto; }
+        
+        /* Summary Grid */
         .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 12px; border-radius: 12px; border-left: 4px solid var(--blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .stat-card h4 { margin: 0; font-size: 0.65rem; color: var(--gray); text-transform: uppercase; }
-        .stat-card p { margin: 5px 0 0; font-size: 0.95rem; font-weight: bold; color: var(--dark); }
+        .stat-card p { margin: 5px 0 0; font-size: 0.9rem; font-weight: bold; color: var(--dark); }
         .full-width-card { grid-column: span 2; border-left-color: var(--green); background: #fafffa; }
+
+        /* Action Sections */
         .action-section { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; }
         .report-section { border-color: var(--blue); }
         .btn-action { border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .report-btn { background: var(--blue); color: white; }
+
+        /* Input Card with Permanent Titles */
         .input-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        label { font-size: 0.7rem; font-weight: bold; color: var(--gray); text-transform: uppercase; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; background: #fafafa; margin-top: 5px; margin-bottom: 10px; }
-        .btn-save { width: 100%; background: var(--blue); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .field-group { margin-bottom: 12px; }
+        .field-label { font-size: 0.65rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 4px; display: block; margin-left: 5px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; background: #fafafa; }
+        
+        .btn-save { width: 100%; background: var(--blue); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
+        
+        /* History */
         .entry-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--blue); }
-        .btn-delete { background: none; border: none; color: var(--red); font-size: 1.2rem; padding: 10px; cursor: pointer; opacity: 0.7; }
+        .btn-delete { background: none; border: none; color: var(--red); font-size: 1.2rem; padding: 10px; cursor: pointer; }
         .loading { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; justify-content:center; align-items:center; }
     </style>
 </head>
 <body>
 
-<div id="loading" class="loading"><b>🔄 Syncing Data...</b></div>
+<div id="loading" class="loading"><b>🔄 Updating La Vida...</b></div>
 
 <div id="loginPage">
     <div class="login-card">
         <h1>LA VIDA</h1>
         <p style="font-size: 0.8rem; margin-bottom: 25px;">Management System</p>
         <input type="password" id="passInput" placeholder="Passcode" style="text-align:center; letter-spacing: 5px;">
-        <button class="btn-save" onclick="checkLogin()" style="margin-top:10px;">UNLOCK</button>
+        <button class="btn-save" onclick="checkLogin()">UNLOCK</button>
     </div>
 </div>
 
@@ -54,34 +64,55 @@
             <div class="stat-card"><h4>Stock</h4><p id="totalStock">0 (TZS)</p></div>
             <div class="stat-card"><h4>Other</h4><p id="totalOther">0 (TZS)</p></div>
             <div class="stat-card"><h4>Savings</h4><p id="totalSavings">0 (TZS)</p></div>
-            <div class="stat-card full-width-card"><h4>Net Balance</h4><p id="balance">0 (TZS)</p></div>
+            <div class="stat-card full-width-card"><h4>Current Balance</h4><p id="balance">0 (TZS)</p></div>
         </div>
 
         <div class="action-section report-section">
-            <label>📅 Download Monthly Report</label>
-            <input type="month" id="reportMonth">
+            <span class="field-label" style="color:var(--gray)">📅 Download Monthly Report</span>
+            <input type="month" id="reportMonth" style="margin-bottom:10px;">
             <button class="btn-action report-btn" onclick="generatePDF()">📥 DOWNLOAD PDF (TZS)</button>
         </div>
 
         <div class="input-card">
-            <label>🔍 Search / Edit Date</label>
-            <div style="display:flex; gap:10px; margin-top:5px;">
-                <input type="date" id="searchDate" style="margin:0;">
-                <button onclick="searchByDate()" style="background:var(--blue); color:white; border:none; padding:0 15px; border-radius:10px;">🔍</button>
+            <span class="field-label">🔍 Search / Edit Date</span>
+            <div style="display:flex; gap:10px;">
+                <input type="date" id="searchDate" style="flex-grow:1;">
+                <button onclick="searchByDate()" style="background:var(--blue); color:white; border:none; padding:0 20px; border-radius:10px; cursor:pointer;">🔍</button>
             </div>
         </div>
 
         <div class="input-card">
-            <label>📝 Daily Record</label>
-            <input type="date" id="date">
-            <input type="number" id="sales" placeholder="Sales (TZS)">
-            <input type="number" id="stock" placeholder="Stocking (TZS)">
-            <input type="number" id="other" placeholder="Other Exp (TZS)">
-            <input type="number" id="savings" placeholder="Savings (TZS)">
+            <span class="field-label" style="font-size: 0.8rem; margin-bottom: 15px; color:var(--gray)">📝 Daily Record Entry</span>
+            
+            <div class="field-group">
+                <span class="field-label">📅 Record Date</span>
+                <input type="date" id="date">
+            </div>
+
+            <div class="field-group">
+                <span class="field-label">💰 Sales Amount (TZS)</span>
+                <input type="number" id="sales" placeholder="Enter Sales">
+            </div>
+
+            <div class="field-group">
+                <span class="field-label">📦 Stocking / Supplies (TZS)</span>
+                <input type="number" id="stock" placeholder="Enter Stocking">
+            </div>
+
+            <div class="field-group">
+                <span class="field-label">💸 Other Expenses (TZS)</span>
+                <input type="number" id="other" placeholder="Enter Other Exp">
+            </div>
+
+            <div class="field-group">
+                <span class="field-label">🏦 Savings (TZS)</span>
+                <input type="number" id="savings" placeholder="Enter Savings">
+            </div>
+
             <button class="btn-save" onclick="addRecord()">SAVE RECORD</button>
         </div>
 
-        <label style="margin-left: 5px; margin-bottom: 10px; display: block;">📑 Last 5 Entries</label>
+        <label style="margin-left: 5px; margin-bottom: 10px; display: block; font-size: 0.7rem; font-weight: bold; color: var(--gray);">📑 RECENT ENTRIES (LAST 5)</label>
         <div id="entryList"></div>
     </div>
 </div>
@@ -121,30 +152,26 @@ function render() {
     list.innerHTML = '';
     let runBal = 0, totals = {s:0, st:0, o:0, sv:0};
     
-    // Sort oldest to newest for balance calculation
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
 
-    // Calculate totals
     data.forEach((row) => {
         runBal += (row.sales - row.stocking - row.other - row.savings);
         totals.s += row.sales; totals.st += row.stocking; totals.o += row.other; totals.sv += row.savings;
     });
 
-    // Display summary with TZS
     document.getElementById('totalSales').innerText = totals.s.toLocaleString() + " (TZS)";
     document.getElementById('totalStock').innerText = totals.st.toLocaleString() + " (TZS)";
     document.getElementById('totalOther').innerText = totals.o.toLocaleString() + " (TZS)";
     document.getElementById('totalSavings').innerText = totals.sv.toLocaleString() + " (TZS)";
     document.getElementById('balance').innerText = runBal.toLocaleString() + " (TZS)";
 
-    // List only last 5 entries (Newest first)
     const recentEntries = [...data].reverse().slice(0, 5);
     recentEntries.forEach(row => {
         list.innerHTML += `
             <div class="entry-item">
                 <div style="flex-grow:1">
                     <b>${row.date}</b><br>
-                    <small>S: ${row.sales.toLocaleString()} | E: ${(row.stocking+row.other).toLocaleString()} (TZS)</small>
+                    <small>Sales: ${row.sales.toLocaleString()} | Exp: ${(row.stocking+row.other).toLocaleString()} (TZS)</small>
                 </div>
                 <button class="btn-delete" onclick="deleteEntry('${row.date}')">🗑️</button>
             </div>`;
@@ -164,6 +191,7 @@ async function addRecord() {
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
         setTimeout(fetchFromCloud, 1000);
+        document.querySelectorAll('.input-card input:not([type="date"])').forEach(i => i.value = '');
     } catch (e) { alert("Error saving."); }
 }
 
@@ -185,7 +213,9 @@ function searchByDate() {
         document.getElementById('stock').value = found.stocking;
         document.getElementById('other').value = found.other;
         document.getElementById('savings').value = found.savings;
-    } else { alert("No record found."); }
+        // Scroll to form so you can see the filled data
+        document.getElementById('date').scrollIntoView({ behavior: 'smooth' });
+    } else { alert("No record found for this date."); }
 }
 
 function generatePDF() {
@@ -196,17 +226,9 @@ function generatePDF() {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text("La Vida Minimart - Report " + monthVal + " (TZS)", 14, 20);
-    
+    doc.text("La Vida Minimart - Report " + monthVal, 14, 20);
     const tableData = filtered.map(d => [d.date, d.sales.toLocaleString(), d.stocking.toLocaleString(), d.other.toLocaleString(), d.savings.toLocaleString()]);
-    
-    doc.autoTable({
-        startY: 30,
-        head: [['Date', 'Sales', 'Stock', 'Other', 'Savings']],
-        body: tableData,
-    });
-
-    // Forces Download in a way that works on mobile/desktops
+    doc.autoTable({ startY: 30, head: [['Date', 'Sales', 'Stock', 'Other', 'Savings']], body: tableData });
     doc.save(`LaVida_Report_${monthVal}.pdf`);
 }
 </script>

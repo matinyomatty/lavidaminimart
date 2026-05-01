@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>La Vida Control Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root { --blue: #004085; --dark: #001a33; --light: #f4f7f9; --green: #28a745; --gray: #6c757d; --red: #dc3545; --gold: #d4af37; }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -11,81 +13,59 @@
         
         /* Sticky Hero Header */
         .header { 
-            background: var(--dark); 
-            color: white; 
-            padding: 15px; 
-            border-bottom: 5px solid var(--blue);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            background: var(--dark); color: white; padding: 15px; border-bottom: 5px solid var(--blue);
+            position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
         .header h1 { margin: 0; font-size: 1.3rem; letter-spacing: 2px; color: var(--gold); text-align: center; }
-        
         .today-panel { 
-            background: rgba(255,255,255,0.05); 
-            margin-top: 10px; 
-            padding: 10px; 
-            border-radius: 12px; 
-            display: flex; 
-            justify-content: space-between; 
-            border: 1px solid rgba(212,175,55,0.2); 
+            background: rgba(255,255,255,0.05); margin-top: 10px; padding: 10px; border-radius: 12px; 
+            display: flex; justify-content: space-between; border: 1px solid rgba(212,175,55,0.2); 
         }
         .today-stat h4 { margin: 0; font-size: 0.55rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; }
         .today-stat p { margin: 4px 0 0; font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; gap: 4px; }
         
-        .trend-badge { font-size: 0.6rem; padding: 1px 4px; border-radius: 4px; font-weight: 800; }
-        .trend-up { background: rgba(40, 167, 69, 0.2); color: #4ade80; }
-        .trend-down { background: rgba(220, 53, 69, 0.2); color: #f87171; }
+        .trend-badge { font-size: 0.6rem; padding: 1px 4px; border-radius: 4px; font-weight: 800; display: none; }
+        .trend-up { background: rgba(40, 167, 69, 0.2); color: #4ade80; display: inline-block; }
+        .trend-down { background: rgba(220, 53, 69, 0.2); color: #f87171; display: inline-block; }
 
-        #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; }
+        #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; position: fixed; width: 100%; top:0; z-index: 5000; }
         .login-card { background: white; width: 100%; max-width: 340px; padding: 40px 25px; border-radius: 24px; text-align: center; }
         #mainApp { display: none; }
         
         .container { padding: 15px; max-width: 480px; margin: auto; }
-        .primary-cta { background: var(--blue); color: white; width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,64,133,0.3); transition: 0.2s; }
+        .primary-cta { background: var(--blue); color: white; width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,64,133,0.3); }
         
         .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 15px; border-radius: 16px; border-left: 4px solid var(--blue); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .stat-card h4 { margin: 0; font-size: 0.6rem; color: var(--gray); text-transform: uppercase; }
         .stat-card p { margin: 6px 0 0; font-size: 0.8rem; font-weight: bold; }
 
-        /* FIXED MODAL STYLE */
+        /* BACKDROP & MODAL */
+        .modal-overlay { display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1999; backdrop-filter: blur(2px); }
         .modal { 
-            display: none; 
-            background: white; 
-            padding: 20px; 
-            border-radius: 24px; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2); 
-            border-top: 6px solid var(--blue); 
-            position: fixed; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            width: 92%; 
-            max-height: 90vh; 
-            overflow-y: auto; 
-            z-index: 2000; 
+            display: none; background: white; padding: 20px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); 
+            border-top: 6px solid var(--blue); position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            width: 92%; max-height: 85vh; overflow-y: auto; z-index: 2000; 
         }
         
         .field-group { margin-bottom: 12px; }
-        .field-label { font-size: 0.7rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .field-label { font-size: 0.7rem; font-weight: 800; color: var(--blue); text-transform: uppercase; display: block; margin-bottom: 4px; }
         input, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; background: #fafafa; outline: none; }
         
         .entry-item { background: white; padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ddd; }
         .entry-item.is-today { border-left-color: var(--gold); background: #fffdf5; }
         .note-text { font-size: 0.7rem; color: var(--gray); font-style: italic; display: block; margin-top: 4px; }
         
-        .action-btns { display: flex; gap: 8px; }
-        .btn-circle { border: none; background: #f0f2f5; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .btn-circle { border: none; background: #f0f2f5; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .secondary-actions { display: flex; gap: 10px; margin-bottom: 20px; }
         .btn-sec { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; background: white; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
-        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center; color:white; }
+        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; color:white; }
     </style>
 </head>
 <body>
 
-<div id="loadingOverlay" class="loading-overlay"><b>⏳ SYNCING...</b></div>
+<div id="loadingOverlay" class="loading-overlay"><b>⏳ SYNCING DATA...</b></div>
+<div id="modalOverlay" class="modal-overlay" onclick="closeModals()"></div>
 
 <div id="loginPage">
     <div class="login-card">
@@ -128,18 +108,29 @@
     </div>
 
     <div id="entryModal" class="modal">
-        <h3 id="formTitle" style="margin:0 0 15px 0; text-align: center;">Entry Details</h3>
+        <h3 id="formTitle" style="margin:0 0 15px 0; text-align: center;">Entry</h3>
         <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
         <div class="field-group"><span class="field-label">Sales (TZS)</span><input type="number" id="sales" placeholder="0" inputmode="decimal"></div>
         <div class="field-group"><span class="field-label">Stocking</span><input type="number" id="stock" placeholder="0" inputmode="decimal"></div>
         <div class="field-group"><span class="field-label">Other Exp</span><input type="number" id="other" placeholder="0" inputmode="decimal"></div>
         <div class="field-group"><span class="field-label">Savings</span><input type="number" id="savings" placeholder="0" inputmode="decimal"></div>
         <div class="field-group"><span class="field-label">Note</span><textarea id="note" style="height:50px;"></textarea></div>
-        
-        <div style="position: sticky; bottom: 0; background: white; padding-top: 10px;">
-            <button class="primary-cta" onclick="saveRecord()" style="margin-bottom:10px;">SAVE DATA</button>
-            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
-        </div>
+        <button class="primary-cta" onclick="saveRecord()">SAVE DATA</button>
+        <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
+    </div>
+
+    <div id="searchModal" class="modal">
+        <h3 style="margin:0 0 15px 0; text-align: center;">Find Record</h3>
+        <input type="date" id="searchDate" style="margin-bottom:15px;">
+        <button class="primary-cta" onclick="findDate()">SEARCH</button>
+        <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
+    </div>
+
+    <div id="reportModal" class="modal">
+        <h3 style="margin:0 0 15px 0; text-align: center;">Generate Report</h3>
+        <p style="font-size:0.8rem; text-align:center; color:var(--gray);">Export entire history to PDF</p>
+        <button class="primary-cta" onclick="generatePDF()">DOWNLOAD PDF</button>
+        <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
     </div>
 </div>
 
@@ -148,9 +139,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDqLcc9kqXA8sH1cfdZ
 let data = [];
 let displayLimit = 5;
 
-function getLocalDateString(dateObj = new Date()) {
-    return dateObj.toLocaleDateString('sv-SE');
-}
+const getLocStr = (d = new Date()) => d.toLocaleDateString('sv-SE');
 
 function checkLogin() {
     if (document.getElementById('passInput').value === "112511") {
@@ -177,9 +166,9 @@ function render() {
     let dayS = 0, yesterdayS = 0;
     let runningBalance = 0, yesterdayBalanceTotal = 0;
 
-    const todayStr = getLocalDateString();
+    const todayStr = getLocStr();
     const yest = new Date(); yest.setDate(yest.getDate() - 1);
-    const yesterdayStr = getLocalDateString(yest);
+    const yesterdayStr = getLocStr(yest);
 
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
     
@@ -198,24 +187,21 @@ function render() {
         }
     });
 
-    // SALES TREND FIX: No fake negative if today is empty
-    const salesBadge = document.getElementById('salesTrend');
+    const sBadge = document.getElementById('salesTrend');
     if(dayS > 0 && yesterdayS > 0) {
         const sDiff = ((dayS - yesterdayS) / yesterdayS) * 100;
-        salesBadge.innerText = (sDiff >= 0 ? "↑ " : "↓ ") + Math.abs(sDiff).toFixed(0) + "%";
-        salesBadge.className = "trend-badge " + (sDiff >= 0 ? "trend-up" : "trend-down");
-    } else { 
-        salesBadge.innerText = ""; 
-        salesBadge.className = "trend-badge";
-    }
+        sBadge.innerText = (sDiff >= 0 ? "↑ " : "↓ ") + Math.abs(sDiff).toFixed(0) + "%";
+        sBadge.style.display = "inline-block";
+        sBadge.className = "trend-badge " + (sDiff >= 0 ? "trend-up" : "trend-down");
+    } else { sBadge.style.display = "none"; }
 
-    // Balance Trend
-    const balBadge = document.getElementById('balTrend');
+    const bBadge = document.getElementById('balTrend');
     if(yesterdayBalanceTotal !== 0) {
         const bDiff = ((runningBalance - yesterdayBalanceTotal) / Math.abs(yesterdayBalanceTotal)) * 100;
-        balBadge.innerText = (bDiff >= 0 ? "↑ " : "↓ ") + Math.abs(bDiff).toFixed(0) + "%";
-        balBadge.className = "trend-badge " + (bDiff >= 0 ? "trend-up" : "trend-down");
-    } else { balBadge.innerText = ""; }
+        bBadge.innerText = (bDiff >= 0 ? "↑ " : "↓ ") + Math.abs(bDiff).toFixed(0) + "%";
+        bBadge.style.display = "inline-block";
+        bBadge.className = "trend-badge " + (bDiff >= 0 ? "trend-up" : "trend-down");
+    } else { bBadge.style.display = "none"; }
 
     document.getElementById('daySales').innerText = dayS.toLocaleString() + " TZS";
     document.getElementById('topBalance').innerText = runningBalance.toLocaleString() + " TZS";
@@ -232,7 +218,6 @@ function render() {
                 <div style="max-width: 65%;">
                     <b style="font-size:0.9rem;">${rowDate}</b><br>
                     <small style="color:var(--gray)">Sales: ${row.sales.toLocaleString()} TZS</small>
-                    ${row.note ? `<span class="note-text">"${row.note}"</span>` : ''}
                 </div>
                 <div class="action-btns">
                     <button class="btn-circle" onclick="editRow('${rowDate}')">✏️</button>
@@ -244,15 +229,31 @@ function render() {
 }
 
 function openForm(type) {
+    closeModals();
+    document.getElementById('modalOverlay').style.display = 'block';
     if(type === 'new') {
         document.getElementById('formTitle').innerText = "New Record";
         document.querySelectorAll('#entryModal input, #entryModal textarea').forEach(i => i.value = '');
-        document.getElementById('date').value = getLocalDateString();
+        document.getElementById('date').value = getLocStr();
         document.getElementById('entryModal').style.display = 'block';
+    } else if(type === 'search') {
+        document.getElementById('searchModal').style.display = 'block';
+    } else if(type === 'report') {
+        document.getElementById('reportModal').style.display = 'block';
     }
 }
-function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
-function loadMore() { displayLimit += 5; render(); }
+
+function closeModals() {
+    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    document.getElementById('modalOverlay').style.display = 'none';
+}
+
+function findDate() {
+    const sDate = document.getElementById('searchDate').value;
+    if(!sDate) return;
+    const found = data.find(d => d.date.split('T')[0] === sDate);
+    if(found) { editRow(sDate); } else { alert("No entry found for " + sDate); }
+}
 
 async function saveRecord() {
     const record = {
@@ -263,6 +264,7 @@ async function saveRecord() {
         savings: parseFloat(document.getElementById('savings').value) || 0,
         note: document.getElementById('note').value || ""
     };
+    if(!record.date) return alert("Date is required!");
     document.getElementById('loadingOverlay').style.display = 'flex';
     await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
     closeModals();
@@ -272,6 +274,8 @@ async function saveRecord() {
 function editRow(date) {
     const found = data.find(d => d.date.split('T')[0] === date);
     if(found) {
+        openForm('none'); // Just opens overlay
+        document.getElementById('formTitle').innerText = "Edit: " + date;
         document.getElementById('date').value = date;
         document.getElementById('sales').value = found.sales;
         document.getElementById('stock').value = found.stocking;
@@ -279,6 +283,7 @@ function editRow(date) {
         document.getElementById('savings').value = found.savings;
         document.getElementById('note').value = found.note || "";
         document.getElementById('entryModal').style.display = 'block';
+        document.getElementById('modalOverlay').style.display = 'block';
     }
 }
 
@@ -288,6 +293,28 @@ async function deleteRow(d) {
     await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({action:"archive", date:d}) });
     setTimeout(fetchData, 1200);
 }
+
+function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text("LA VIDA SALES REPORT", 14, 15);
+    const tableData = data.map(r => [
+        r.date.split('T')[0],
+        r.sales.toLocaleString(),
+        r.stocking.toLocaleString(),
+        r.other.toLocaleString(),
+        r.savings.toLocaleString(),
+        (r.sales - r.stocking - r.other - r.savings).toLocaleString()
+    ]);
+    doc.autoTable({
+        startY: 20,
+        head: [['Date', 'Sales', 'Stock', 'Exp', 'Save', 'Net']],
+        body: tableData,
+    });
+    doc.save(`La_Vida_Report_${getLocStr()}.pdf`);
+}
+
+function loadMore() { displayLimit += 5; render(); }
 </script>
 </body>
 </html>

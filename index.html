@@ -1,42 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>La Vida Control Pro</title>
+<!-- ================= ONLY CHANGES ARE MARKED WITH ✅ ================= -->
 
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-
+<!-- ====== CSS FIX ====== -->
 <style>
-:root {
-    --blue: #004085;
-    --dark: #001a33;
-    --light: #f0f4f8;
-    --green: #28a745;
-    --gray: #6c757d;
-    --red: #dc3545;
-    --gold: #d4af37;
-}
-* { box-sizing: border-box; margin:0; padding:0; }
-body { font-family:'DM Sans', sans-serif; background:var(--dark); }
-body.unlocked { background: var(--light); }
+/* KEEP EVERYTHING ABOVE EXACTLY THE SAME */
 
-/* LOGIN */
-#loginPage { position:fixed; inset:0; display:flex; justify-content:center; align-items:center; background:var(--dark); }
-.login-card { background:white; padding:30px; border-radius:20px; width:90%; max-width:300px; text-align:center; }
-.pass-input { width:100%; padding:15px; font-size:1.3rem; text-align:center; margin-bottom:10px; }
-
-/* HEADER */
-.header { background:var(--dark); color:white; padding:14px; position:sticky; top:0; }
-.today-panel { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px; }
-.today-stat h4 { font-size:10px; color:var(--gold); }
-.today-stat p { font-weight:bold; }
-
-/* BUTTON */
-.primary-cta { background:var(--blue); color:white; padding:14px; border:none; border-radius:12px; width:100%; margin:10px 0; }
-
-/* ENTRY */
-.entry-item { background:white; padding:12px; border-radius:12px; margin-bottom:8px; }
+/* ✅ FIXED BROKEN BLOCK */
 .sales-trend {
     display: inline-block;
     font-size: 0.68rem;
@@ -45,6 +13,7 @@ body.unlocked { background: var(--light); }
     padding: 2px 7px;
     border-radius: 6px;
 }
+
 .tag-today {
     display: inline-block;
     background: var(--gold);
@@ -54,166 +23,192 @@ body.unlocked { background: var(--light); }
     border-radius: 4px;
     font-weight: 900;
     margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.5px;
 }
-
-/* MODAL */
-.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); }
-.modal-overlay.active { display:flex; align-items:flex-end; }
-.modal { background:white; width:100%; padding:20px; border-radius:20px 20px 0 0; }
-
-/* TOAST */
-.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:black; color:white; padding:10px 20px; border-radius:10px; opacity:0; }
-.toast.show { opacity:1; }
 </style>
-</head>
-
-<body>
-
-<div id="loginPage">
-<div class="login-card">
-<h2>LA VIDA</h2>
-<input type="password" id="passInput" class="pass-input">
-<button class="primary-cta" onclick="checkLogin()">UNLOCK</button>
-<div id="pinError"></div>
-</div>
-</div>
-
-<div id="mainApp" style="display:none">
-
-<div class="header">
-<div id="headerDate"></div>
-<div class="today-panel">
-<div class="today-stat"><h4>Sales</h4><p id="daySales"></p></div>
-<div class="today-stat"><h4>Net</h4><p id="dayNet"></p></div>
-<div class="today-stat"><h4>Balance</h4><p id="topBalance"></p></div>
-</div>
-</div>
-
-<div style="padding:15px;">
-<button class="primary-cta" onclick="openModal()">ADD ENTRY</button>
-<div id="entryList"></div>
-</div>
-
-</div>
-
-<div class="modal-overlay" id="overlay">
-<div class="modal">
-<input type="date" id="date"><br><br>
-<input type="number" id="sales" placeholder="Sales"><br><br>
-<input type="number" id="stock" placeholder="Stock"><br><br>
-<input type="number" id="other" placeholder="Other"><br><br>
-<input type="number" id="savings" placeholder="Savings"><br><br>
-<button class="primary-cta" onclick="saveRecord()">SAVE</button>
-</div>
-</div>
-
-<div id="toast" class="toast"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDqLcc9kqXA8sH1cfdZ17asFXBXfZ8mwVpXXiPeZV-uesUw_KlIfquwZJsx2Q7pq00/exec";
-const PIN = "112511";
-const DAILY_TARGET = 50000;
 
-let data = [];
+/* KEEP EVERYTHING ABOVE EXACTLY THE SAME */
 
-function showToast(msg){
-    const t=document.getElementById('toast');
-    t.innerText=msg;
-    t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'),2500);
-}
+// ================= RENDER =================
+function render() {
 
-function checkLogin(){
-    if(document.getElementById('passInput').value===PIN){
-        loginPage.style.display='none';
-        mainApp.style.display='block';
-        document.body.classList.add('unlocked');
-        fetchData();
-    }
-}
+    const DAILY_TARGET = 50000; // ✅ ADDED
 
-async function fetchData(){
-    const res = await fetch(SCRIPT_URL);
-    data = await res.json();
-    render();
-}
+    const list = document.getElementById('entryList');
+    list.innerHTML = '';
 
-function render(){
-    const today = new Date().toISOString().split('T')[0];
+    let totalSales = 0, totalStock = 0, totalOther = 0, totalSavings = 0;
+    let dayS = null, dayStock = 0, dayOther = 0, daySavings = 0;
+    let runningBalance = 0;
 
-    let totalSales=0,totalStock=0,totalOther=0,totalSavings=0;
-    let dayS=null,dayStock=0,dayOther=0,daySavings=0;
+    const todayStr = getLocalDateStr();
 
-    data.forEach(r=>{
-        totalSales+=+r.sales||0;
-        totalStock+=+r.stocking||0;
-        totalOther+=+r.other||0;
-        totalSavings+=+r.savings||0;
+    data.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        if(r.date.startsWith(today)){
-            dayS=+r.sales||0;
-            dayStock=+r.stocking||0;
-            dayOther=+r.other||0;
-            daySavings=+r.savings||0;
+    data.forEach(row => {
+        const rowDate = (row.date || '').split('T')[0];
+
+        totalSales    += Number(row.sales)    || 0;
+        totalStock    += Number(row.stocking) || 0;
+        totalOther    += Number(row.other)    || 0;
+        totalSavings  += Number(row.savings)  || 0;
+
+        runningBalance = totalSales - totalStock - totalOther - totalSavings;
+
+        if (rowDate === todayStr) {
+            dayS        = Number(row.sales)    || 0;
+            dayStock    = Number(row.stocking) || 0;
+            dayOther    = Number(row.other)    || 0;
+            daySavings  = Number(row.savings)  || 0;
         }
     });
 
-    let balance = totalSales-totalStock-totalOther-totalSavings;
-    topBalance.innerText = balance+" TZS";
+    // ===== TODAY PANEL =====
+    if (dayS !== null) {
 
-    if(dayS!==null){
-        let net = dayS-dayStock-dayOther-daySavings;
-        let margin = dayS>0?((net/dayS)*100).toFixed(0):0;
+        const dayNet = dayS - dayStock - dayOther - daySavings;
+        const margin = dayS > 0 ? ((dayNet / dayS) * 100).toFixed(0) : 0;
 
-        daySales.innerText = dayS+" TZS";
-        dayNet.innerText = net+" ("+margin+"%)";
+        document.getElementById('daySales').innerText = fmt(dayS);
+        document.getElementById('dayNet').innerText   = fmt(dayNet) + ` (${margin}%)`;
+        document.getElementById('dayNet').style.color = dayNet >= 0 ? '#4ade80' : '#f87171';
 
-        const alerts=[];
+        // ✅ SMART ALERT (COMBINED)
+        const alerts = [];
 
-        if(dayS>=DAILY_TARGET){alerts.push("✅ Target hit")}
-        else{alerts.push("⚠️ Below target")}
+        if (dayS >= DAILY_TARGET) {
+            alerts.push("✅ Target hit");
+        } else {
+            alerts.push("⚠️ Below target");
+        }
 
-        if((dayStock+dayOther)>dayS){alerts.push("⚠️ Overspending")}
+        if ((dayStock + dayOther) > dayS) {
+            alerts.push("⚠️ Overspending");
+        }
 
-        if(net<0){alerts.push("❌ Negative profit")}
-        else if(margin>=30){alerts.push("💰 Strong margin")}
+        if (dayNet < 0) {
+            alerts.push("❌ Negative profit");
+        } else if (margin >= 30) {
+            alerts.push("💰 Strong margin");
+        }
 
-        alerts.sort((a,b)=>a.includes("❌")?-1:0);
+        alerts.sort((a, b) => a.includes("❌") ? -1 : 0);
 
-        if(alerts.length) showToast(alerts.join(" • "));
+        if (alerts.length > 0) {
+            showToast(alerts.join(" • "));
+        }
+
+    } else {
+        document.getElementById('daySales').innerText = '— TZS';
+        document.getElementById('dayNet').innerText   = 'No entry';
+        document.getElementById('dayNet').style.color = 'rgba(255,255,255,0.5)';
     }
 
-    entryList.innerHTML = data.map(r=>`
-        <div class="entry-item">
-            ${r.date} ${r.date.startsWith(today)?'<span class="tag-today">TODAY</span>':''}
-            <br>Sales: ${r.sales}
-        </div>
-    `).reverse().join('');
+    document.getElementById('topBalance').innerText = fmt(runningBalance);
+
+    // KEEP REST OF render() EXACTLY THE SAME
 }
 
-function openModal(){
-    overlay.classList.add('active');
-    setTimeout(()=>document.getElementById('sales').focus(),300);
+// ================= MODAL UX =================
+function openModal(type) {
+    closeModals();
+
+    if (type === 'entry') {
+        document.getElementById('formTitle').innerText = "New Entry";
+        document.querySelectorAll('#overlayEntry input, #overlayEntry textarea').forEach(i => i.value = '');
+        document.getElementById('date').value = getLocalDateStr();
+        document.getElementById('overlayEntry').classList.add('active');
+
+        // ✅ AUTO FOCUS
+        setTimeout(() => document.getElementById('sales').focus(), 300);
+    }
 }
 
-async function saveRecord(){
-    const record={
-        date:date.value,
-        sales:+sales.value||0,
-        stocking:+stock.value||0,
-        other:+other.value||0,
-        savings:+savings.value||0
+// ================= SAVE =================
+async function saveRecord() {
+
+    const record = {
+        date:     document.getElementById('date').value,
+        sales:    parseFloat(document.getElementById('sales').value)   || 0,
+        stocking: parseFloat(document.getElementById('stock').value)   || 0,
+        other:    parseFloat(document.getElementById('other').value)   || 0,
+        savings:  parseFloat(document.getElementById('savings').value) || 0,
+        note:     document.getElementById('note').value.trim() || ""
     };
 
-    await fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(record)});
-    navigator.vibrate?.(50);
-    showToast("Saved");
-    overlay.classList.remove('active');
-    setTimeout(fetchData,1000);
-}
-</script>
+    closeModals();
+    showLoader(true);
 
-</body>
-</html>
+    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
+
+    showToast("✅ Record saved!");
+
+    // ✅ VIBRATION
+    navigator.vibrate?.(50);
+
+    setTimeout(fetchData, 1400);
+}
+
+// ================= DELETE =================
+async function deleteRow(d) {
+
+    if (!confirm("Delete record for " + d + "?")) return;
+
+    showLoader(true);
+
+    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", date: d }) });
+
+    showToast("🗑️ Record deleted.");
+
+    // ✅ VIBRATION
+    navigator.vibrate?.(50);
+
+    setTimeout(fetchData, 1400);
+}
+
+// ================= PDF =================
+function generatePDF() {
+
+    const m = document.getElementById('reportMonth').value;
+    const filtered = data.filter(d => (d.date || '').startsWith(m));
+
+    let totSales = 0, totStock = 0, totOther = 0, totSav = 0;
+
+    filtered.forEach(r => {
+        totSales += Number(r.sales)    || 0;
+        totStock += Number(r.stocking) || 0;
+        totOther += Number(r.other)    || 0;
+        totSav   += Number(r.savings)  || 0;
+    });
+
+    const totNet = totSales - totStock - totOther - totSav;
+
+    // ✅ NEW METRICS
+    const avg = totSales / filtered.length;
+
+    let bestDay = filtered[0];
+    let worstDay = filtered[0];
+
+    filtered.forEach(r => {
+        if ((r.sales || 0) > (bestDay.sales || 0)) bestDay = r;
+        if ((r.sales || 0) < (worstDay.sales || 0)) worstDay = r;
+    });
+
+    const summaries = [
+        ['Total Sales', totSales.toLocaleString() + ' TZS'],
+        ['Total Stock', totStock.toLocaleString() + ' TZS'],
+        ['Other Exp',   totOther.toLocaleString() + ' TZS'],
+        ['Savings',     totSav.toLocaleString()   + ' TZS'],
+        ['Net Balance', totNet.toLocaleString()   + ' TZS'],
+        ['Avg / Day',   avg.toLocaleString(undefined,{maximumFractionDigits:0}) + ' TZS'],
+        ['Best Day',    (bestDay.date || '').split('T')[0]],
+        ['Worst Day',   (worstDay.date || '').split('T')[0]],
+    ];
+
+    // KEEP REST OF PDF CODE SAME
+}
+
+</script>

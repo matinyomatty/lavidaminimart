@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Vida Minimart - Tracker</title>
+    <style>
+        :root {
+            --la-vida-blue: #0056b3;
+            --la-vida-dark: #003366;
+            --la-vida-light: #e6f0ff;
+            --success-green: #28a745;
+            --danger-red: #dc3545;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f0f2f5; 
+            margin: 0; 
+            padding: 20px;
+            color: #333;
+        }
+
+        .container { 
+            max-width: 1000px; 
+            margin: auto; 
+            background: white; 
+            border-radius: 15px; 
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .banner-container {
+            width: 100%;
+            background: var(--la-vida-dark);
+            text-align: center;
+        }
+
+        .banner-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .content { padding: 30px; }
+
+        h2 { 
+            color: var(--la-vida-dark); 
+            margin-top: 0; 
+            border-bottom: 2px solid var(--la-vida-light);
+            padding-bottom: 10px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            background: var(--la-vida-light);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .input-group { display: flex; flex-direction: column; }
+
+        label { 
+            font-size: 0.85rem; 
+            font-weight: bold; 
+            color: var(--la-vida-dark);
+            margin-bottom: 5px;
+        }
+
+        input { 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+        }
+
+        .btn-add { 
+            background: var(--la-vida-blue); 
+            color: white; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            cursor: pointer;
+            margin-top: auto;
+        }
+
+        .btn-add:hover { background: var(--la-vida-dark); }
+
+        .btn-delete {
+            background: none;
+            border: 1px solid var(--danger-red);
+            color: var(--danger-red);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger-red);
+            color: white;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+
+        th { 
+            background: var(--la-vida-dark); 
+            color: white; 
+            padding: 12px; 
+            text-align: left;
+        }
+
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid var(--la-vida-blue);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .card h4 { margin: 0; color: #666; font-size: 0.8rem; }
+        .card p { margin: 5px 0 0; font-size: 1.1rem; font-weight: bold; color: var(--la-vida-dark); }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="banner-container">
+        <img src="LA VIDA MINIMART 3.jpg" alt="La Vida Minimart Logo">
+    </div>
+
+    <div class="content">
+        <h2>Daily Business Tracker</h2>
+
+        <div class="input-grid">
+            <div class="input-group">
+                <label>Date</label>
+                <input type="date" id="date">
+            </div>
+            <div class="input-group">
+                <label>Sales</label>
+                <input type="number" id="sales" placeholder="0">
+            </div>
+            <div class="input-group">
+                <label>Stocking</label>
+                <input type="number" id="stock" placeholder="0">
+            </div>
+            <div class="input-group">
+                <label>Other</label>
+                <input type="number" id="other" placeholder="0">
+            </div>
+            <div class="input-group">
+                <label>Savings</label>
+                <input type="number" id="savings" placeholder="0">
+            </div>
+            <button class="btn-add" onclick="addRecord()">Add Entry</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Sales</th>
+                        <th>Stocking</th>
+                        <th>Other</th>
+                        <th>Savings</th>
+                        <th>Balance</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="summary-cards">
+            <div class="card"><h4>Total Sales</h4><p id="totalSales">0</p></div>
+            <div class="card"><h4>Stocking</h4><p id="totalStock">0</p></div>
+            <div class="card"><h4>Expenses</h4><p id="totalOther">0</p></div>
+            <div class="card"><h4>Savings</h4><p id="totalSavings">0</p></div>
+            <div class="card" style="border-left-color: var(--success-green);">
+                <h4>Balance</h4><p id="balance">0</p>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        © 2026 La Vida Minimart | 0676 221 903
+    </div>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem('la_vida_data')) || [];
+
+async function addRecord() {
+    const date = document.getElementById('date').value;
+    const sales = parseFloat(document.getElementById('sales').value) || 0;
+    const stocking = parseFloat(document.getElementById('stock').value) || 0;
+    const other = parseFloat(document.getElementById('other').value) || 0;
+    const savings = parseFloat(document.getElementById('savings').value) || 0;
+
+    if (!date) return alert('Please select a date');
+
+    const record = { date, sales, stocking, other, savings };
+    data.push(record);
+    saveAndRender();
+
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPgWzw2hfk8d2R4thkTJ-PFdpFGvdMMAUY2rqKFwd6ULfc37BdbdAH45aCxQqQVOVT/exec";
+    try {
+        await fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify(record)
+        });
+    } catch (e) { console.log("Sync skipped"); }
+
+    document.querySelectorAll('input:not([type="date"])').forEach(i => i.value = '');
+}
+
+function deleteRecord(index) {
+    if(confirm("Delete this entry? (Note: This only removes it from this view, not your Google Sheet history)")) {
+        data.splice(index, 1);
+        saveAndRender();
+    }
+}
+
+function saveAndRender() {
+    localStorage.setItem('la_vida_data', JSON.stringify(data));
+    render();
+}
+
+function render() {
+    let table = document.getElementById('tableBody');
+    table.innerHTML = '';
+    let runningBalance = 0;
+    let totals = { s:0, st:0, o:0, sv:0 };
+
+    data.forEach((row, index) => {
+        const rowBal = row.sales - row.stocking - row.other - row.savings;
+        runningBalance += rowBal;
+        
+        totals.s += row.sales;
+        totals.st += row.stocking;
+        totals.o += row.other;
+        totals.sv += row.savings;
+
+        table.innerHTML += `<tr>
+            <td>${row.date}</td>
+            <td>${row.sales.toLocaleString()}</td>
+            <td>${row.stocking.toLocaleString()}</td>
+            <td>${row.other.toLocaleString()}</td>
+            <td>${row.savings.toLocaleString()}</td>
+            <td><strong>${runningBalance.toLocaleString()}</strong></td>
+            <td><button class="btn-delete" onclick="deleteRecord(${index})">Delete</button></td>
+        </tr>`;
+    });
+
+    document.getElementById('totalSales').innerText = totals.s.toLocaleString();
+    document.getElementById('totalStock').innerText = totals.st.toLocaleString();
+    document.getElementById('totalOther').innerText = totals.o.toLocaleString();
+    document.getElementById('totalSavings').innerText = totals.sv.toLocaleString();
+    document.getElementById('balance').innerText = runningBalance.toLocaleString();
+}
+
+render();
+</script>
+</body>
+</html>

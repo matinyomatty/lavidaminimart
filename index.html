@@ -3,114 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>La Vida Minimart</title>
+    <title>La Vida Control Pro</title>
     <style>
         :root { --blue: #004085; --dark: #001a33; --light: #f4f7f9; --green: #28a745; --gray: #6c757d; --red: #dc3545; --gold: #d4af37; }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--light); margin: 0; padding: 0; color: var(--dark); }
         
-        /* STICKY HERO SECTION */
-        .sticky-header { 
-            position: sticky; 
-            top: 0; 
-            z-index: 1000; 
-            background: var(--dark); 
-            color: white; 
-            padding: 15px; 
-            border-bottom: 4px solid var(--blue);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .sticky-header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 2px; color: var(--gold); text-align: center; font-weight: 900; }
+        /* Header & Today Panel */
+        .header { background: var(--dark); color: white; padding: 20px 15px; border-bottom: 5px solid var(--blue); }
+        .header h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; color: var(--gold); }
+        .today-panel { background: rgba(255,255,255,0.05); margin-top: 15px; padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; border: 1px solid rgba(212,175,55,0.2); }
+        .today-stat h4 { margin: 0; font-size: 0.55rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; }
+        .today-stat p { margin: 4px 0 0; font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; gap: 4px; }
         
-        .today-panel { 
-            background: rgba(255,255,255,0.1); 
-            margin-top: 10px; 
-            padding: 12px; 
-            border-radius: 12px; 
-            display: flex; 
-            justify-content: space-around; 
-            border: 1px solid rgba(212,175,55,0.3); 
-            backdrop-filter: blur(5px);
-        }
-        .today-stat { text-align: center; }
-        .today-stat h4 { margin: 0; font-size: 0.55rem; color: var(--gold); text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
-        .today-stat p { margin: 3px 0 0; font-size: 0.95rem; font-weight: bold; }
+        .trend-badge { font-size: 0.65rem; padding: 1px 4px; border-radius: 4px; font-weight: 800; }
+        .trend-up { background: rgba(40, 167, 69, 0.2); color: #4ade80; }
+        .trend-down { background: rgba(220, 53, 69, 0.2); color: #f87171; }
 
-        .container { padding: 15px; max-width: 480px; margin: auto; }
-        
-        #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; position: fixed; width: 100%; z-index: 2000; }
+        #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; }
         .login-card { background: white; width: 100%; max-width: 340px; padding: 40px 25px; border-radius: 24px; text-align: center; }
         
         #mainApp { display: none; }
-
-        .primary-cta { 
-            background: var(--blue); color: white; width: 100%; padding: 18px; border: none; 
-            border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; gap: 10px; 
-            margin: 10px 0 20px 0; box-shadow: 0 8px 20px rgba(0,64,133,0.2); 
-            transition: transform 0.1s;
-        }
+        .container { padding: 15px; max-width: 480px; margin: auto; }
+        
+        .primary-cta { background: var(--blue); color: white; width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,64,133,0.3); transition: 0.2s; }
         .primary-cta:active { transform: scale(0.98); }
         
         .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: white; padding: 12px; border-radius: 14px; border-left: 4px solid var(--blue); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-        .stat-card h4 { margin: 0; font-size: 0.6rem; color: var(--gray); text-transform: uppercase; font-weight: bold; }
-        .stat-card p { margin: 5px 0 0; font-size: 0.9rem; font-weight: bold; color: var(--dark); }
-        .balance-card { grid-column: 1 / -1; background: #e7f3ff; border-left-color: var(--green); padding: 15px; }
+        .stat-card { background: white; padding: 15px; border-radius: 16px; border-left: 4px solid var(--blue); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .stat-card h4 { margin: 0; font-size: 0.65rem; color: var(--gray); text-transform: uppercase; }
+        .stat-card p { margin: 8px 0 0; font-size: 0.85rem; font-weight: bold; }
 
-        /* Modals & Inputs */
         .modal { display: none; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); margin-bottom: 20px; border-top: 6px solid var(--blue); }
         .field-group { margin-bottom: 15px; }
         .field-label { font-size: 0.7rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 6px; display: block; }
-        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; background: #fafafa; }
+        input, textarea { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; background: #fafafa; outline: none; }
+        textarea { height: 60px; font-family: inherit; resize: none; }
 
-        /* History List */
-        .entry-item { background: white; padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #eee; }
+        .entry-item { background: white; padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ddd; }
         .entry-item.is-today { border-left-color: var(--gold); background: #fffdf5; }
-        .tag-today { background: var(--gold); color: var(--dark); font-size: 0.5rem; padding: 2px 6px; border-radius: 4px; font-weight: 900; margin-left: 5px; }
+        .note-text { font-size: 0.7rem; color: var(--gray); font-style: italic; display: block; margin-top: 4px; }
         
         .action-btns { display: flex; gap: 8px; }
         .btn-circle { border: none; background: #f0f2f5; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
         
         .secondary-actions { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-sec { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; background: white; font-weight: bold; font-size: 0.75rem; color: var(--gray); cursor: pointer; }
+        .btn-sec { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; background: white; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
 
         .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center; color:white; }
     </style>
 </head>
 <body>
 
-<div id="loadingOverlay" class="loading-overlay"><b>⏳ UPDATING...</b></div>
+<div id="loadingOverlay" class="loading-overlay"><b>⏳ SYNCING LA VIDA...</b></div>
 
 <div id="loginPage">
     <div class="login-card">
-        <h1 style="margin:0; letter-spacing:2px; font-size: 1.8rem; color: var(--dark);">LA VIDA</h1>
-        <p style="color:var(--gray); font-size:0.8rem; margin-bottom:30px;">Minimart Management</p>
-        <input type="password" id="passInput" inputmode="numeric" placeholder="PASSCODE" style="text-align:center; letter-spacing:8px; font-size:1.2rem;">
-        <button class="primary-cta" style="margin-top:20px;" onclick="checkLogin()">UNLOCK SYSTEM</button>
+        <h1 style="margin:0; letter-spacing:3px;">LA VIDA</h1>
+        <p style="color:var(--gray); font-size:0.8rem; margin-bottom:30px;">Security Verification</p>
+        <input type="password" id="passInput" inputmode="numeric" placeholder="••••••" style="text-align:center; letter-spacing:10px; font-size:1.5rem;">
+        <button class="primary-cta" style="margin-top:20px;" onclick="checkLogin()">UNLOCK</button>
     </div>
 </div>
 
 <div id="mainApp">
-    <div class="sticky-header">
-        <h1>LA VIDA MINIMART</h1>
+    <div class="header">
+        <h1>LA VIDA</h1>
         <div class="today-panel">
-            <div class="today-stat"><h4>Today Sales</h4><p id="daySales">0</p></div>
-            <div class="today-stat"><h4>Net Profit</h4><p id="dayNet" style="color:#4dff88">0</p></div>
+            <div class="today-stat">
+                <h4>Today Sales</h4>
+                <p><span id="daySales">0</span> <span id="salesTrend" class="trend-badge"></span></p>
+            </div>
+            <div class="today-stat" style="text-align: right;">
+                <h4>Net Balance</h4>
+                <p><span id="balTrend" class="trend-badge"></span> <span id="topBalance" style="color:var(--gold)">0</span></p>
+            </div>
         </div>
     </div>
 
     <div class="container">
-        <button class="primary-cta" onclick="openForm('new')">
-            <span>➕</span> NEW DAILY ENTRY
-        </button>
+        <button class="primary-cta" onclick="openForm('new')"><span>➕</span> ADD DAILY ENTRY</button>
 
         <div class="summary-grid">
-            <div class="stat-card"><h4>Stocking Cost</h4><p id="totalStock">...</p></div>
+            <div class="stat-card"><h4>Stock Value</h4><p id="totalStock">...</p></div>
             <div class="stat-card"><h4>Other Exp</h4><p id="totalOther">...</p></div>
-            <div class="stat-card"><h4>Total Savings</h4><p id="totalSavings">...</p></div>
             <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
-            <div class="stat-card balance-card"><h4>Total Cash Balance</h4><p id="balance" style="font-size:1.1rem; color:var(--blue);">...</p></div>
+            <div class="stat-card"><h4>Savings</h4><p id="totalSavings">...</p></div>
         </div>
 
         <div class="secondary-actions">
@@ -119,21 +97,34 @@
         </div>
 
         <div id="entryModal" class="modal">
-            <h3 id="formTitle" style="margin-top:0;">Record Entry</h3>
+            <h3 id="formTitle" style="margin-top:0;">New Record</h3>
             <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
-            <div class="field-group"><span class="field-label">Sales (TZS)</span><input type="number" id="sales"></div>
-            <div class="field-group"><span class="field-label">Money for Stocking</span><input type="number" id="stock"></div>
-            <div class="field-group"><span class="field-label">Other Exp</span><input type="number" id="other"></div>
-            <div class="field-group"><span class="field-label">Savings</span><input type="number" id="savings"></div>
+            <div class="field-group"><span class="field-label">Sales (TZS)</span><input type="number" id="sales" placeholder="0"></div>
+            <div class="field-group"><span class="field-label">Stocking</span><input type="number" id="stock" placeholder="0"></div>
+            <div class="field-group"><span class="field-label">Other Exp</span><input type="number" id="other" placeholder="0"></div>
+            <div class="field-group"><span class="field-label">Savings</span><input type="number" id="savings" placeholder="0"></div>
+            <div class="field-group"><span class="field-label">Note</span><textarea id="note" placeholder="What happened today?"></textarea></div>
             <button class="primary-cta" onclick="saveRecord()">SAVE DATA</button>
             <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
         </div>
 
-        <label style="font-size:0.7rem; font-weight:bold; color:var(--gray); text-transform:uppercase; display:block; margin-bottom:10px; letter-spacing:1px;">Log History</label>
+        <div id="searchModal" class="modal">
+            <span class="field-label">Search Date</span>
+            <input type="date" id="searchDate" style="margin-bottom:15px;">
+            <button class="primary-cta" onclick="executeSearch()">GO TO DATE</button>
+            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CLOSE</button>
+        </div>
+
+        <div id="reportModal" class="modal">
+            <span class="field-label">Export Month</span>
+            <input type="month" id="reportMonth" style="margin-bottom:15px;">
+            <button class="primary-cta" onclick="generatePDF()">DOWNLOAD PDF</button>
+            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CLOSE</button>
+        </div>
+
+        <label style="font-size:0.7rem; font-weight:bold; color:var(--gray); text-transform:uppercase; display:block; margin-bottom:10px;">Recent Logs</label>
         <div id="entryList"></div>
-        <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:10px; display:none;" onclick="loadMore()">VIEW PREVIOUS</button>
-        
-        <div style="height: 50px;"></div>
+        <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:10px; display:none;" onclick="loadMore()">VIEW MORE</button>
     </div>
 </div>
 
@@ -152,26 +143,21 @@ function checkLogin() {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
         fetchData();
-    } else { alert("Passcode incorrect"); }
+    } else { alert("Wrong Code"); }
 }
 
 function openForm(type) {
     closeModals();
     if(type === 'new') {
         document.getElementById('formTitle').innerText = "New Record";
-        document.querySelectorAll('#entryModal input').forEach(i => i.value = '');
+        document.querySelectorAll('#entryModal input, #entryModal textarea').forEach(i => i.value = '');
         document.getElementById('date').valueAsDate = new Date();
         document.getElementById('entryModal').style.display = 'block';
-    } else if(type === 'search') {
-        document.getElementById('searchModal').style.display = 'block';
-    } else if(type === 'report') {
-        document.getElementById('reportModal').style.display = 'block';
-    }
+    } else if(type === 'search') { document.getElementById('searchModal').style.display = 'block';
+    } else if(type === 'report') { document.getElementById('reportModal').style.display = 'block'; }
 }
 
-function closeModals() {
-    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-}
+function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
 
 async function fetchData() {
     document.getElementById('loadingOverlay').style.display = 'flex';
@@ -179,42 +165,69 @@ async function fetchData() {
         const res = await fetch(SCRIPT_URL);
         data = await res.json();
         render();
-    } catch (e) { alert("Could not fetch data."); }
+    } catch (e) { console.error(e); }
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
 function render() {
     const list = document.getElementById('entryList');
     list.innerHTML = '';
-    let totals = {s:0, st:0, o:0, sv:0}, dayS = 0, dayN = 0;
+    let totalSales = 0, totalStock = 0, totalOther = 0, totalSavings = 0;
+    let dayS = 0, yesterdayS = 0;
+    let runningBalance = 0, yesterdayBalance = 0;
+
     const todayStr = new Date().toISOString().split('T')[0];
+    const yesterdayObj = new Date();
+    yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+    const yesterdayStr = yesterdayObj.toISOString().split('T')[0];
 
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
+    
     data.forEach(row => {
-        totals.s += row.sales; totals.st += row.stocking; 
-        totals.o += row.other; totals.sv += row.savings;
-        if(row.date === todayStr) {
-            dayS = row.sales;
-            dayN = row.sales - row.stocking - row.other - row.savings;
+        const rowNet = row.sales - row.stocking - row.other - row.savings;
+        runningBalance += rowNet;
+        totalSales += row.sales; totalStock += row.stocking; 
+        totalOther += row.other; totalSavings += row.savings;
+
+        if(row.date === todayStr) dayS = row.sales;
+        if(row.date === yesterdayStr) {
+            yesterdayS = row.sales;
+            yesterdayBalance = runningBalance; 
         }
     });
 
+    // Sales Trend
+    const salesBadge = document.getElementById('salesTrend');
+    if(dayS > 0 && yesterdayS > 0) {
+        const sDiff = ((dayS - yesterdayS) / yesterdayS) * 100;
+        salesBadge.innerText = (sDiff >= 0 ? "↑ " : "↓ ") + Math.abs(sDiff).toFixed(0) + "%";
+        salesBadge.className = "trend-badge " + (sDiff >= 0 ? "trend-up" : "trend-down");
+    } else { salesBadge.innerText = ""; }
+
+    // Balance Trend
+    const balBadge = document.getElementById('balTrend');
+    if(runningBalance !== 0 && yesterdayBalance !== 0) {
+        const bDiff = ((runningBalance - yesterdayBalance) / Math.abs(yesterdayBalance)) * 100;
+        balBadge.innerText = (bDiff >= 0 ? "↑ " : "↓ ") + Math.abs(bDiff).toFixed(0) + "%";
+        balBadge.className = "trend-badge " + (bDiff >= 0 ? "trend-up" : "trend-down");
+    } else { balBadge.innerText = ""; }
+
     document.getElementById('daySales').innerText = dayS.toLocaleString();
-    document.getElementById('dayNet').innerText = dayN.toLocaleString();
-    document.getElementById('totalSales').innerText = totals.s.toLocaleString();
-    document.getElementById('totalStock').innerText = totals.st.toLocaleString();
-    document.getElementById('totalOther').innerText = totals.o.toLocaleString();
-    document.getElementById('totalSavings').innerText = totals.sv.toLocaleString();
-    document.getElementById('balance').innerText = (totals.s - totals.st - totals.o - totals.sv).toLocaleString() + " TZS";
+    document.getElementById('topBalance').innerText = runningBalance.toLocaleString();
+    document.getElementById('totalSales').innerText = totalSales.toLocaleString();
+    document.getElementById('totalStock').innerText = totalStock.toLocaleString();
+    document.getElementById('totalOther').innerText = totalOther.toLocaleString();
+    document.getElementById('totalSavings').innerText = totalSavings.toLocaleString();
 
     const visible = [...data].reverse().slice(0, displayLimit);
     visible.forEach(row => {
         const isToday = row.date === todayStr;
         list.innerHTML += `
             <div class="entry-item ${isToday ? 'is-today' : ''}">
-                <div>
-                    <b>${row.date}</b>${isToday ? '<span class="tag-today">TODAY</span>' : ''}<br>
-                    <small style="color:var(--gray)">S: ${row.sales.toLocaleString()} | Cost: ${(row.stocking+row.other).toLocaleString()}</small>
+                <div style="max-width: 65%;">
+                    <b style="font-size:0.9rem;">${row.date}</b><br>
+                    <small style="color:var(--gray)">Sales: ${row.sales.toLocaleString()}</small>
+                    ${row.note ? `<span class="note-text">"${row.note}"</span>` : ''}
                 </div>
                 <div class="action-btns">
                     <button class="btn-circle" onclick="editRow('${row.date}')">✏️</button>
@@ -233,7 +246,8 @@ async function saveRecord() {
         sales: parseFloat(document.getElementById('sales').value) || 0,
         stocking: parseFloat(document.getElementById('stock').value) || 0,
         other: parseFloat(document.getElementById('other').value) || 0,
-        savings: parseFloat(document.getElementById('savings').value) || 0
+        savings: parseFloat(document.getElementById('savings').value) || 0,
+        note: document.getElementById('note').value || ""
     };
     if(!record.date) return alert("Select Date");
     document.getElementById('loadingOverlay').style.display = 'flex';
@@ -250,28 +264,36 @@ function editRow(date) {
         document.getElementById('stock').value = found.stocking;
         document.getElementById('other').value = found.other;
         document.getElementById('savings').value = found.savings;
-        document.getElementById('formTitle').innerText = "Update: " + date;
+        document.getElementById('note').value = found.note || "";
+        document.getElementById('formTitle').innerText = "Edit: " + date;
         document.getElementById('entryModal').style.display = 'block';
     }
 }
 
+function executeSearch() {
+    const d = document.getElementById('searchDate').value;
+    if(data.some(row => row.date === d)) {
+        editRow(d);
+        document.getElementById('searchModal').style.display = 'none';
+    } else { alert("No entry for this date."); }
+}
+
 async function deleteRow(d) {
-    if(!confirm("Delete " + d + "?")) return;
+    if(!confirm("Move " + d + " to Archive?")) return;
     document.getElementById('loadingOverlay').style.display = 'flex';
-    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({action:"delete", date:d}) });
+    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({action:"archive", date:d}) });
     setTimeout(fetchData, 1200);
 }
 
 function generatePDF() {
     const m = document.getElementById('reportMonth').value;
     const filtered = data.filter(d => d.date.startsWith(m));
-    if(filtered.length === 0) return alert("No data for this month.");
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text("LA VIDA MINIMART REPORT: " + m, 14, 20);
-    const rows = filtered.map(d => [d.date, d.sales.toLocaleString(), d.stocking.toLocaleString(), d.other.toLocaleString(), d.savings.toLocaleString()]);
-    doc.autoTable({ startY: 30, head: [['Date', 'Sales', 'Stock Cost', 'Expenses', 'Savings']], body: rows });
-    doc.save(`LaVida_Report_${m}.pdf`);
+    doc.text("LA VIDA REPORT - " + m, 14, 20);
+    const rows = filtered.map(d => [d.date, d.sales.toLocaleString(), d.stocking.toLocaleString(), d.other.toLocaleString(), d.note || "-"]);
+    doc.autoTable({ startY: 30, head: [['Date', 'Sales', 'Stock', 'Expenses', 'Note']], body: rows });
+    doc.save(`LaVida_Pro_${m}.pdf`);
 }
 </script>
 </body>

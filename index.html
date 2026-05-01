@@ -41,6 +41,7 @@
         #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; }
         .login-card { background: white; width: 100%; max-width: 340px; padding: 40px 25px; border-radius: 24px; text-align: center; }
         #mainApp { display: none; }
+        
         .container { padding: 15px; max-width: 480px; margin: auto; }
         .primary-cta { background: var(--blue); color: white; width: 100%; padding: 18px; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,64,133,0.3); transition: 0.2s; }
         
@@ -49,10 +50,27 @@
         .stat-card h4 { margin: 0; font-size: 0.6rem; color: var(--gray); text-transform: uppercase; }
         .stat-card p { margin: 6px 0 0; font-size: 0.8rem; font-weight: bold; }
 
-        .modal { display: none; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); margin-bottom: 20px; border-top: 6px solid var(--blue); position: fixed; top: 10%; left: 5%; width: 90%; z-index: 2000; }
-        .field-group { margin-bottom: 15px; }
-        .field-label { font-size: 0.7rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 6px; display: block; }
-        input, textarea { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; background: #fafafa; outline: none; }
+        /* FIXED MODAL STYLE */
+        .modal { 
+            display: none; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 24px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2); 
+            border-top: 6px solid var(--blue); 
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 92%; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            z-index: 2000; 
+        }
+        
+        .field-group { margin-bottom: 12px; }
+        .field-label { font-size: 0.7rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 4px; display: block; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; background: #fafafa; outline: none; }
         
         .entry-item { background: white; padding: 15px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ddd; }
         .entry-item.is-today { border-left-color: var(--gold); background: #fffdf5; }
@@ -110,15 +128,18 @@
     </div>
 
     <div id="entryModal" class="modal">
-        <h3 id="formTitle" style="margin:0 0 15px 0;">Entry</h3>
+        <h3 id="formTitle" style="margin:0 0 15px 0; text-align: center;">Entry Details</h3>
         <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
-        <div class="field-group"><span class="field-label">Sales (TZS)</span><input type="number" id="sales" placeholder="0"></div>
-        <div class="field-group"><span class="field-label">Stocking</span><input type="number" id="stock" placeholder="0"></div>
-        <div class="field-group"><span class="field-label">Other Exp</span><input type="number" id="other" placeholder="0"></div>
-        <div class="field-group"><span class="field-label">Savings</span><input type="number" id="savings" placeholder="0"></div>
+        <div class="field-group"><span class="field-label">Sales (TZS)</span><input type="number" id="sales" placeholder="0" inputmode="decimal"></div>
+        <div class="field-group"><span class="field-label">Stocking</span><input type="number" id="stock" placeholder="0" inputmode="decimal"></div>
+        <div class="field-group"><span class="field-label">Other Exp</span><input type="number" id="other" placeholder="0" inputmode="decimal"></div>
+        <div class="field-group"><span class="field-label">Savings</span><input type="number" id="savings" placeholder="0" inputmode="decimal"></div>
         <div class="field-group"><span class="field-label">Note</span><textarea id="note" style="height:50px;"></textarea></div>
-        <button class="primary-cta" onclick="saveRecord()">SAVE DATA</button>
-        <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
+        
+        <div style="position: sticky; bottom: 0; background: white; padding-top: 10px;">
+            <button class="primary-cta" onclick="saveRecord()" style="margin-bottom:10px;">SAVE DATA</button>
+            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
+        </div>
     </div>
 </div>
 
@@ -177,7 +198,7 @@ function render() {
         }
     });
 
-    // SALES TREND FIX: Only show if BOTH today and yesterday have sales > 0
+    // SALES TREND FIX: No fake negative if today is empty
     const salesBadge = document.getElementById('salesTrend');
     if(dayS > 0 && yesterdayS > 0) {
         const sDiff = ((dayS - yesterdayS) / yesterdayS) * 100;

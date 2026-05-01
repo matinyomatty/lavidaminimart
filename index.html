@@ -24,19 +24,29 @@
     /* ── LOGIN ── */
     #loginPage {
         display: flex; justify-content: center; align-items: center;
-        height: 100vh; background: var(--dark); padding: 20px;
+        min-height: 100vh; width: 100vw;
+        background: var(--dark); padding: 24px;
+        position: fixed; inset: 0; z-index: 100;
     }
     .login-card {
-        background: white; width: 100%; max-width: 340px;
-        padding: 44px 28px; border-radius: 28px; text-align: center;
-        box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+        background: white; width: 100%; max-width: 320px;
+        padding: 36px 24px 28px; border-radius: 24px; text-align: center;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.5);
     }
     .login-logo {
-        font-family: 'Syne', sans-serif; font-size: 2rem;
-        letter-spacing: 6px; color: var(--dark); margin-bottom: 4px;
+        font-family: 'Syne', sans-serif; font-size: 2.2rem;
+        letter-spacing: 8px; color: var(--dark); margin-bottom: 6px;
     }
-    .login-sub { color: var(--gray); font-size: 0.75rem; margin-bottom: 32px; }
-    #pinError { color: var(--red); font-size: 0.8rem; min-height: 20px; margin-top: 10px; }
+    .login-sub { color: var(--gray); font-size: 0.75rem; margin-bottom: 28px; }
+    .pass-input {
+        width: 100%; padding: 16px; border: 2px solid #e0e6ef;
+        border-radius: 14px; font-size: 1.4rem; text-align: center;
+        letter-spacing: 8px; background: #f8fafc; outline: none;
+        font-family: 'DM Sans', sans-serif; margin-bottom: 16px;
+        transition: border-color 0.2s;
+    }
+    .pass-input:focus { border-color: var(--blue); background: white; }
+    #pinError { color: var(--red); font-size: 0.78rem; min-height: 18px; margin-top: 8px; }
 
     /* ── MAIN APP ── */
     #mainApp { display: none; }
@@ -284,8 +294,7 @@
         <div class="login-logo">LA VIDA</div>
         <div class="login-sub">Authorized Access Only</div>
         <input type="password" id="passInput" inputmode="numeric"
-            placeholder="••••••"
-            style="text-align:center; letter-spacing:8px; font-size:1.4rem; margin-bottom:16px;"
+            class="pass-input" placeholder="••••••"
             onkeypress="if(event.key==='Enter') checkLogin()">
         <button class="primary-cta" style="margin-bottom:0;" onclick="checkLogin()">UNLOCK</button>
         <div id="pinError"></div>

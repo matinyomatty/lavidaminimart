@@ -7,49 +7,62 @@
     <style>
         :root { --blue: #004085; --dark: #001a33; --light: #f8fbff; --green: #28a745; --gray: #6c757d; --red: #dc3545; --gold: #d4af37; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f0f2f5; margin: 0; padding: 0; }
+        body { background: #f0f2f5; margin: 0; padding: 0; overflow-x: hidden; }
+        
         .brand-header { background: var(--dark); color: white; padding: 30px 10px; text-align: center; border-bottom: 6px solid var(--blue); }
         .brand-header h1 { margin: 0; font-size: 2.2rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
+
         #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; }
         .login-card { background: white; width: 100%; max-width: 350px; padding: 40px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        
         #mainApp { display: none; }
         .container { padding: 15px; max-width: 500px; margin: auto; }
         
         /* Summary Grid */
         .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 12px; border-radius: 12px; border-left: 4px solid var(--blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .stat-card h4 { margin: 0; font-size: 0.65rem; color: var(--gray); text-transform: uppercase; }
-        .stat-card p { margin: 5px 0 0; font-size: 0.9rem; font-weight: bold; color: var(--dark); }
+        .stat-card h4 { margin: 0; font-size: 0.6rem; color: var(--gray); text-transform: uppercase; }
+        .stat-card p { margin: 5px 0 0; font-size: 0.85rem; font-weight: bold; color: var(--dark); }
         .full-width-card { grid-column: span 2; border-left-color: var(--green); background: #fafffa; }
 
-        /* Action Sections */
-        .action-section { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; }
-        .report-section { border-color: var(--blue); }
-        .btn-action { border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .report-btn { background: var(--blue); color: white; }
+        /* Navigation Buttons */
+        .nav-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .nav-btn { height: 80px; border: none; border-radius: 15px; font-weight: bold; font-size: 0.9rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-new { background: var(--blue); color: white; }
+        .btn-history { background: white; color: var(--blue); border: 2px solid var(--blue); }
+        .nav-btn span { font-size: 1.5rem; margin-bottom: 5px; }
 
-        /* Input Card with Permanent Titles */
-        .input-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        /* AI Insights Section */
+        .ai-section { background: #fffdf5; border: 1px solid var(--gold); border-radius: 15px; padding: 15px; margin-bottom: 20px; }
+        .ai-btn { background: var(--dark); color: var(--gold); border: 1px solid var(--gold); padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .ai-response { font-size: 0.85rem; color: #444; line-height: 1.5; white-space: pre-line; display: none; margin-top: 12px; padding: 12px; background: white; border-radius: 10px; border-left: 3px solid var(--gold); }
+
+        /* Input Card (Hidden by Default) */
+        #entryFormCard { display: none; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 5px solid var(--blue); }
         .field-group { margin-bottom: 12px; }
         .field-label { font-size: 0.65rem; font-weight: 800; color: var(--blue); text-transform: uppercase; margin-bottom: 4px; display: block; margin-left: 5px; }
         input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; background: #fafafa; }
-        
         .btn-save { width: 100%; background: var(--blue); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
+        .btn-cancel { width: 100%; background: #eee; color: #555; border: none; padding: 10px; border-radius: 10px; margin-top: 10px; cursor: pointer; font-weight: bold; }
+
+        /* Reports and Search */
+        .action-section { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; }
         
-        /* History */
-        .entry-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--blue); }
+        /* History Items */
+        .entry-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--blue); box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
         .btn-delete { background: none; border: none; color: var(--red); font-size: 1.2rem; padding: 10px; cursor: pointer; }
+        
         .loading { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; justify-content:center; align-items:center; }
     </style>
 </head>
 <body>
 
-<div id="loading" class="loading"><b>🔄 Updating La Vida...</b></div>
+<div id="loading" class="loading"><b>🔄 Loading La Vida...</b></div>
 
 <div id="loginPage">
     <div class="login-card">
         <h1>LA VIDA</h1>
-        <p style="font-size: 0.8rem; margin-bottom: 25px;">Management System</p>
+        <p style="font-size: 0.8rem; color: var(--gray); margin-bottom: 25px;">Management System</p>
         <input type="password" id="passInput" placeholder="Passcode" style="text-align:center; letter-spacing: 5px;">
         <button class="btn-save" onclick="checkLogin()">UNLOCK</button>
     </div>
@@ -64,55 +77,50 @@
             <div class="stat-card"><h4>Stock</h4><p id="totalStock">0 (TZS)</p></div>
             <div class="stat-card"><h4>Other</h4><p id="totalOther">0 (TZS)</p></div>
             <div class="stat-card"><h4>Savings</h4><p id="totalSavings">0 (TZS)</p></div>
-            <div class="stat-card full-width-card"><h4>Current Balance</h4><p id="balance">0 (TZS)</p></div>
+            <div class="stat-card full-width-card"><h4>Net Balance</h4><p id="balance">0 (TZS)</p></div>
         </div>
 
-        <div class="action-section report-section">
-            <span class="field-label" style="color:var(--gray)">📅 Download Monthly Report</span>
-            <input type="month" id="reportMonth" style="margin-bottom:10px;">
-            <button class="btn-action report-btn" onclick="generatePDF()">📥 DOWNLOAD PDF (TZS)</button>
+        <div class="ai-section">
+            <button class="ai-btn" onclick="generateInsights()">✨ SHOW BUSINESS INSIGHTS</button>
+            <div id="aiResponse" class="ai-response"></div>
         </div>
 
-        <div class="input-card">
-            <span class="field-label">🔍 Search / Edit Date</span>
-            <div style="display:flex; gap:10px;">
+        <div class="nav-menu">
+            <button class="nav-btn btn-new" onclick="toggleEntryForm(true)">
+                <span>➕</span> NEW ENTRY
+            </button>
+            <button class="nav-btn btn-history" onclick="scrollToHistory()">
+                <span>📑</span> HISTORY
+            </button>
+        </div>
+
+        <div id="entryFormCard">
+            <span class="field-label" style="font-size: 0.8rem; margin-bottom: 15px; color:var(--blue)">Create New Record</span>
+            <div class="field-group"><span class="field-label">📅 Date</span><input type="date" id="date"></div>
+            <div class="field-group"><span class="field-label">💰 Sales (TZS)</span><input type="number" id="sales" placeholder="0"></div>
+            <div class="field-group"><span class="field-label">📦 Stocking (TZS)</span><input type="number" id="stock" placeholder="0"></div>
+            <div class="field-group"><span class="field-label">💸 Other Expenses (TZS)</span><input type="number" id="other" placeholder="0"></div>
+            <div class="field-group"><span class="field-label">🏦 Savings (TZS)</span><input type="number" id="savings" placeholder="0"></div>
+            <button class="btn-save" onclick="addRecord()">SAVE TO CLOUD</button>
+            <button class="btn-cancel" onclick="toggleEntryForm(false)">CANCEL</button>
+        </div>
+
+        <div class="action-section">
+            <span class="field-label">🔍 Edit Previous Date</span>
+            <div style="display:flex; gap:10px; margin-top:5px;">
                 <input type="date" id="searchDate" style="flex-grow:1;">
-                <button onclick="searchByDate()" style="background:var(--blue); color:white; border:none; padding:0 20px; border-radius:10px; cursor:pointer;">🔍</button>
+                <button onclick="searchByDate()" style="background:var(--blue); color:white; border:none; padding:0 15px; border-radius:10px;">🔍</button>
             </div>
         </div>
 
-        <div class="input-card">
-            <span class="field-label" style="font-size: 0.8rem; margin-bottom: 15px; color:var(--gray)">📝 Daily Record Entry</span>
-            
-            <div class="field-group">
-                <span class="field-label">📅 Record Date</span>
-                <input type="date" id="date">
-            </div>
-
-            <div class="field-group">
-                <span class="field-label">💰 Sales Amount (TZS)</span>
-                <input type="number" id="sales" placeholder="Enter Sales">
-            </div>
-
-            <div class="field-group">
-                <span class="field-label">📦 Stocking / Supplies (TZS)</span>
-                <input type="number" id="stock" placeholder="Enter Stocking">
-            </div>
-
-            <div class="field-group">
-                <span class="field-label">💸 Other Expenses (TZS)</span>
-                <input type="number" id="other" placeholder="Enter Other Exp">
-            </div>
-
-            <div class="field-group">
-                <span class="field-label">🏦 Savings (TZS)</span>
-                <input type="number" id="savings" placeholder="Enter Savings">
-            </div>
-
-            <button class="btn-save" onclick="addRecord()">SAVE RECORD</button>
+        <div class="action-section">
+            <span class="field-label">📅 Monthly Report</span>
+            <input type="month" id="reportMonth" style="margin-top:5px; margin-bottom:10px;">
+            <button class="btn-action btn-save" style="margin-top:0; padding:12px;" onclick="generatePDF()">📥 DOWNLOAD PDF (TZS)</button>
         </div>
 
-        <label style="margin-left: 5px; margin-bottom: 10px; display: block; font-size: 0.7rem; font-weight: bold; color: var(--gray);">📑 RECENT ENTRIES (LAST 5)</label>
+        <div id="historyTarget"></div>
+        <label style="margin-left: 5px; margin-bottom: 10px; display: block; font-size: 0.7rem; font-weight: bold; color: var(--gray);">📑 RECENT LOGS (LAST 5)</label>
         <div id="entryList"></div>
     </div>
 </div>
@@ -137,6 +145,16 @@ function showApp() {
     fetchFromCloud();
 }
 
+function toggleEntryForm(show) {
+    const form = document.getElementById('entryFormCard');
+    form.style.display = show ? 'block' : 'none';
+    if(show) form.scrollIntoView({ behavior: 'smooth' });
+}
+
+function scrollToHistory() {
+    document.getElementById('historyTarget').scrollIntoView({ behavior: 'smooth' });
+}
+
 async function fetchFromCloud() {
     document.getElementById('loading').style.display = 'flex';
     try {
@@ -151,9 +169,7 @@ function render() {
     const list = document.getElementById('entryList');
     list.innerHTML = '';
     let runBal = 0, totals = {s:0, st:0, o:0, sv:0};
-    
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
-
     data.forEach((row) => {
         runBal += (row.sales - row.stocking - row.other - row.savings);
         totals.s += row.sales; totals.st += row.stocking; totals.o += row.other; totals.sv += row.savings;
@@ -171,11 +187,21 @@ function render() {
             <div class="entry-item">
                 <div style="flex-grow:1">
                     <b>${row.date}</b><br>
-                    <small>Sales: ${row.sales.toLocaleString()} | Exp: ${(row.stocking+row.other).toLocaleString()} (TZS)</small>
+                    <small>S: ${row.sales.toLocaleString()} | Exp: ${(row.stocking+row.other).toLocaleString()} (TZS)</small>
                 </div>
                 <button class="btn-delete" onclick="deleteEntry('${row.date}')">🗑️</button>
             </div>`;
     });
+}
+
+function generateInsights() {
+    const aiBox = document.getElementById('aiResponse');
+    aiBox.style.display = 'block';
+    if (data.length === 0) { aiBox.innerText = "No data yet."; return; }
+    let tSales = 0, tStock = 0;
+    data.forEach(d => { tSales += d.sales; tStock += d.stocking; });
+    const stockRatio = (tStock / tSales) * 100;
+    aiBox.innerText = `📊 **AI ANALYSIS**\n• Avg Sales: ${(tSales/data.length).toFixed(0).toLocaleString()} TZS\n• Stock Ratio: ${stockRatio.toFixed(1)}%\n${stockRatio > 55 ? "⚠️ Warning: Stocking costs are taking too much of your cash." : "✅ Margins look healthy today."}`;
 }
 
 async function addRecord() {
@@ -186,13 +212,14 @@ async function addRecord() {
         other: parseFloat(document.getElementById('other').value) || 0,
         savings: parseFloat(document.getElementById('savings').value) || 0
     };
-    if (!record.date) return alert("Select a date.");
+    if (!record.date) return alert("Select date.");
     document.getElementById('loading').style.display = 'flex';
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
+        toggleEntryForm(false);
         setTimeout(fetchFromCloud, 1000);
-        document.querySelectorAll('.input-card input:not([type="date"])').forEach(i => i.value = '');
-    } catch (e) { alert("Error saving."); }
+        document.querySelectorAll('#entryFormCard input:not([type="date"])').forEach(i => i.value = '');
+    } catch (e) { alert("Save Error"); }
 }
 
 async function deleteEntry(dateToDelete) {
@@ -201,7 +228,7 @@ async function deleteEntry(dateToDelete) {
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({action: "delete", date: dateToDelete}) });
         setTimeout(fetchFromCloud, 1000);
-    } catch (e) { alert("Delete failed"); }
+    } catch (e) {}
 }
 
 function searchByDate() {
@@ -213,23 +240,21 @@ function searchByDate() {
         document.getElementById('stock').value = found.stocking;
         document.getElementById('other').value = found.other;
         document.getElementById('savings').value = found.savings;
-        // Scroll to form so you can see the filled data
-        document.getElementById('date').scrollIntoView({ behavior: 'smooth' });
-    } else { alert("No record found for this date."); }
+        toggleEntryForm(true);
+    } else { alert("Not found."); }
 }
 
 function generatePDF() {
     const monthVal = document.getElementById('reportMonth').value;
-    if (!monthVal) return alert("Select a month.");
+    if (!monthVal) return alert("Select month.");
     const filtered = data.filter(d => d.date.startsWith(monthVal));
-    if (filtered.length === 0) return alert("No data found.");
-
+    if (filtered.length === 0) return alert("No data.");
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text("La Vida Minimart - Report " + monthVal, 14, 20);
+    doc.text("La Vida Minimart Report - " + monthVal, 14, 20);
     const tableData = filtered.map(d => [d.date, d.sales.toLocaleString(), d.stocking.toLocaleString(), d.other.toLocaleString(), d.savings.toLocaleString()]);
     doc.autoTable({ startY: 30, head: [['Date', 'Sales', 'Stock', 'Other', 'Savings']], body: tableData });
-    doc.save(`LaVida_Report_${monthVal}.pdf`);
+    doc.save(`LaVida_${monthVal}.pdf`);
 }
 </script>
 </body>

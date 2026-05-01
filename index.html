@@ -8,53 +8,38 @@
         :root { --blue: #004085; --dark: #001a33; --light: #f8fbff; --green: #28a745; --gray: #6c757d; --red: #dc3545; --gold: #d4af37; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #f0f2f5; margin: 0; padding: 0; }
-        
         .brand-header { background: var(--dark); color: white; padding: 30px 10px; text-align: center; border-bottom: 6px solid var(--blue); }
         .brand-header h1 { margin: 0; font-size: 2.2rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
-
         #loginPage { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; }
         .login-card { background: white; width: 100%; max-width: 350px; padding: 40px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        
         #mainApp { display: none; }
         .container { padding: 15px; max-width: 500px; margin: auto; }
-        
-        /* Stacked Summary Grid for Mobile */
         .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 12px; border-radius: 12px; border-left: 4px solid var(--blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .stat-card h4 { margin: 0; font-size: 0.65rem; color: var(--gray); text-transform: uppercase; }
-        .stat-card p { margin: 5px 0 0; font-size: 1rem; font-weight: bold; color: var(--dark); }
+        .stat-card p { margin: 5px 0 0; font-size: 0.95rem; font-weight: bold; color: var(--dark); }
         .full-width-card { grid-column: span 2; border-left-color: var(--green); background: #fafffa; }
-
-        /* Report & AI Action Sections */
         .action-section { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; }
-        .ai-section { border-color: var(--gold); }
         .report-section { border-color: var(--blue); }
         .btn-action { border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .ai-btn { background: var(--dark); color: var(--gold); border: 1px solid var(--gold); }
         .report-btn { background: var(--blue); color: white; }
-        .ai-response { font-size: 0.85rem; color: #444; line-height: 1.4; white-space: pre-line; display: none; margin-top: 10px; padding: 10px; background: #fffdf5; border-radius: 8px; }
-
-        /* Input Styles */
         .input-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
         label { font-size: 0.7rem; font-weight: bold; color: var(--gray); text-transform: uppercase; }
         input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; background: #fafafa; margin-top: 5px; margin-bottom: 10px; }
         .btn-save { width: 100%; background: var(--blue); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; }
-        
-        /* Entry List */
         .entry-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--blue); }
         .btn-delete { background: none; border: none; color: var(--red); font-size: 1.2rem; padding: 10px; cursor: pointer; opacity: 0.7; }
-
         .loading { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; justify-content:center; align-items:center; }
     </style>
 </head>
 <body>
 
-<div id="loading" class="loading"><b>🔄 Connecting to La Vida Cloud...</b></div>
+<div id="loading" class="loading"><b>🔄 Syncing Data...</b></div>
 
 <div id="loginPage">
     <div class="login-card">
-        <h1 style="color:var(--dark); margin:0;">LA VIDA</h1>
-        <p style="color:var(--gray); font-size: 0.8rem; margin-bottom: 25px;">Management System</p>
+        <h1>LA VIDA</h1>
+        <p style="font-size: 0.8rem; margin-bottom: 25px;">Management System</p>
         <input type="password" id="passInput" placeholder="Passcode" style="text-align:center; letter-spacing: 5px;">
         <button class="btn-save" onclick="checkLogin()" style="margin-top:10px;">UNLOCK</button>
     </div>
@@ -65,26 +50,21 @@
 
     <div class="container">
         <div class="summary-grid">
-            <div class="stat-card"><h4>Sales</h4><p id="totalSales">0</p></div>
-            <div class="stat-card"><h4>Stock</h4><p id="totalStock">0</p></div>
-            <div class="stat-card"><h4>Other</h4><p id="totalOther">0</p></div>
-            <div class="stat-card"><h4>Savings</h4><p id="totalSavings">0</p></div>
-            <div class="stat-card full-width-card"><h4>Net Balance</h4><p id="balance">0</p></div>
+            <div class="stat-card"><h4>Sales</h4><p id="totalSales">0 (TZS)</p></div>
+            <div class="stat-card"><h4>Stock</h4><p id="totalStock">0 (TZS)</p></div>
+            <div class="stat-card"><h4>Other</h4><p id="totalOther">0 (TZS)</p></div>
+            <div class="stat-card"><h4>Savings</h4><p id="totalSavings">0 (TZS)</p></div>
+            <div class="stat-card full-width-card"><h4>Net Balance</h4><p id="balance">0 (TZS)</p></div>
         </div>
 
         <div class="action-section report-section">
-            <label>📅 PDF Report Generator</label>
+            <label>📅 Download Monthly Report</label>
             <input type="month" id="reportMonth">
-            <button class="btn-action report-btn" onclick="generatePDF()">📥 DOWNLOAD PDF REPORT</button>
-        </div>
-
-        <div class="action-section ai-section">
-            <button class="btn-action ai-btn" onclick="generateInsights()">✨ GET AI BUSINESS INSIGHTS</button>
-            <div id="aiResponse" class="ai-response"></div>
+            <button class="btn-action report-btn" onclick="generatePDF()">📥 DOWNLOAD PDF (TZS)</button>
         </div>
 
         <div class="input-card">
-            <label>🔍 Go to Date / Edit Record</label>
+            <label>🔍 Search / Edit Date</label>
             <div style="display:flex; gap:10px; margin-top:5px;">
                 <input type="date" id="searchDate" style="margin:0;">
                 <button onclick="searchByDate()" style="background:var(--blue); color:white; border:none; padding:0 15px; border-radius:10px;">🔍</button>
@@ -92,16 +72,16 @@
         </div>
 
         <div class="input-card">
-            <label>📝 Daily Record Entry</label>
+            <label>📝 Daily Record</label>
             <input type="date" id="date">
-            <input type="number" id="sales" placeholder="Sales Amount">
-            <input type="number" id="stock" placeholder="Stocking/Supplies">
-            <input type="number" id="other" placeholder="Other Expenses">
-            <input type="number" id="savings" placeholder="Savings">
+            <input type="number" id="sales" placeholder="Sales (TZS)">
+            <input type="number" id="stock" placeholder="Stocking (TZS)">
+            <input type="number" id="other" placeholder="Other Exp (TZS)">
+            <input type="number" id="savings" placeholder="Savings (TZS)">
             <button class="btn-save" onclick="addRecord()">SAVE RECORD</button>
         </div>
 
-        <label style="margin-left: 5px; margin-bottom: 10px; display: block;">📑 Recent History</label>
+        <label style="margin-left: 5px; margin-bottom: 10px; display: block;">📑 Last 5 Entries</label>
         <div id="entryList"></div>
     </div>
 </div>
@@ -112,8 +92,6 @@
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDqLcc9kqXA8sH1cfdZ17asFXBXfZ8mwVpXXiPeZV-uesUw_KlIfquwZJsx2Q7pq00/exec";
 let data = [];
-
-window.onload = () => { if (sessionStorage.getItem('la_vida_session') === 'active') showApp(); };
 
 function checkLogin() {
     if (document.getElementById('passInput').value === "112511") {
@@ -134,7 +112,7 @@ async function fetchFromCloud() {
         const res = await fetch(SCRIPT_URL);
         data = await res.json();
         render();
-    } catch (e) { console.error("Fetch Error", e); }
+    } catch (e) { console.error(e); }
     document.getElementById('loading').style.display = 'none';
 }
 
@@ -143,28 +121,34 @@ function render() {
     list.innerHTML = '';
     let runBal = 0, totals = {s:0, st:0, o:0, sv:0};
     
+    // Sort oldest to newest for balance calculation
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
 
+    // Calculate totals
     data.forEach((row) => {
         runBal += (row.sales - row.stocking - row.other - row.savings);
         totals.s += row.sales; totals.st += row.stocking; totals.o += row.other; totals.sv += row.savings;
+    });
 
-        list.innerHTML = `
+    // Display summary with TZS
+    document.getElementById('totalSales').innerText = totals.s.toLocaleString() + " (TZS)";
+    document.getElementById('totalStock').innerText = totals.st.toLocaleString() + " (TZS)";
+    document.getElementById('totalOther').innerText = totals.o.toLocaleString() + " (TZS)";
+    document.getElementById('totalSavings').innerText = totals.sv.toLocaleString() + " (TZS)";
+    document.getElementById('balance').innerText = runBal.toLocaleString() + " (TZS)";
+
+    // List only last 5 entries (Newest first)
+    const recentEntries = [...data].reverse().slice(0, 5);
+    recentEntries.forEach(row => {
+        list.innerHTML += `
             <div class="entry-item">
                 <div style="flex-grow:1">
                     <b>${row.date}</b><br>
-                    <small>S: ${row.sales.toLocaleString()} | Bal: ${runBal.toLocaleString()}</small>
+                    <small>S: ${row.sales.toLocaleString()} | E: ${(row.stocking+row.other).toLocaleString()} (TZS)</small>
                 </div>
                 <button class="btn-delete" onclick="deleteEntry('${row.date}')">🗑️</button>
-            </div>
-        ` + list.innerHTML;
+            </div>`;
     });
-
-    document.getElementById('totalSales').innerText = totals.s.toLocaleString();
-    document.getElementById('totalStock').innerText = totals.st.toLocaleString();
-    document.getElementById('totalOther').innerText = totals.o.toLocaleString();
-    document.getElementById('totalSavings').innerText = totals.sv.toLocaleString();
-    document.getElementById('balance').innerText = runBal.toLocaleString();
 }
 
 async function addRecord() {
@@ -180,17 +164,16 @@ async function addRecord() {
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
         setTimeout(fetchFromCloud, 1000);
-        document.querySelectorAll('.input-card input:not([type="date"])').forEach(i => i.value = '');
-    } catch (e) { alert("Save Error"); }
+    } catch (e) { alert("Error saving."); }
 }
 
 async function deleteEntry(dateToDelete) {
-    if(!confirm("Archive record for " + dateToDelete + "?")) return;
+    if(!confirm("Delete " + dateToDelete + "?")) return;
     document.getElementById('loading').style.display = 'flex';
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({action: "delete", date: dateToDelete}) });
         setTimeout(fetchFromCloud, 1000);
-    } catch (e) { alert("Delete Error"); }
+    } catch (e) { alert("Delete failed"); }
 }
 
 function searchByDate() {
@@ -202,19 +185,7 @@ function searchByDate() {
         document.getElementById('stock').value = found.stocking;
         document.getElementById('other').value = found.other;
         document.getElementById('savings').value = found.savings;
-    } else { alert("No record for this date."); }
-}
-
-function generateInsights() {
-    const aiBox = document.getElementById('aiResponse');
-    aiBox.style.display = 'block';
-    if (data.length === 0) { aiBox.innerText = "Need more data."; return; }
-    
-    let tSales = 0, tStock = 0;
-    data.forEach(d => { tSales += d.sales; tStock += d.stocking; });
-    const stockRatio = (tStock / tSales) * 100;
-    
-    aiBox.innerText = `📊 AI ANALYSIS\n• Avg Daily Sales: ${(tSales/data.length).toFixed(0)}\n• Stocking Ratio: ${stockRatio.toFixed(0)}%\n• ${stockRatio > 55 ? "⚠️ Warning: Stocking costs are high." : "✅ Margin health is good."}`;
+    } else { alert("No record found."); }
 }
 
 function generatePDF() {
@@ -225,10 +196,18 @@ function generatePDF() {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text("La Vida Minimart - Report: " + monthVal, 14, 20);
-    const tableData = filtered.map(d => [d.date, d.sales, d.stocking, d.other, d.savings]);
-    doc.autoTable({ startY: 30, head: [['Date', 'Sales', 'Stock', 'Other', 'Savings']], body: tableData });
-    doc.save(`LaVida_${monthVal}.pdf`);
+    doc.text("La Vida Minimart - Report " + monthVal + " (TZS)", 14, 20);
+    
+    const tableData = filtered.map(d => [d.date, d.sales.toLocaleString(), d.stocking.toLocaleString(), d.other.toLocaleString(), d.savings.toLocaleString()]);
+    
+    doc.autoTable({
+        startY: 30,
+        head: [['Date', 'Sales', 'Stock', 'Other', 'Savings']],
+        body: tableData,
+    });
+
+    // Forces Download in a way that works on mobile/desktops
+    doc.save(`LaVida_Report_${monthVal}.pdf`);
 }
 </script>
 </body>

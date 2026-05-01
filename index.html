@@ -17,6 +17,7 @@
             --gold: #d4af37;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        html { background: var(--dark); } /* fixes white flash on overscroll pull-down */
         body { background: var(--light); font-family: 'DM Sans', system-ui, sans-serif; color: var(--dark); }
 
 ```
@@ -35,25 +36,7 @@
         letter-spacing: 6px; color: var(--dark); margin-bottom: 4px;
     }
     .login-sub { color: var(--gray); font-size: 0.75rem; margin-bottom: 32px; }
-    .pin-dots {
-        display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; height: 14px;
-    }
-    .pin-dot {
-        width: 12px; height: 12px; border-radius: 50%;
-        border: 2px solid #ccc; background: transparent; transition: 0.2s;
-    }
-    .pin-dot.filled { background: var(--blue); border-color: var(--blue); }
-    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-    .num-btn {
-        padding: 18px; border: 1px solid #eee; border-radius: 16px; background: #fafafa;
-        font-size: 1.2rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif;
-        transition: 0.15s;
-    }
-    .num-btn:active { background: var(--blue); color: white; }
-    .num-btn.del { font-size: 1rem; color: var(--red); }
-    .num-btn.enter { background: var(--blue); color: white; font-size: 0.8rem; letter-spacing: 1px; }
-    .num-btn.enter:active { background: #002d5e; }
-    #pinError { color: var(--red); font-size: 0.8rem; min-height: 20px; }
+    #pinError { color: var(--red); font-size: 0.8rem; min-height: 20px; margin-top: 10px; }
 
     /* ── MAIN APP ── */
     #mainApp { display: none; }
@@ -108,7 +91,8 @@
         display: flex; align-items: center; justify-content: center; gap: 10px;
         margin-bottom: 16px;
         box-shadow: 0 8px 20px rgba(0,64,133,0.3);
-        font-family: 'Syne', sans-serif; letter-spacing: 1px;
+        font-family: 'DM Sans', sans-serif; letter-spacing: 1.5px;
+        text-transform: uppercase;
         transition: transform 0.15s, box-shadow 0.15s;
     }
     .primary-cta:active { transform: scale(0.98); box-shadow: 0 4px 10px rgba(0,64,133,0.2); }
@@ -166,7 +150,10 @@
     .entry-date { font-size: 0.88rem; font-weight: 700; }
     .entry-meta { font-size: 0.72rem; color: var(--gray); margin-top: 3px; }
     .entry-note { font-size: 0.68rem; color: var(--gray); font-style: italic; margin-top: 4px; }
-    .tag-today {
+    .sales-trend {
+        display: inline-block; font-size: 0.68rem; font-weight: 700;
+        margin-top: 4px; padding: 2px 7px; border-radius: 6px;
+    }
         display: inline-block; background: var(--gold); color: var(--dark);
         font-size: 0.45rem; padding: 2px 6px; border-radius: 4px;
         font-weight: 900; margin-left: 6px; vertical-align: middle;
@@ -296,28 +283,11 @@
     <div class="login-card">
         <div class="login-logo">LA VIDA</div>
         <div class="login-sub">Authorized Access Only</div>
-        <div class="pin-dots" id="pinDots">
-            <div class="pin-dot" id="dot0"></div>
-            <div class="pin-dot" id="dot1"></div>
-            <div class="pin-dot" id="dot2"></div>
-            <div class="pin-dot" id="dot3"></div>
-            <div class="pin-dot" id="dot4"></div>
-            <div class="pin-dot" id="dot5"></div>
-        </div>
-        <div class="numpad">
-            <button class="num-btn" onclick="pinPress('1')">1</button>
-            <button class="num-btn" onclick="pinPress('2')">2</button>
-            <button class="num-btn" onclick="pinPress('3')">3</button>
-            <button class="num-btn" onclick="pinPress('4')">4</button>
-            <button class="num-btn" onclick="pinPress('5')">5</button>
-            <button class="num-btn" onclick="pinPress('6')">6</button>
-            <button class="num-btn" onclick="pinPress('7')">7</button>
-            <button class="num-btn" onclick="pinPress('8')">8</button>
-            <button class="num-btn" onclick="pinPress('9')">9</button>
-            <button class="num-btn del" onclick="pinDel()">⌫</button>
-            <button class="num-btn" onclick="pinPress('0')">0</button>
-            <button class="num-btn enter" onclick="checkLogin()">OK</button>
-        </div>
+        <input type="password" id="passInput" inputmode="numeric"
+            placeholder="••••••"
+            style="text-align:center; letter-spacing:8px; font-size:1.4rem; margin-bottom:16px;"
+            onkeypress="if(event.key==='Enter') checkLogin()">
+        <button class="primary-cta" style="margin-bottom:0;" onclick="checkLogin()">UNLOCK</button>
         <div id="pinError"></div>
     </div>
 </div>
@@ -363,7 +333,7 @@
             <p id="totalSales">...</p>
         </div>
         <div class="stat-card">
-            <h4>Stock Value</h4>
+            <h4>Stocking Expenses</h4>
             <p id="totalStock">...</p>
         </div>
         <div class="stat-card">
@@ -373,10 +343,6 @@
         <div class="stat-card">
             <h4>Total Savings</h4>
             <p id="totalSavings">...</p>
-        </div>
-        <div class="stat-card balance-card">
-            <h4>Current Cash Balance</h4>
-            <p id="totalBalance">...</p>
         </div>
     </div>
 
@@ -476,7 +442,6 @@ const PIN = "112511"; // ⚠️ Move this to server-side when possible
 
 let data = [];
 let displayLimit = 5;
-let pinBuffer = "";
 
 // ── HELPERS ─────────────────────────────────────────────
 function getLocalDateStr(d = new Date()) {
@@ -496,46 +461,20 @@ function showLoader(on) {
     document.getElementById('loadingOverlay').style.display = on ? 'flex' : 'none';
 }
 
-// ── PIN / LOGIN ──────────────────────────────────────────
-function pinPress(d) {
-    if (pinBuffer.length >= 6) return;
-    pinBuffer += d;
-    updateDots();
-    if (pinBuffer.length === 6) setTimeout(checkLogin, 150);
-}
-
-function pinDel() {
-    pinBuffer = pinBuffer.slice(0, -1);
-    updateDots();
-}
-
-function updateDots() {
-    for (let i = 0; i < 6; i++) {
-        document.getElementById('dot' + i).classList.toggle('filled', i < pinBuffer.length);
-    }
-}
-
+// ── LOGIN ────────────────────────────────────────────────
 function checkLogin() {
-    if (pinBuffer === PIN) {
+    const entered = document.getElementById('passInput').value;
+    if (entered === PIN) {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
         setHeaderDate();
         fetchData();
     } else {
         document.getElementById('pinError').innerText = "Incorrect PIN. Try again.";
-        pinBuffer = "";
-        updateDots();
-        setTimeout(() => document.getElementById('pinError').innerText = "", 2000);
+        document.getElementById('passInput').value = '';
+        setTimeout(() => document.getElementById('pinError').innerText = '', 2000);
     }
 }
-
-// Keyboard PIN support
-document.addEventListener('keydown', e => {
-    if (document.getElementById('loginPage').style.display === 'none') return;
-    if (e.key >= '0' && e.key <= '9') pinPress(e.key);
-    if (e.key === 'Backspace') pinDel();
-    if (e.key === 'Enter') checkLogin();
-});
 
 // ── HEADER DATE ─────────────────────────────────────────
 function setHeaderDate() {
@@ -606,7 +545,13 @@ function render() {
     document.getElementById('totalStock').innerText   = fmt(totalStock);
     document.getElementById('totalOther').innerText   = fmt(totalOther);
     document.getElementById('totalSavings').innerText = fmt(totalSavings);
-    document.getElementById('totalBalance').innerText = fmt(runningBalance);
+
+    // Build a date→sales map for trend lookup
+    const salesByDate = {};
+    data.forEach(row => {
+        const d = (row.date || '').split('T')[0];
+        salesByDate[d] = Number(row.sales) || 0;
+    });
 
     // Transaction list (most recent first)
     const sorted = [...data].reverse();
@@ -619,13 +564,22 @@ function render() {
         visible.forEach(row => {
             const rowDate = (row.date || '').split('T')[0];
             const isToday = rowDate === todayStr;
-            const sales   = Number(row.sales)    || 0;
+            const sales   = Number(row.sales) || 0;
             const stk     = Number(row.stocking) || 0;
             const oth     = Number(row.other)    || 0;
-            const sav     = Number(row.savings)  || 0;
-            const net     = sales - stk - oth - sav;
-            const netCls  = net >= 0 ? 'pos' : 'neg';
-            const netSign = net >= 0 ? '+' : '';
+
+            // Sales trend vs previous day
+            const prev = new Date(rowDate);
+            prev.setDate(prev.getDate() - 1);
+            const prevStr  = getLocalDateStr(prev);
+            const prevSales = salesByDate[prevStr];
+            let trendHtml = '';
+            if (prevSales !== undefined && prevSales > 0) {
+                const diff = ((sales - prevSales) / prevSales) * 100;
+                const arrow = diff >= 0 ? '↑' : '↓';
+                const cls   = diff >= 0 ? 'trend-up' : 'trend-down';
+                trendHtml = `<span class="sales-trend ${cls}">${arrow} ${Math.abs(diff).toFixed(0)}% vs prev day</span>`;
+            }
 
             const div = document.createElement('div');
             div.className = 'entry-item' + (isToday ? ' is-today' : '');
@@ -634,8 +588,8 @@ function render() {
                     <div class="entry-date">
                         ${rowDate}${isToday ? '<span class="tag-today">TODAY</span>' : ''}
                     </div>
-                    <div class="entry-meta">Sales: ${sales.toLocaleString()} | Exp: ${(stk+oth).toLocaleString()}</div>
-                    <div class="entry-net ${netCls}">Net: ${netSign}${net.toLocaleString()} TZS</div>
+                    <div class="entry-meta">Sales: ${sales.toLocaleString()} TZS | Exp: ${(stk+oth).toLocaleString()} TZS</div>
+                    ${trendHtml}
                     ${row.note ? `<div class="entry-note">"${row.note}"</div>` : ''}
                 </div>
                 <div class="action-btns">

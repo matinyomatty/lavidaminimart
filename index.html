@@ -85,7 +85,7 @@
         .header-date { font-size: 0.65rem; color: rgba(255,255,255,0.5); text-align: right; }
 
         .today-panel {
-            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            display: grid; grid-template-columns: 1fr 1fr;
             gap: 8px; background: rgba(255,255,255,0.04);
             border: 1px solid rgba(212,175,55,0.2);
             border-radius: 14px; padding: 10px 12px;
@@ -176,7 +176,6 @@
         .entry-meta { font-size: 0.72rem; color: var(--gray); margin-top: 3px; }
         .entry-note { font-size: 0.68rem; color: var(--gray); font-style: italic; margin-top: 4px; }
         
-        /* ✅ FIXED CSS BLOCK */
         .sales-trend {
             display: inline-block;
             font-size: 0.68rem;
@@ -198,12 +197,6 @@
             vertical-align: middle;
             letter-spacing: 0.5px;
         }
-
-        .entry-net {
-            font-size: 0.75rem; font-weight: 700; margin-top: 3px;
-        }
-        .entry-net.pos { color: var(--green); }
-        .entry-net.neg { color: var(--red); }
 
         .action-btns { display: flex; gap: 8px; flex-shrink: 0; }
         .btn-circle {
@@ -342,10 +335,6 @@
                 <h4>Today Sales</h4>
                 <p id="daySales">— TZS</p>
             </div>
-            <div class="today-stat center">
-                <h4>Today Net</h4>
-                <p id="dayNet">—</p>
-            </div>
             <div class="today-stat right">
                 <h4>All Balance</h4>
                 <p id="topBalance" style="color:var(--gold)">— TZS</p>
@@ -471,6 +460,53 @@ const PIN = "112511"; // ⚠️ Move this to server-side when possible
 let data = [];
 let displayLimit = 5;
 
+// ── SESSION & INACTIVITY TRACKING ───────────────────────
+const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+function updateActivity() {
+    if (localStorage.getItem('laVidaLoggedIn') === 'true') {
+        localStorage.setItem('laVidaLastActivity', Date.now());
+    }
+}
+
+function checkInactivity() {
+    if (localStorage.getItem('laVidaLoggedIn') === 'true') {
+        const lastActivity = parseInt(localStorage.getItem('laVidaLastActivity')) || 0;
+        if (Date.now() - lastActivity > INACTIVITY_LIMIT) {
+            performLogout();
+        }
+    }
+}
+
+function performLogout() {
+    localStorage.removeItem('laVidaLoggedIn');
+    document.getElementById('loginPage').style.display = 'table';
+    document.getElementById('mainApp').style.display = 'none';
+    document.body.classList.remove('unlocked');
+    showToast("🔒 Logged out due to inactivity");
+}
+
+// Track actions that indicate the user is active
+['click', 'touchstart', 'scroll', 'keyup'].forEach(evt => {
+    document.addEventListener(evt, updateActivity);
+});
+
+// ── INITIALIZATION ──────────────────────────────────────
+window.onload = () => {
+    // Check if session exists and is still valid
+    if (localStorage.getItem('laVidaLoggedIn') === 'true') {
+        const lastActivity = parseInt(localStorage.getItem('laVidaLastActivity')) || 0;
+        if (Date.now() - lastActivity > INACTIVITY_LIMIT) {
+            performLogout(); // Expired while away/closed
+        } else {
+            updateActivity(); // Refresh activity
+            unlockUI(); // Auto-login
+        }
+    }
+    // Check inactivity every 5 seconds
+    setInterval(checkInactivity, 5000);
+};
+
 // ── HELPERS ─────────────────────────────────────────────
 function getLocalDateStr(d = new Date()) {
     return d.toLocaleDateString('sv-SE'); // YYYY-MM-DD using local time
@@ -493,16 +529,23 @@ function showLoader(on) {
 function checkLogin() {
     const entered = document.getElementById('passInput').value;
     if (entered === PIN) {
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
-        document.body.classList.add('unlocked');
-        setHeaderDate();
-        fetchData();
+        localStorage.setItem('laVidaLoggedIn', 'true');
+        localStorage.setItem('laVidaLastActivity', Date.now());
+        document.getElementById('passInput').value = '';
+        unlockUI();
     } else {
         document.getElementById('pinError').innerText = "Incorrect PIN. Try again.";
         document.getElementById('passInput').value = '';
         setTimeout(() => document.getElementById('pinError').innerText = '', 2000);
     }
+}
+
+function unlockUI() {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    document.body.classList.add('unlocked');
+    setHeaderDate();
+    fetchData();
 }
 
 // ── HEADER DATE ─────────────────────────────────────────
@@ -528,13 +571,13 @@ async function fetchData() {
 
 // ── RENDER ───────────────────────────────────────────────
 function render() {
-    const DAILY_TARGET = 50000; // ✅ ADDED BUSINESS LOGIC
+    const DAILY_TARGET = 50000;
 
     const list = document.getElementById('entryList');
     list.innerHTML = '';
 
     let totalSales = 0, totalStock = 0, totalOther = 0, totalSavings = 0;
-    let dayS = null, dayStock = 0, dayOther = 0, daySavings = 0;
+    let dayS = null, dayStock = 0, dayOther = 0;
     let runningBalance = 0;
 
     const todayStr = getLocalDateStr();
@@ -554,20 +597,14 @@ function render() {
             dayS        = Number(row.sales)    || 0;
             dayStock    = Number(row.stocking) || 0;
             dayOther    = Number(row.other)    || 0;
-            daySavings  = Number(row.savings)  || 0;
         }
     });
 
     // Today panel with Business Logic & Alert Integration
     if (dayS !== null) {
-        const dayNet = dayS - dayStock - dayOther - daySavings;
-        const margin = dayS > 0 ? ((dayNet / dayS) * 100).toFixed(0) : 0;
-
         document.getElementById('daySales').innerText = fmt(dayS);
-        document.getElementById('dayNet').innerText   = fmt(dayNet) + ` (${margin}%)`;
-        document.getElementById('dayNet').style.color = dayNet >= 0 ? '#4ade80' : '#f87171';
 
-        // ✅ SMART ALERT (COMBINED)
+        // ✅ SMART ALERT
         const alerts = [];
 
         if (dayS >= DAILY_TARGET) {
@@ -580,21 +617,11 @@ function render() {
             alerts.push("⚠️ Overspending");
         }
 
-        if (dayNet < 0) {
-            alerts.push("❌ Negative profit");
-        } else if (margin >= 30) {
-            alerts.push("💰 Strong margin");
-        }
-
-        alerts.sort((a, b) => a.includes("❌") ? -1 : 0);
-
         if (alerts.length > 0) {
             showToast(alerts.join(" • "));
         }
     } else {
         document.getElementById('daySales').innerText = '— TZS';
-        document.getElementById('dayNet').innerText   = 'No entry';
-        document.getElementById('dayNet').style.color = 'rgba(255,255,255,0.5)';
     }
     
     document.getElementById('topBalance').innerText = fmt(runningBalance);
@@ -800,9 +827,7 @@ function generatePDF() {
         totOther += Number(r.other)    || 0;
         totSav   += Number(r.savings)  || 0;
     });
-    const totNet = totSales - totStock - totOther - totSav;
 
-    // ✅ NEW PDF METRICS
     const avg = totSales / filtered.length;
 
     let bestDay = filtered[0];
@@ -822,13 +847,11 @@ function generatePDF() {
         ['Total Stock', totStock.toLocaleString() + ' TZS'],
         ['Other Exp',   totOther.toLocaleString() + ' TZS'],
         ['Savings',     totSav.toLocaleString()   + ' TZS'],
-        ['Net Balance', totNet.toLocaleString()   + ' TZS'],
         ['Avg / Day',   avg.toLocaleString(undefined,{maximumFractionDigits:0}) + ' TZS'],
         ['Best Day',    (bestDay.date || '').split('T')[0]],
         ['Worst Day',   (worstDay.date || '').split('T')[0]],
     ];
 
-    // Wrap summaries into 2 rows to fit 8 metrics
     summaries.forEach((s, i) => {
         const col = i % 4; // 4 columns
         const row = Math.floor(i / 4); // 2 rows
@@ -853,19 +876,18 @@ function generatePDF() {
             st.toLocaleString(),
             o.toLocaleString(),
             sv.toLocaleString(),
-            (s - st - o - sv).toLocaleString(),
             r.note || ''
         ];
     });
 
     doc.autoTable({
-        startY: summaryY + 22, // Pushed down slightly to fit the new row of metrics
-        head: [['Date', 'Sales', 'Stock', 'Expenses', 'Savings', 'Net', 'Note']],
+        startY: summaryY + 22,
+        head: [['Date', 'Sales', 'Stock', 'Expenses', 'Savings', 'Note']],
         body: rows,
         styles: { fontSize: 7.5, cellPadding: 3 },
         headStyles: { fillColor: [0, 64, 133], textColor: 255, fontStyle: 'bold' },
         alternateRowStyles: { fillColor: [245, 248, 252] },
-        columnStyles: { 6: { cellWidth: 40 } }
+        columnStyles: { 5: { cellWidth: 40 } }
     });
 
     doc.save('LaVida_Report_' + m + '.pdf');

@@ -16,307 +16,287 @@
             --gold: #d4af37;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-        html, body { min-height: 100vh; font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--dark); }
+        html, body { min-height: 100vh; font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--dark); overflow-x: hidden; }
         body.unlocked { background: var(--light); }
 
-        /* Splash & Login */
+        /* Splash & Pin Pad */
         .splash { position: fixed; inset: 0; background: var(--dark); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.5s ease; }
-        .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px; }
-        .pin-btn { width: 70px; height: 70px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); background: transparent; color: white; font-size: 1.5rem; font-weight: 700; cursor: pointer; }
+        .pin-display { color: white; font-size: 2.5rem; letter-spacing: 8px; margin-bottom: 30px; font-weight: 800; min-height: 4rem; }
+        .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 280px; }
+        .pin-btn { width: 80px; height: 80px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: white; font-size: 1.6rem; font-weight: 700; cursor: pointer; transition: background 0.1s; }
+        .pin-btn:active { background: rgba(255,255,255,0.2); }
 
-        /* Layout */
+        /* Dashboard Layout */
         .container { max-width: 500px; margin: 0 auto; padding: 20px; display: none; }
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--blue); letter-spacing: -0.5px; }
 
-        /* Cards */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .card { background: white; padding: 18px; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
+        .card { background: white; padding: 18px; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); }
         .card-label { font-size: 0.75rem; color: var(--gray); font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
         .card-val { font-size: 1.2rem; font-weight: 800; color: var(--dark); }
 
-        /* Buttons */
-        .primary-cta { width: 100%; padding: 16px; border-radius: 16px; border: none; font-weight: 700; font-size: 1rem; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform 0.1s; }
-        .primary-cta:active { transform: scale(0.98); }
+        /* Action Buttons */
+        .primary-cta { width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 700; font-size: 1rem; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-pos { background: var(--green); color: white; }
         .btn-entry { background: var(--blue); color: white; }
 
         /* Modals */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,26,51,0.8); display: none; align-items: flex-end; z-index: 2000; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,26,51,0.85); display: none; align-items: flex-end; z-index: 2000; }
         .modal-overlay.active { display: flex; }
-        .modal { width: 100%; background: white; border-radius: 30px 30px 0 0; padding: 25px; animation: slideUp 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
+        .modal { width: 100%; background: white; border-radius: 30px 30px 0 0; padding: 25px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        input, select { width: 100%; padding: 15px; border-radius: 14px; border: 1.5px solid #e0e6ef; margin-bottom: 15px; font-size: 1rem; font-family: inherit; }
+        .cart-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f4f8; font-size: 0.9rem; }
         
-        /* POS Specific Styles */
-        .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 12px; margin-bottom: 8px; border: 1px solid #eee; }
-        
-        input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid #e0e6ef; margin-bottom: 15px; font-size: 1rem; }
-        
-        .loader { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--blue); border-radius: 50%; animation: spin 1s linear infinite; display: none; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader { width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; display: none; margin: 15px auto; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div class="splash" id="splash">
-    <div class="logo" style="color: white; font-size: 2rem; margin-bottom: 20px;">LA VIDA</div>
-    <div id="pinDisplay" style="color: white; font-size: 2rem; letter-spacing: 10px;">____</div>
+    <div class="logo" style="color: white; font-size: 2rem; margin-bottom: 10px;">LA VIDA</div>
+    <div class="pin-display" id="pinDisplay">••••••</div>
     <div class="pin-pad">
-        <button class="pin-btn" onclick="pressPin('1')">1</button>
-        <button class="pin-btn" onclick="pressPin('2')">2</button>
-        <button class="pin-btn" onclick="pressPin('3')">3</button>
-        <button class="pin-btn" onclick="pressPin('4')">4</button>
-        <button class="pin-btn" onclick="pressPin('5')">5</button>
-        <button class="pin-btn" onclick="pressPin('6')">6</button>
-        <button class="pin-btn" onclick="pressPin('7')">7</button>
-        <button class="pin-btn" onclick="pressPin('8')">8</button>
-        <button class="pin-btn" onclick="pressPin('9')">9</button>
-        <button class="pin-btn" style="background:var(--red)" onclick="clearPin()">C</button>
-        <button class="pin-btn" onclick="pressPin('0')">0</button>
-        <button class="pin-btn" style="background:var(--green)" onclick="checkPin()">OK</button>
+        <button class="pin-btn" onclick="addPin('1')">1</button>
+        <button class="pin-btn" onclick="addPin('2')">2</button>
+        <button class="pin-btn" onclick="addPin('3')">3</button>
+        <button class="pin-btn" onclick="addPin('4')">4</button>
+        <button class="pin-btn" onclick="addPin('5')">5</button>
+        <button class="pin-btn" onclick="addPin('6')">6</button>
+        <button class="pin-btn" onclick="addPin('7')">7</button>
+        <button class="pin-btn" onclick="addPin('8')">8</button>
+        <button class="pin-btn" onclick="addPin('9')">9</button>
+        <button class="pin-btn" style="background:var(--red); border:none;" onclick="resetPin()">C</button>
+        <button class="pin-btn" onclick="addPin('0')">0</button>
+        <button class="pin-btn" style="background:var(--green); border:none;" onclick="validateLogin()">OK</button>
     </div>
 </div>
 
 <div class="container" id="mainApp">
     <header>
         <div class="logo">LA VIDA</div>
-        <div id="dateDisplay" style="font-weight: 700; font-size: 0.9rem; color: var(--gray);"></div>
+        <div id="topDate" style="font-weight: 700; font-size: 0.85rem; color: var(--gray);"></div>
     </header>
 
     <div class="stats-grid">
         <div class="card">
-            <div class="card-label">Today's Sales</div>
-            <div class="card-val" id="todaySales">0 TZS</div>
+            <div class="card-label">Daily Sales</div>
+            <div class="card-val" id="dispToday">0 TZS</div>
         </div>
         <div class="card">
-            <div class="card-label">Monthly Total</div>
-            <div class="card-val" id="monthSales">0 TZS</div>
+            <div class="card-label">Monthly</div>
+            <div class="card-val" id="dispMonth">0 TZS</div>
         </div>
     </div>
 
-    <button class="primary-cta btn-pos" onclick="openPOS()">
-        🛒 OPEN POS REGISTER
+    <button class="primary-cta btn-pos" onclick="toggleModal('pos', true)">
+        🛒 POS REGISTER
     </button>
-    
-    <button class="primary-cta btn-entry" onclick="openEntry()">
-        ➕ ADD MANUAL ENTRY
+    <button class="primary-cta btn-entry" onclick="toggleModal('manual', true)">
+        ➕ MANUAL ENTRY
     </button>
 
-    <div class="loader" id="loader"></div>
-    <div id="historyList" style="margin-top: 20px;"></div>
+    <div class="loader" id="syncLoader"></div>
+    <div id="recentHistory" style="margin-top: 20px;"></div>
 </div>
 
-<div class="modal-overlay" id="posOverlay" onclick="closeOnOverlay(event)">
+<div class="modal-overlay" id="modalPOS">
     <div class="modal">
-        <div class="logo" style="margin-bottom: 15px; font-size: 1.1rem;">Register</div>
+        <div class="logo" style="font-size: 1.1rem; margin-bottom: 20px;">Register</div>
         
-        <label style="font-size: 0.8rem; font-weight: 700; color: var(--gray);">SELECT ITEM</label>
-        <select id="posItemSelect" onchange="updatePriceHint()">
-            <option value="">Choose item...</option>
+        <select id="selItem" onchange="showItemDetails()">
+            <option value="">Select Product...</option>
         </select>
 
-        <div style="display: flex; gap: 10px;">
-            <div style="flex: 2;">
-                <label style="font-size: 0.8rem; font-weight: 700; color: var(--gray);">SALE TYPE</label>
-                <select id="posType" onchange="updatePriceHint()">
-                    <option value="unit">Single Unit</option>
-                    <option value="pack">Full Package</option>
-                </select>
-            </div>
-            <div style="flex: 1;">
-                <label style="font-size: 0.8rem; font-weight: 700; color: var(--gray);">QTY</label>
-                <input type="number" id="posQty" value="1">
+        <div style="display: flex; gap: 12px;">
+            <select id="selType" style="flex: 2;" onchange="showItemDetails()">
+                <option value="unit">Single Unit</option>
+                <option value="pack">Full Package</option>
+            </select>
+            <input type="number" id="inpQty" value="1" style="flex: 1; text-align: center;">
+        </div>
+
+        <div id="itemDetail" style="margin-bottom: 15px; font-weight: 700; color: var(--blue); font-size: 0.85rem;"></div>
+
+        <button class="primary-cta btn-entry" onclick="pushToCart()">ADD TO CART</button>
+
+        <div style="background: #f8f9fa; border-radius: 18px; padding: 15px; margin-top: 15px;">
+            <div style="font-size: 0.7rem; font-weight: 800; color: var(--gray); margin-bottom: 10px;">SHOPPING CART</div>
+            <div id="cartList"></div>
+            <div style="display: flex; justify-content: space-between; border-top: 2px dashed #ddd; margin-top: 12px; padding-top: 12px; font-weight: 800;">
+                <span>TOTAL:</span>
+                <span id="cartSum" style="color: var(--green);">0 TZS</span>
             </div>
         </div>
 
-        <div id="priceHint" style="font-size: 0.85rem; color: var(--blue); margin-bottom: 15px; font-weight: 700;"></div>
-
-        <button class="primary-cta btn-entry" onclick="addToCart()">ADD TO CART</button>
-
-        <div style="margin-top: 20px; background: #f0f4f8; border-radius: 15px; padding: 15px;">
-            <div style="font-weight: 800; font-size: 0.8rem; color: var(--gray); margin-bottom: 10px; text-transform: uppercase;">Current Cart</div>
-            <div id="cartItems"></div>
-            <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 10px; border-top: 2px dashed #cbd5e0;">
-                <span style="font-weight: 800;">TOTAL</span>
-                <span style="font-weight: 800; color: var(--green);" id="cartTotal">0 TZS</span>
-            </div>
-        </div>
-
-        <button class="primary-cta btn-pos" style="margin-top: 20px;" onclick="checkout()">COMPLETE SALE</button>
-        <button class="primary-cta" style="background:transparent; color:var(--gray);" onclick="closeModals()">Cancel</button>
+        <button class="primary-cta btn-pos" style="margin-top: 20px;" onclick="finalizePOS()">COMPLETE TRANSACTION</button>
+        <button class="primary-cta" style="background:none; color:var(--gray);" onclick="toggleModal('pos', false)">Cancel</button>
     </div>
 </div>
 
-<div class="modal-overlay" id="entryOverlay" onclick="closeOnOverlay(event)">
+<div class="modal-overlay" id="modalManual">
     <div class="modal">
-        <div class="logo" style="margin-bottom: 15px; font-size: 1.1rem;">Manual Entry</div>
-        <input type="number" id="eSales" placeholder="Sales Amount (TZS)">
-        <input type="number" id="eStock" placeholder="Stocking Costs">
-        <input type="number" id="eOther" placeholder="Other Expenses">
-        <input type="text" id="eNote" placeholder="Notes (Optional)">
-        <button class="primary-cta btn-entry" onclick="submitEntry()">SAVE ENTRY</button>
-        <button class="primary-cta" style="background:transparent; color:var(--gray);" onclick="closeModals()">Cancel</button>
+        <div class="logo" style="font-size: 1.1rem; margin-bottom: 20px;">Add Sale</div>
+        <input type="number" id="mSales" placeholder="Sales Amount (TZS)">
+        <input type="number" id="mStock" placeholder="Stocking Costs">
+        <input type="text" id="mNote" placeholder="Notes">
+        <button class="primary-cta btn-entry" onclick="submitManual()">SAVE DATA</button>
+        <button class="primary-cta" style="background:none; color:var(--gray);" onclick="toggleModal('manual', false)">Cancel</button>
     </div>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygOnwnnSJnLnxv6PULm-svK7zsxye7kZjMVZSyT0hkgSKDQ2N1uNLP6s1Y-LHjYOBQ/exec";
-    let pin = "";
-    let inventory = [];
-    let salesData = [];
-    let cart = [];
+    const SECRET_PIN = "112511";
+    let currentInput = "";
+    let localInventory = [];
+    let localSales = [];
+    let activeCart = [];
 
-    // --- SECURITY ---
-    function pressPin(n) { if(pin.length < 4) pin += n; updatePinUI(); }
-    function clearPin() { pin = ""; updatePinUI(); }
-    function updatePinUI() { document.getElementById('pinDisplay').innerText = pin.padEnd(4, '_'); }
-    function checkPin() {
-        if(pin === "1234") { // Replace with your actual pin
+    // --- PIN LOGIC ---
+    function addPin(num) {
+        if (currentInput.length < 6) {
+            currentInput += num;
+            updatePinDisplay();
+        }
+    }
+    function resetPin() { currentInput = ""; updatePinDisplay(); }
+    function updatePinDisplay() {
+        const display = document.getElementById('pinDisplay');
+        display.innerText = "•".repeat(currentInput.length).padEnd(6, "•");
+    }
+    function validateLogin() {
+        if (currentInput === SECRET_PIN) {
             document.getElementById('splash').style.opacity = "0";
             setTimeout(() => {
                 document.getElementById('splash').style.display = "none";
                 document.body.classList.add('unlocked');
                 document.getElementById('mainApp').style.display = "block";
-                fetchData();
-            }, 500);
+                syncData();
+            }, 400);
         } else {
-            alert("Incorrect PIN");
-            clearPin();
+            alert("Incorrect Password");
+            resetPin();
         }
     }
 
-    // --- DATA ---
-    async function fetchData() {
-        toggleLoader(true);
+    // --- DATA HANDLING ---
+    async function syncData() {
+        showLoader(true);
         try {
-            const resp = await fetch(SCRIPT_URL);
-            const json = await resp.json();
-            salesData = json.entries;
-            inventory = json.inventory;
-            renderDashboard();
-            populateInventoryDropdown();
-        } catch(e) {
-            alert("Connection error. Please retry.");
-        }
-        toggleLoader(false);
+            const r = await fetch(SCRIPT_URL + "?t=" + Date.now());
+            const data = await r.json();
+            localSales = data.entries;
+            localInventory = data.inventory;
+            updateDashboard();
+            loadInventoryDropdown();
+        } catch (e) { console.error(e); }
+        showLoader(false);
     }
 
-    function renderDashboard() {
-        const today = new Date().toLocaleDateString('sv-SE');
-        const todayEntry = salesData.find(d => d.date.split('T')[0] === today);
+    function updateDashboard() {
+        const todayStr = new Date().toLocaleDateString('sv-SE');
+        const todayData = localSales.find(s => s.date.includes(todayStr));
         
-        document.getElementById('todaySales').innerText = (todayEntry ? Number(todayEntry.sales).toLocaleString() : "0") + " TZS";
+        document.getElementById('dispToday').innerText = (todayData ? Number(todayData.sales).toLocaleString() : "0") + " TZS";
         
-        let monthTotal = salesData.reduce((acc, curr) => acc + (Number(curr.sales) || 0), 0);
-        document.getElementById('monthSales').innerText = monthTotal.toLocaleString() + " TZS";
+        const total = localSales.reduce((sum, item) => sum + (Number(item.sales) || 0), 0);
+        document.getElementById('dispMonth').innerText = total.toLocaleString() + " TZS";
 
-        const hist = document.getElementById('historyList');
-        hist.innerHTML = '<div style="font-weight:800; color:var(--gray); font-size:0.75rem; margin-bottom:10px;">RECENT ACTIVITY</div>';
-        salesData.slice(-5).reverse().forEach(d => {
-            hist.innerHTML += `
-                <div class="card" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <div style="font-size:0.8rem; font-weight:800;">${d.date.split('T')[0]}</div>
-                        <div style="font-size:0.7rem; color:var(--gray)">${d.note || 'Regular sale'}</div>
-                    </div>
-                    <div style="font-weight:800; color:var(--green)">+${Number(d.sales).toLocaleString()}</div>
-                </div>
-            `;
+        const history = document.getElementById('recentHistory');
+        history.innerHTML = '<div style="font-weight:800; font-size:0.7rem; color:var(--gray); margin-bottom:10px;">RECENT LOGS</div>';
+        localSales.slice(-4).reverse().forEach(s => {
+            history.innerHTML += `
+                <div class="card" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; padding:15px;">
+                    <div style="font-size:0.8rem; font-weight:700;">${s.date.split('T')[0]}</div>
+                    <div style="color:var(--green); font-weight:800;">+${Number(s.sales).toLocaleString()}</div>
+                </div>`;
         });
     }
 
-    // --- POS LOGIC ---
-    function populateInventoryDropdown() {
-        const select = document.getElementById('posItemSelect');
-        select.innerHTML = '<option value="">Choose item...</option>';
-        inventory.forEach(item => {
-            const opt = document.createElement('option');
-            opt.value = item.row_index;
-            opt.innerText = `${item.item} (${item.qty_packages.toFixed(1)} left)`;
-            select.appendChild(opt);
+    // --- POS FUNCTIONS ---
+    function loadInventoryDropdown() {
+        const sel = document.getElementById('selItem');
+        sel.innerHTML = '<option value="">Select Product...</option>';
+        localInventory.forEach(i => {
+            const o = document.createElement('option');
+            o.value = i.row_index;
+            o.innerText = `${i.item} (${Number(i.qty_packages).toFixed(1)} pk left)`;
+            sel.appendChild(o);
         });
     }
 
-    function updatePriceHint() {
-        const rowIdx = document.getElementById('posItemSelect').value;
-        const type = document.getElementById('posType').value;
-        if(!rowIdx) return;
-        
-        const item = inventory.find(i => i.row_index == rowIdx);
+    function showItemDetails() {
+        const idx = document.getElementById('selItem').value;
+        if (!idx) return;
+        const item = localInventory.find(i => i.row_index == idx);
+        const type = document.getElementById('selType').value;
         const price = type === 'pack' ? item.sell_price_pack : item.sell_price_unit;
-        document.getElementById('priceHint').innerText = `Price: ${Number(price).toLocaleString()} TZS per ${type}`;
+        document.getElementById('itemDetail').innerText = `Price: ${Number(price).toLocaleString()} TZS per ${type}`;
     }
 
-    function addToCart() {
-        const rowIdx = document.getElementById('posItemSelect').value;
-        const qty = parseInt(document.getElementById('posQty').value);
-        const type = document.getElementById('posType').value;
+    function pushToCart() {
+        const idx = document.getElementById('selItem').value;
+        const qty = parseInt(document.getElementById('inpQty').value);
+        const type = document.getElementById('selType').value;
+        if (!idx || qty < 1) return;
 
-        if(!rowIdx || qty <= 0) return;
-
-        const item = inventory.find(i => i.row_index == rowIdx);
+        const item = localInventory.find(i => i.row_index == idx);
         const price = type === 'pack' ? item.sell_price_pack : item.sell_price_unit;
 
-        cart.push({
+        activeCart.push({
             row_index: item.row_index,
             name: item.item,
-            cart_qty: qty,
-            sell_type: type,
+            qty: qty,
+            type: type,
             price: price,
             pack_size: item.pack_size
         });
-
         renderCart();
-        document.getElementById('posQty').value = 1;
     }
 
     function renderCart() {
-        const container = document.getElementById('cartItems');
-        container.innerHTML = "";
-        let total = 0;
-
-        cart.forEach((c, idx) => {
-            const lineTotal = c.price * c.cart_qty;
-            total += lineTotal;
-            container.innerHTML += `
+        const list = document.getElementById('cartList');
+        list.innerHTML = "";
+        let sum = 0;
+        activeCart.forEach((c, i) => {
+            const line = c.qty * c.price;
+            sum += line;
+            list.innerHTML += `
                 <div class="cart-item">
-                    <span>${c.cart_qty}x ${c.name} (${c.sell_type})</span>
-                    <span>${lineTotal.toLocaleString()} <b onclick="removeFromCart(${idx})" style="color:var(--red); margin-left:10px;">×</b></span>
-                </div>
-            `;
+                    <span>${c.qty}x ${c.name}</span>
+                    <span>${line.toLocaleString()} <b style="color:var(--red); margin-left:8px;" onclick="activeCart.splice(${i},1);renderCart();">×</b></span>
+                </div>`;
         });
-        document.getElementById('cartTotal').innerText = total.toLocaleString() + " TZS";
+        document.getElementById('cartSum').innerText = sum.toLocaleString() + " TZS";
     }
 
-    function removeFromCart(idx) { cart.splice(idx, 1); renderCart(); }
-
-    async function checkout() {
-        if(cart.length === 0) return;
-        toggleLoader(true);
+    async function finalizePOS() {
+        if (activeCart.length === 0) return;
+        showLoader(true);
         try {
             await fetch(SCRIPT_URL, {
                 method: "POST",
-                body: JSON.stringify({ action: "pos_checkout", cart: cart })
+                body: JSON.stringify({ action: "pos_checkout", cart: activeCart })
             });
-            cart = [];
-            closeModals();
-            fetchData();
-            alert("Sale completed!");
-        } catch(e) { alert("Checkout failed."); }
-        toggleLoader(false);
+            activeCart = [];
+            toggleModal('pos', false);
+            syncData();
+        } catch (e) { alert("Error completing sale."); }
+        showLoader(false);
     }
 
-    // --- UI HELPERS ---
-    function openPOS() { document.getElementById('posOverlay').classList.add('active'); cart = []; renderCart(); }
-    function openEntry() { document.getElementById('entryOverlay').classList.add('active'); }
-    function closeModals() { 
-        document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); 
+    // --- UTILS ---
+    function toggleModal(id, show) {
+        const el = id === 'pos' ? document.getElementById('modalPOS') : document.getElementById('modalManual');
+        el.classList.toggle('active', show);
+        if (id === 'pos' && show) { activeCart = []; renderCart(); }
     }
-    function closeOnOverlay(e) { if(e.target.classList.contains('modal-overlay')) closeModals(); }
-    function toggleLoader(show) { document.getElementById('loader').style.display = show ? "block" : "none"; }
-    
-    document.getElementById('dateDisplay').innerText = new Date().toDateString();
+    function showLoader(s) { document.getElementById('syncLoader').style.display = s ? "block" : "none"; }
+    document.getElementById('topDate').innerText = new Date().toDateString().toUpperCase();
 </script>
 
 </body>

@@ -430,18 +430,115 @@
 
 </div>
 
-<!-- ── MODAL: AI ANALYST ── -->
-<div class="modal-overlay" id="overlayAI" onclick="overlayClose(event,'overlayAI')">
-    <div class="modal" style="border-top-color: #764ba2;">
-        <div class="modal-handle"></div>
-        <div class="ai-header-title">✨ Vida AI Analyst</div>
-        <div id="aiOutput">
-            <!-- Dynamically populated by JS -->
-            <div style="text-align: center; padding: 20px; color: var(--gray);">Gathering 30-day insights...</div>
+// ── AI ANALYST LOGIC (ADVANCED BUSINESS INSIGHTS) ──────────────────────────────────────
+function generateAIReport() {
+    const now = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+    const thirtyStr = getLocalDateStr(thirtyDaysAgo);
+
+    // Filter last 30 days
+    const recent = data.filter(d => (d.date || '').split('T')[0] >= thirtyStr);
+
+    if (recent.length === 0) {
+        document.getElementById('aiOutput').innerHTML = `<div class="ai-bubble">Not enough data recorded in the last 30 days. Add some entries!</div>`;
+        return;
+    }
+
+    let tSales = 0, tStock = 0, tOther = 0, tSav = 0;
+    let weekendSales = 0, weekendDays = 0, weekdaySales = 0, weekdayDays = 0;
+    let recent15Sales = 0, old15Sales = 0;
+
+    // Midpoint date to calculate momentum (Last 15 days vs Previous 15 days)
+    const midPointDate = new Date();
+    midPointDate.setDate(now.getDate() - 15);
+    const midStr = getLocalDateStr(midPointDate);
+
+    recent.forEach(r => {
+        const rowDateStr = (r.date || '').split('T')[0];
+        const s = Number(r.sales) || 0;
+        const stk = Number(r.stocking) || 0;
+        const oth = Number(r.other) || 0;
+        const sav = Number(r.savings) || 0;
+
+        tSales += s;
+        tStock += stk;
+        tOther += oth;
+        tSav += sav;
+
+        // Weekday vs Weekend calculation (0 = Sun, 6 = Sat)
+        const dObj = new Date(rowDateStr);
+        const dayOfWeek = dObj.getDay();
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            weekendSales += s; 
+            weekendDays++;
+        } else {
+            weekdaySales += s; 
+            weekdayDays++;
+        }
+
+        // Momentum split
+        if (rowDateStr >= midStr) recent15Sales += s;
+        else old15Sales += s;
+    });
+
+    // --- ADVANCED CALCULATIONS ---
+    const tExp = tStock + tOther;
+    const netMargin = tSales - tExp;
+    const profitMarginPct = tSales > 0 ? ((netMargin / tSales) * 100).toFixed(1) : 0;
+    const stockRatioPct = tSales > 0 ? ((tStock / tSales) * 100).toFixed(1) : 0;
+    
+    const avgWeekend = weekendDays > 0 ? weekendSales / weekendDays : 0;
+    const avgWeekday = weekdayDays > 0 ? weekdaySales / weekdayDays : 0;
+    
+    // Growth/Decline percentage
+    const momentum = old15Sales > 0 ? (((recent15Sales - old15Sales) / old15Sales) * 100).toFixed(1) : 0;
+
+    // --- DYNAMIC STRATEGIC ADVICE ---
+    let adviceHtml = "";
+    if (profitMarginPct < 15) {
+        adviceHtml = `🚨 <strong>Critical Alert:</strong> Your profit margin is low (<strong>${profitMarginPct}%</strong>). You are moving inventory but not keeping enough cash. Audit your 'Other Expenses' immediately and negotiate better bulk pricing with your suppliers.`;
+    } else if (stockRatioPct > 65) {
+        adviceHtml = `⚠️ <strong>Inventory Warning:</strong> <strong>${stockRatioPct}%</strong> of your revenue is tied up in restocking. You may be over-ordering dead stock. Focus on selling existing inventory before placing new large orders.`;
+    } else if (momentum < -10) {
+        adviceHtml = `📉 <strong>Momentum Drop:</strong> Revenue in the last 15 days dropped by <strong>${Math.abs(momentum)}%</strong> compared to the 15 days prior. Run a quick promotion or check if external factors (weather/holidays) disrupted foot traffic.`;
+    } else {
+        adviceHtml = `🚀 <strong>Excellent Health:</strong> Business is highly efficient. Your margins are healthy (<strong>${profitMarginPct}%</strong>) and cash flow is positive. Consider reinvesting a portion of your <strong>${fmt(tSav)}</strong> savings into a new fast-moving product line to scale.`;
+    }
+
+    // --- ACTIONABLE BEHAVIORAL INSIGHT ---
+    let behaviorHtml = "";
+    if (avgWeekend > (avgWeekday * 1.3)) {
+        behaviorHtml = "Weekends drive significantly more volume. Ensure your shelves are fully stocked by Friday afternoon and consider increasing your float/staff for Saturday.";
+    } else if (avgWeekday > (avgWeekend * 1.3)) {
+        behaviorHtml = "Weekdays are your primary revenue drivers. You likely rely on local workers or commuters. Consider optimizing morning or lunch-hour checkout speeds.";
+    } else {
+        behaviorHtml = "Foot traffic is highly consistent across the entire week. This predictable revenue makes it safe to plan larger, automated monthly stock purchases.";
+    }
+
+    // --- RENDER HTML ---
+    document.getElementById('aiOutput').innerHTML = `
+        <div class="ai-bubble" style="background: #f4ebff; border-left-color: #764ba2;">
+            <p>${adviceHtml}</p>
         </div>
-        <button class="btn-sec" style="width:100%; border:none; margin-top:16px;" onclick="closeModals()">DISMISS</button>
-    </div>
-</div>
+
+        <div class="ai-bubble">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: #888; font-weight: 700; margin-bottom:6px;">Financial Diagnostics (30d)</div>
+            <div class="ai-stat-row"><span>Gross Profit Margin:</span> <strong style="color:${profitMarginPct >= 20 ? 'var(--green)' : 'var(--red)'}">${profitMarginPct}%</strong></div>
+            <div class="ai-stat-row"><span>Stock-to-Sales Ratio:</span> <strong>${stockRatioPct}%</strong></div>
+            <div class="ai-stat-row"><span>15-Day Momentum:</span> <strong style="color:${momentum >= 0 ? 'var(--green)' : 'var(--red)'}">${momentum >= 0 ? '+' + momentum : momentum}%</strong></div>
+            <div class="ai-stat-row" style="border:none;"><span>Cash Saved:</span> <strong style="color:var(--gold)">${fmt(tSav)}</strong></div>
+        </div>
+
+        <div class="ai-bubble" style="background: #fdfaf4; border-left-color: #d4af37;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: #888; font-weight: 700; margin-bottom:6px;">Operational Insight</div>
+            <p style="margin-bottom:10px; font-size: 0.8rem; color: #444;">${behaviorHtml}</p>
+            <div class="ai-stat-row" style="font-size: 0.75rem;"><span>Avg Weekday Sales:</span> <strong>${fmt(avgWeekday.toFixed(0))}</strong></div>
+            <div class="ai-stat-row" style="font-size: 0.75rem; border:none;"><span>Avg Weekend Sales:</span> <strong>${fmt(avgWeekend.toFixed(0))}</strong></div>
+        </div>
+    `;
+}
+
 
 <!-- ── MODAL: ENTRY FORM ── -->
 <div class="modal-overlay" id="overlayEntry" onclick="overlayClose(event,'overlayEntry')">

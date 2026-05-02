@@ -429,9 +429,17 @@
         <div class="login-card">
             <div class="login-logo">LA VIDA</div>
             <div class="login-sub">Authorized Access Only</div>
-            <input type="password" id="passInput" inputmode="numeric"
-                class="pass-input" placeholder="••••••"
-                onkeypress="if(event.key==='Enter') checkLogin()">
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+                <select id="userSelect" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:1rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;-webkit-appearance:none;appearance:none;text-align:center;">
+                    <option value="">— Select User —</option>
+                    <option value="matt">Matt</option>
+                    <option value="vida">Vida</option>
+                    <option value="shop">Shop</option>
+                </select>
+                <input type="password" id="passInput" inputmode="numeric"
+                    class="pass-input" placeholder="••••••" style="margin-bottom:0;"
+                    onkeypress="if(event.key='Enter') checkLogin()">
+            </div>
             <button class="primary-cta" style="margin-bottom:0;" onclick="checkLogin()">UNLOCK</button>
             <div id="pinError"></div>
         </div>
@@ -461,7 +469,11 @@
         <div class="header">
             <div class="header-top">
                 <div class="header-logo">LA VIDA</div>
-                <div class="header-date" id="headerDate"></div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span id="loggedInUser" style="font-size:0.65rem;color:rgba(255,255,255,0.55);letter-spacing:1px;text-transform:uppercase;"></span>
+                    <div class="header-date" id="headerDate"></div>
+                    <button onclick="performLogout()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:0.7rem;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Logout">⏻</button>
+                </div>
             </div>
             <div class="today-panel">
                 <div class="today-stat">
@@ -469,13 +481,13 @@
                     <p id="daySales">— TZS</p>
                     <div id="heroSalesTrend" style="margin-top:4px;"></div>
                 </div>
-                <div class="today-stat right">
+                <div class="today-stat right role-admin">
                     <h4>All Balance</h4>
                     <p id="topBalance" style="color:var(--gold)">— TZS</p>
                     <div id="heroBalanceTrend" style="margin-top:4px;"></div>
                 </div>
             </div>
-            <div class="today-panel" style="margin-top:8px;">
+            <div class="today-panel role-admin" style="margin-top:8px;">
                 <div class="today-stat">
                     <h4>Total Savings</h4>
                     <p id="heroTotalSavings" style="color:#4ade80">— TZS</p>
@@ -488,25 +500,25 @@
         </div>
 
         <div class="container">
-            <button class="primary-cta" onclick="openModal('entry')" style="margin-top:14px;">
+            <button class="primary-cta role-admin" onclick="openModal('entry')" style="margin-top:14px;">
                 💰 SAVINGS & EXPENSES
             </button>
-            <div class="summary-grid">
+            <div class="summary-grid role-admin">
                 <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
                 <div class="stat-card"><h4>Stocking Expenses</h4><p id="totalStock">...</p></div>
                 <div class="stat-card"><h4>Other Expenses</h4><p id="totalOther">...</p></div>
                 <div class="stat-card"><h4>Total Savings</h4><p id="totalSavings">...</p></div>
             </div>
-            <div class="secondary-actions">
+            <div class="secondary-actions role-admin">
                 <button class="btn-sec" onclick="openModal('search')">🔍 FIND DATE</button>
                 <button class="btn-sec" onclick="openModal('report')">📄 REPORTS</button>
             </div>
-            <span class="section-label">Transaction History</span>
-            <div id="entryList"></div>
-            <button id="loadMoreBtn" class="btn-sec" style="width:100%; margin-top:4px; display:none;" onclick="loadMore()">VIEW MORE</button>
+            <span class="section-label role-admin">Transaction History</span>
+            <div id="entryList" class="role-admin"></div>
+            <button id="loadMoreBtn" class="btn-sec role-admin" style="width:100%; margin-top:4px; display:none;" onclick="loadMore()">VIEW MORE</button>
         </div>
 
-        <button class="fab-ai" onclick="openModal('ai')" title="AI Analyst">✨</button>
+        <button class="fab-ai role-admin" onclick="openModal('ai')" title="AI Analyst">✨</button>
     </div>
 
     <!-- ════════════════════════════
@@ -605,10 +617,10 @@
 <div class="modal-overlay" id="overlaySearch" onclick="overlayClose(event,'overlaySearch')">
     <div class="modal">
         <div class="modal-handle"></div>
-        <div class="modal-title">Find a Date</div>
-        <div class="field-group"><span class="field-label">Select Date</span><input type="date" id="searchDate"></div>
-        <button class="primary-cta" style="margin-top:6px;" onclick="executeSearch()">SEARCH</button>
-        <button class="btn-sec" style="width:100%; border:none; margin-top:8px;" onclick="closeModals()">CLOSE</button>
+        <div class="modal-title">🔍 Find a Date</div>
+        <div class="field-group"><span class="field-label">Select Date</span><input type="date" id="searchDate" onchange="executeSearch()"></div>
+        <div id="searchResults" style="margin-top:12px;"></div>
+        <button class="btn-sec" style="width:100%; border:none; margin-top:16px;" onclick="closeModals()">CLOSE</button>
     </div>
 </div>
 
@@ -616,10 +628,13 @@
 <div class="modal-overlay" id="overlayReport" onclick="overlayClose(event,'overlayReport')">
     <div class="modal">
         <div class="modal-handle"></div>
-        <div class="modal-title">Monthly Report</div>
-        <div class="field-group"><span class="field-label">Select Month</span><input type="month" id="reportMonth"></div>
-        <button class="primary-cta" style="margin-top:6px;" onclick="generatePDF()">DOWNLOAD PDF</button>
-        <button class="btn-sec" style="width:100%; border:none; margin-top:8px;" onclick="closeModals()">CLOSE</button>
+        <div class="modal-title">📄 Monthly Report</div>
+        <div class="field-group"><span class="field-label">Select Month</span><input type="month" id="reportMonth" onchange="previewReport()"></div>
+        <div id="reportPreview" style="margin-top:14px;"></div>
+        <div class="save-bar" style="margin-top:8px;">
+            <button class="primary-cta" onclick="generatePDF()">⬇️ DOWNLOAD PDF</button>
+            <button class="btn-sec" style="width:100%; border:none; margin-top:8px;" onclick="closeModals()">CLOSE</button>
+        </div>
     </div>
 </div>
 
@@ -717,12 +732,18 @@
 // ════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOBcOqYd15AgRoUX1Pd5_nxlKxmVxhqFVwzSdxQa-Z-Jzk6M3Mu2MRskJ9eZvLfoA/exec";
-const PIN = "112511";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu4AfjNREvxGPL3eNBv6hhZknGgNSSAyUAEX0P9IVsvpVgQ38k3Z_rEXGVIKZpg96e/exec";
+const USERS = {
+    matt:  { pin: "112511", role: "admin",  name: "Matt" },
+    vida:  { pin: "112511", role: "admin",  name: "Vida" },
+    shop:  { pin: "1234",   role: "shop",   name: "Shop" },
+};
+let currentUser = null; // { name, role }
 
 // ── STATE ──
 let data = [];            // Transactions
 let inventory = [];       // Inventory items
+let salesLog = [];        // Sales_Log entries
 let cart = {};            // { itemId: qty }
 let displayLimit = 5;
 let activeCat = 'All';
@@ -748,10 +769,12 @@ function checkInactivity() {
 }
 function performLogout() {
     localStorage.removeItem('laVidaLoggedIn');
+    localStorage.removeItem('laVidaUser');
+    currentUser = null;
     document.getElementById('loginPage').style.display = 'table';
     document.getElementById('mainApp').style.display = 'none';
     document.body.classList.remove('unlocked');
-    showToast("🔒 Logged out due to inactivity");
+    showToast("🔒 Logged out");
 }
 ['click','touchstart','scroll','keyup'].forEach(e => document.addEventListener(e, updateActivity));
 
@@ -786,24 +809,66 @@ function showLoader(on) {
 //  LOGIN
 // ════════════════════════════════════════════════
 function checkLogin() {
+    const userKey = document.getElementById('userSelect').value;
     const entered = document.getElementById('passInput').value;
-    if (entered === PIN) {
-        localStorage.setItem('laVidaLoggedIn', 'true');
-        localStorage.setItem('laVidaLastActivity', Date.now());
-        document.getElementById('passInput').value = '';
-        unlockUI();
-    } else {
-        document.getElementById('pinError').innerText = "Incorrect PIN. Try again.";
-        document.getElementById('passInput').value = '';
-        setTimeout(() => document.getElementById('pinError').innerText = '', 2000);
+    const err = document.getElementById('pinError');
+
+    if (!userKey) {
+        err.innerText = "Please select a user.";
+        setTimeout(() => err.innerText = '', 2000);
+        return;
     }
+    const user = USERS[userKey];
+    if (!user || entered !== user.pin) {
+        err.innerText = "Incorrect PIN. Try again.";
+        document.getElementById('passInput').value = '';
+        setTimeout(() => err.innerText = '', 2000);
+        return;
+    }
+    currentUser = { name: user.name, role: user.role };
+    localStorage.setItem('laVidaLoggedIn', 'true');
+    localStorage.setItem('laVidaUser', userKey);
+    localStorage.setItem('laVidaLastActivity', Date.now());
+    document.getElementById('passInput').value = '';
+    document.getElementById('userSelect').value = '';
+    unlockUI();
 }
 function unlockUI() {
+    // Restore user from session if page was refreshed
+    if (!currentUser) {
+        const saved = localStorage.getItem('laVidaUser');
+        if (saved && USERS[saved]) {
+            currentUser = { name: USERS[saved].name, role: USERS[saved].role };
+        } else {
+            performLogout(); return;
+        }
+    }
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     document.body.classList.add('unlocked');
+    applyRole();
     setHeaderDate();
     fetchAll();
+}
+
+function applyRole() {
+    const isShop = currentUser && currentUser.role === 'shop';
+
+    // Dashboard tab — hidden for shop
+    const tabDash = document.getElementById('tab-dashboard');
+    if (tabDash) tabDash.style.display = isShop ? 'none' : '';
+
+    // If shop, switch to POS tab
+    if (isShop) switchTab('pos');
+
+    // Hide savings & balance panels on dashboard
+    document.querySelectorAll('.role-admin').forEach(el => {
+        el.style.display = isShop ? 'none' : '';
+    });
+
+    // Show logged-in user name
+    const nameEl = document.getElementById('loggedInUser');
+    if (nameEl) nameEl.innerText = currentUser.name;
 }
 
 // ════════════════════════════════════════════════
@@ -841,6 +906,7 @@ async function fetchAll() {
         const json = await res.json();
         data      = Array.isArray(json.transactions) ? json.transactions : [];
         inventory = Array.isArray(json.inventory)    ? json.inventory    : [];
+        salesLog  = Array.isArray(json.salesLog)     ? json.salesLog     : [];
         render();
         renderPOSItems();
         renderInventoryPage();
@@ -1409,7 +1475,7 @@ function openModal(type) {
     } else if (type === 'report') {
         const now = new Date();
         document.getElementById('reportMonth').value = getLocalDateStr(now).slice(0, 7);
-        document.getElementById('overlayReport').classList.add('active');
+        document.getElementById('overlayReport').classList.add('active'); setTimeout(previewReport, 100);
     } else if (type === 'ai') {
         document.getElementById('overlayAI').classList.add('active');
         document.getElementById('aiOutput').innerHTML = `<div style="text-align:center; padding:20px; color:var(--gray);">Gathering insights...</div>`;
@@ -1467,10 +1533,87 @@ function editRow(date) {
 
 function executeSearch() {
     const d = document.getElementById('searchDate').value;
-    if (!d) { showToast("Select a date first."); return; }
-    const found = data.some(row => (row.date || '').split('T')[0] === d);
-    if (found) { closeModals(); editRow(d); }
-    else showToast("No record found for " + d);
+    const container = document.getElementById('searchResults');
+    if (!d) { container.innerHTML = ''; return; }
+
+    const fmtDate = new Date(d + 'T12:00:00').toLocaleDateString('en-TZ', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    const dayData = data.filter(row => (row.date || '').split('T')[0] === d);
+
+    if (dayData.length === 0) {
+        container.innerHTML = `<div class="empty-state" style="padding:20px 0;">
+            <div class="icon">📭</div>No entries found for<br><strong>${fmtDate}</strong>
+        </div>`;
+        return;
+    }
+
+    const row      = dayData[0];
+    const sales    = Number(row.sales)    || 0;
+    const stocking = Number(row.stocking) || 0;
+    const other    = Number(row.other)    || 0;
+    const savings  = Number(row.savings)  || 0;
+    const net      = sales - stocking - other - savings;
+
+    // Build individual POS sale lines from salesLog (in-memory, loaded with inventory)
+    // We group Sales_Log entries by timestamp — each confirmSale() is one transaction
+    const dayLog = (salesLog || []).filter(r => (r.date || '').split('T')[0] === d);
+
+    // Group by saleTotal+timestamp to reconstruct individual sales
+    const salesMap = {};
+    dayLog.forEach(r => {
+        const key = r.timestamp || r.saleTotal;
+        if (!salesMap[key]) salesMap[key] = { timestamp: r.timestamp, items: [], total: Number(r.saleTotal)||0 };
+        salesMap[key].items.push(r);
+    });
+    const salesEntries = Object.values(salesMap).sort((a,b) => a.timestamp > b.timestamp ? 1 : -1);
+
+    const posHtml = salesEntries.length > 0 ? `
+        <div style="font-size:0.68rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px;">
+            🛒 POS Sales (${salesEntries.length} transaction${salesEntries.length>1?'s':''})
+        </div>
+        ${salesEntries.map((sale, si) => `
+        <div style="background:#f0fdf4;border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:3px solid var(--pos-green);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:0.72rem;color:var(--gray);">Sale #${si+1} · ${sale.timestamp ? new Date(sale.timestamp).toLocaleTimeString('en-TZ',{hour:'2-digit',minute:'2-digit'}) : ''}</span>
+                <strong style="color:var(--pos-green);font-size:0.85rem;">${sale.total.toLocaleString()} TZS</strong>
+            </div>
+            ${sale.items.map(it => `
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#555;padding:2px 0;">
+                <span>${it.itemName} × ${it.qty}</span>
+                <span>${(Number(it.subtotal)||0).toLocaleString()} TZS</span>
+            </div>`).join('')}
+        </div>`).join('')}` : '';
+
+    container.innerHTML = `
+        <div style="font-size:0.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">${fmtDate}</div>
+
+        <!-- Day Summary -->
+        <div style="background:#f8fafc;border-radius:14px;padding:14px;margin-bottom:4px;">
+            ${sales > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="font-size:0.8rem;color:var(--gray);">🛒 Total Sales</span>
+                <strong style="color:var(--green);">+${sales.toLocaleString()} TZS</strong></div>` : ''}
+            ${stocking > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="font-size:0.8rem;color:var(--gray);">📦 Stocking Cost</span>
+                <strong style="color:var(--red);">-${stocking.toLocaleString()} TZS</strong></div>` : ''}
+            ${other > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="font-size:0.8rem;color:var(--gray);">💸 Other Expenses</span>
+                <strong style="color:var(--red);">-${other.toLocaleString()} TZS</strong></div>` : ''}
+            ${savings > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="font-size:0.8rem;color:var(--gray);">🏦 Savings</span>
+                <strong style="color:var(--blue);">-${savings.toLocaleString()} TZS</strong></div>` : ''}
+            <div style="display:flex;justify-content:space-between;padding:8px 0 0;">
+                <span style="font-size:0.85rem;font-weight:700;">Net Balance</span>
+                <strong style="font-size:0.95rem;color:${net>=0?'var(--green)':'var(--red)'};">${net>=0?'+':''}${net.toLocaleString()} TZS</strong>
+            </div>
+        </div>
+
+        ${posHtml}
+
+        ${row.note ? `<div style="font-size:0.75rem;color:var(--gray);font-style:italic;margin:10px 0;">"${row.note}"</div>` : ''}
+
+        <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn-sec" style="flex:1;" onclick="closeModals(); editRow('${d}')">✏️ Edit Entry</button>
+            <button class="btn-sec" style="flex:1;color:var(--red);" onclick="closeModals(); deleteRow('${d}')">🗑️ Delete Entry</button>
+        </div>`;
 }
 
 async function deleteRow(d) {
@@ -1484,69 +1627,265 @@ async function deleteRow(d) {
 }
 
 // ════════════════════════════════════════════════
-//  PDF REPORT
+//  REPORT — preview on month select + full PDF
 // ════════════════════════════════════════════════
+function getCurrentMonth() {
+    return getLocalDateStr().slice(0, 7);
+}
+
+function previewReport() {
+    const m = document.getElementById('reportMonth')?.value || getCurrentMonth();
+    const preview = document.getElementById('reportPreview');
+    if (!preview) return;
+    const monthLabel = new Date(m + '-15').toLocaleDateString('en-TZ', {month:'long', year:'numeric'});
+    const filtered = data.filter(d => (d.date || '').startsWith(m));
+
+    if (filtered.length === 0) {
+        preview.innerHTML = `
+            <div style="font-size:0.75rem;color:var(--gray);text-align:center;margin-bottom:12px;">
+                Report for <strong>${monthLabel}</strong>
+            </div>
+            <div class="empty-state" style="padding:14px 0;"><div class="icon">📭</div>No data yet for this month.</div>`;
+        return;
+    }
+    let totSales=0, totStock=0, totOther=0, totSav=0;
+    filtered.forEach(r => {
+        totSales += Number(r.sales)||0; totStock += Number(r.stocking)||0;
+        totOther += Number(r.other)||0; totSav   += Number(r.savings)||0;
+    });
+    const netProfit = totSales - totStock - totOther - totSav;
+    const margin = totSales > 0 ? ((netProfit/totSales)*100).toFixed(1) : 0;
+
+    // Top 5 selling items from salesLog this month
+    const monthLog = (salesLog||[]).filter(r => (r.date||'').startsWith(m));
+    const itemTotals = {};
+    monthLog.forEach(r => {
+        if (!itemTotals[r.itemName]) itemTotals[r.itemName] = 0;
+        itemTotals[r.itemName] += Number(r.qty)||0;
+    });
+    const topItems = Object.entries(itemTotals).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+    preview.innerHTML = `
+        <div style="font-size:0.75rem;color:var(--gray);text-align:center;margin-bottom:12px;">
+            Report for <strong>${monthLabel}</strong> · ${filtered.length} days recorded
+        </div>
+        <div style="background:#f8fafc;border-radius:14px;padding:14px;font-size:0.8rem;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="color:var(--gray);">🛒 Total Sales</span><strong style="color:var(--green);">${totSales.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="color:var(--gray);">📦 Stocking Cost</span><strong style="color:var(--red);">${totStock.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="color:var(--gray);">💸 Other Expenses</span><strong style="color:var(--red);">${totOther.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="color:var(--gray);">🏦 Savings</span><strong style="color:var(--blue);">${totSav.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0 0;">
+                <strong>Net Profit</strong>
+                <strong style="color:${netProfit>=0?'var(--green)':'var(--red)'};">${netProfit.toLocaleString()} TZS (${margin}%)</strong></div>
+        </div>
+        ${topItems.length > 0 ? `
+        <div style="font-size:0.68rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Top Sellers This Month</div>
+        <div style="background:#f8fafc;border-radius:12px;padding:10px 14px;margin-bottom:10px;">
+            ${topItems.map(([name,qty],i)=>`
+            <div style="display:flex;justify-content:space-between;font-size:0.78rem;padding:4px 0;${i<topItems.length-1?'border-bottom:1px solid #eee;':''}">
+                <span>${i+1}. ${name}</span><strong>${qty} units</strong>
+            </div>`).join('')}
+        </div>` : ''}
+        <div style="font-size:0.68rem;color:var(--gray);text-align:center;">${inventory.length} inventory items tracked</div>`;
+}
+
 function generatePDF() {
-    const m = document.getElementById('reportMonth').value;
-    if (!m) { showToast("Select a month first."); return; }
+    const m = document.getElementById('reportMonth')?.value || getCurrentMonth();
     const filtered = data.filter(d => (d.date || '').startsWith(m));
     if (filtered.length === 0) { showToast("No records for " + m); return; }
     filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    doc.setFillColor(0, 26, 51); doc.rect(0, 0, 210, 30, 'F');
-    doc.setTextColor(212, 175, 55); doc.setFontSize(16); doc.setFont('helvetica', 'bold');
-    doc.text('LA VIDA MINIMART', 14, 13);
-    doc.setTextColor(255, 255, 255); doc.setFontSize(9); doc.setFont('helvetica', 'normal');
-    doc.text('Monthly Report — ' + m, 14, 22);
-    doc.text('Generated: ' + new Date().toLocaleDateString(), 150, 22);
+    const W = 210, dark = [0,26,51], gold = [212,175,55], blue = [0,64,133];
+    const monthLabel = new Date(m + '-01').toLocaleDateString('en-TZ', {month:'long', year:'numeric'});
 
-    let totSales = 0, totStock = 0, totOther = 0, totSav = 0;
-    filtered.forEach(r => {
-        totSales += Number(r.sales) || 0; totStock += Number(r.stocking) || 0;
-        totOther += Number(r.other) || 0; totSav   += Number(r.savings)  || 0;
-    });
-    const avg = totSales / filtered.length;
-    let bestDay = filtered[0], worstDay = filtered[0];
-    filtered.forEach(r => {
-        if ((r.sales || 0) > (bestDay.sales || 0)) bestDay = r;
-        if ((r.sales || 0) < (worstDay.sales || 0)) worstDay = r;
-    });
+    // ── Header ──
+    doc.setFillColor(...dark); doc.rect(0, 0, W, 32, 'F');
+    doc.setTextColor(...gold); doc.setFontSize(18); doc.setFont('helvetica','bold');
+    doc.text('LA VIDA MINIMART', 14, 14);
+    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('Full Monthly Report — ' + monthLabel, 14, 23);
+    doc.text('Generated: ' + new Date().toLocaleDateString('en-TZ'), 140, 23);
 
-    doc.setTextColor(0, 26, 51); doc.setFontSize(8);
-    const summaryY = 38;
-    const summaries = [
-        ['Total Sales', totSales.toLocaleString() + ' TZS'],
-        ['Total Stock', totStock.toLocaleString() + ' TZS'],
-        ['Other Exp',   totOther.toLocaleString() + ' TZS'],
-        ['Savings',     totSav.toLocaleString()   + ' TZS'],
-        ['Avg / Day',   avg.toLocaleString(undefined,{maximumFractionDigits:0}) + ' TZS'],
-        ['Best Day',    (bestDay.date || '').split('T')[0]],
-        ['Worst Day',   (worstDay.date || '').split('T')[0]],
+    // ── Compute totals ──
+    let totSales=0, totStock=0, totOther=0, totSav=0;
+    let bestDay=filtered[0], worstDay=filtered[0];
+    filtered.forEach(r => {
+        const s=Number(r.sales)||0, st=Number(r.stocking)||0, o=Number(r.other)||0, sv=Number(r.savings)||0;
+        totSales+=s; totStock+=st; totOther+=o; totSav+=sv;
+        if(s>(Number(bestDay.sales)||0)) bestDay=r;
+        if(s<(Number(worstDay.sales)||0)) worstDay=r;
+    });
+    const netProfit = totSales - totStock - totOther - totSav;
+    const margin = totSales>0?((netProfit/totSales)*100).toFixed(1):0;
+    const avgDaily = filtered.length>0?(totSales/filtered.length).toFixed(0):0;
+
+    // ── Summary boxes ──
+    let y = 40;
+    doc.setTextColor(...dark);
+    doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text('FINANCIAL SUMMARY', 14, y); y += 6;
+
+    const boxes = [
+        {label:'Total Sales',    val:totSales.toLocaleString()+' TZS',   color:[40,167,69]},
+        {label:'Stocking Cost',  val:totStock.toLocaleString()+' TZS',   color:[220,53,69]},
+        {label:'Other Expenses', val:totOther.toLocaleString()+' TZS',   color:[220,53,69]},
+        {label:'Savings',        val:totSav.toLocaleString()+' TZS',     color:[0,64,133]},
+        {label:'Net Profit',     val:netProfit.toLocaleString()+' TZS',  color:netProfit>=0?[40,167,69]:[220,53,69]},
+        {label:'Profit Margin',  val:margin+'%',                          color:netProfit>=0?[40,167,69]:[220,53,69]},
+        {label:'Avg Daily Sales',val:Number(avgDaily).toLocaleString()+' TZS', color:[0,26,51]},
+        {label:'Days Recorded',  val:String(filtered.length)+' days',    color:[0,26,51]},
     ];
-    summaries.forEach((s, i) => {
-        const col = i % 4, row = Math.floor(i / 4);
-        const x = 14 + (col * 45), y = summaryY + (row * 12);
-        doc.setFont('helvetica', 'bold'); doc.text(s[0], x, y);
-        doc.setFont('helvetica', 'normal'); doc.text(String(s[1]), x, y + 5);
+    const bw=44, bh=14, cols=4;
+    boxes.forEach((b,i) => {
+        const bx = 14+(i%cols)*(bw+2), by = y+Math.floor(i/cols)*(bh+3);
+        doc.setFillColor(248,250,252); doc.roundedRect(bx, by, bw, bh, 2, 2, 'F');
+        doc.setFontSize(6.5); doc.setFont('helvetica','normal');
+        doc.setTextColor(120,120,120); doc.text(b.label, bx+3, by+5);
+        doc.setFontSize(8); doc.setFont('helvetica','bold');
+        doc.setTextColor(...b.color); doc.text(b.val, bx+3, by+11);
+    });
+    y += Math.ceil(boxes.length/cols)*(bh+3) + 6;
+
+    // ── Best / Worst day ──
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(...dark);
+    doc.text('Best Day: ' + (bestDay.date||'').split('T')[0] + '  (' + (Number(bestDay.sales)||0).toLocaleString() + ' TZS)', 14, y);
+    doc.text('Worst Day: ' + (worstDay.date||'').split('T')[0] + '  (' + (Number(worstDay.sales)||0).toLocaleString() + ' TZS)', 105, y);
+    y += 8;
+
+    // ── Daily Transactions table ──
+    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(...dark);
+    doc.text('DAILY TRANSACTIONS', 14, y); y += 4;
+
+    const txRows = filtered.map(r => {
+        const s=Number(r.sales)||0, st=Number(r.stocking)||0, o=Number(r.other)||0, sv=Number(r.savings)||0;
+        const net=s-st-o-sv;
+        return [(r.date||'').split('T')[0], s.toLocaleString(), st.toLocaleString(), o.toLocaleString(), sv.toLocaleString(), net.toLocaleString(), r.note||''];
     });
 
-    const rows = filtered.map(r => {
-        const s = Number(r.sales)||0, st = Number(r.stocking)||0, o = Number(r.other)||0, sv = Number(r.savings)||0;
-        return [(r.date||'').split('T')[0], s.toLocaleString(), st.toLocaleString(), o.toLocaleString(), sv.toLocaleString(), r.note||''];
-    });
     doc.autoTable({
-        startY: summaryY + 22,
-        head: [['Date','Sales','Stock','Expenses','Savings','Note']],
-        body: rows,
-        styles: { fontSize: 7.5, cellPadding: 3 },
-        headStyles: { fillColor: [0,64,133], textColor: 255, fontStyle: 'bold' },
+        startY: y,
+        head: [['Date','Sales TZS','Stocking TZS','Other Exp TZS','Savings TZS','Net TZS','Note']],
+        body: txRows,
+        styles: { fontSize: 7, cellPadding: 2.5 },
+        headStyles: { fillColor: blue, textColor: 255, fontStyle: 'bold', fontSize: 7 },
         alternateRowStyles: { fillColor: [245,248,252] },
-        columnStyles: { 5: { cellWidth: 40 } }
+        columnStyles: { 6: { cellWidth: 30 } },
+        margin: { left: 14, right: 14 },
+        didParseCell: (d) => {
+            if(d.section==='body' && d.column.index===5) {
+                const v = parseFloat(String(d.cell.raw).replace(/,/g,''));
+                d.cell.styles.textColor = v >= 0 ? [40,167,69] : [220,53,69];
+                d.cell.styles.fontStyle = 'bold';
+            }
+        }
     });
-    doc.save('LaVida_Report_' + m + '.pdf');
-    showToast("📄 PDF downloaded!");
+
+    // ── Inventory Snapshot ──
+    if (inventory.length > 0) {
+        doc.addPage();
+        doc.setFillColor(...dark); doc.rect(0, 0, W, 18, 'F');
+        doc.setTextColor(...gold); doc.setFontSize(12); doc.setFont('helvetica','bold');
+        doc.text('INVENTORY SNAPSHOT', 14, 12);
+        doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','normal');
+        doc.text('As of ' + new Date().toLocaleDateString('en-TZ'), 150, 12);
+
+        const totalValue = inventory.reduce((s,i)=>s+((i.costPrice||0)*(i.stock||0)),0);
+        const lowItems   = inventory.filter(i=>i.stock>0&&i.stock<=(i.reorderLevel||5)).length;
+        const outItems   = inventory.filter(i=>(i.stock||0)<=0).length;
+
+        doc.setTextColor(...dark); doc.setFontSize(8); doc.setFont('helvetica','normal');
+        doc.text(`Total Items: ${inventory.length}   |   Stock Value: ${totalValue.toLocaleString()} TZS   |   Low Stock: ${lowItems}   |   Out of Stock: ${outItems}`, 14, 26);
+
+        const invRows = inventory
+            .sort((a,b)=>(a.stock||0)-(b.stock||0))
+            .map(i => {
+                const status = (i.stock||0)<=0 ? 'OUT' : (i.stock||0)<=(i.reorderLevel||5) ? 'LOW' : 'OK';
+                return [i.name||'', i.category||'', String(i.stock||0), String(i.reorderLevel||5),
+                        (i.sellPrice||0).toLocaleString(), (i.costPrice||0).toLocaleString(), status];
+            });
+
+        doc.autoTable({
+            startY: 30,
+            head: [['Item','Category','Stock','Reorder At','Sell Price TZS','Cost Price TZS','Status']],
+            body: invRows,
+            styles: { fontSize: 7, cellPadding: 2.5 },
+            headStyles: { fillColor: dark, textColor: gold, fontStyle: 'bold', fontSize: 7 },
+            alternateRowStyles: { fillColor: [245,248,252] },
+            margin: { left: 14, right: 14 },
+            didParseCell: (d) => {
+                if(d.section==='body' && d.column.index===6) {
+                    if(d.cell.raw==='OUT') { d.cell.styles.textColor=[220,53,69]; d.cell.styles.fontStyle='bold'; }
+                    else if(d.cell.raw==='LOW') { d.cell.styles.textColor=[255,140,0]; d.cell.styles.fontStyle='bold'; }
+                    else { d.cell.styles.textColor=[40,167,69]; }
+                }
+            }
+        });
+    }
+
+    // ── Page 3: Sales Log (individual transactions) ──
+    const monthLog = (salesLog||[]).filter(r => (r.date||'').startsWith(m));
+    if (monthLog.length > 0) {
+        doc.addPage();
+        doc.setFillColor(...dark); doc.rect(0, 0, W, 18, 'F');
+        doc.setTextColor(...gold); doc.setFontSize(12); doc.setFont('helvetica','bold');
+        doc.text('SALES LOG', 14, 12);
+        doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','normal');
+        doc.text(monthLog.length + ' line items · ' + monthLabel, 80, 12);
+
+        // Top sellers
+        const itemTotals = {};
+        monthLog.forEach(r => {
+            if (!itemTotals[r.itemName]) itemTotals[r.itemName] = {qty:0, revenue:0};
+            itemTotals[r.itemName].qty     += Number(r.qty)||0;
+            itemTotals[r.itemName].revenue += Number(r.subtotal)||0;
+        });
+        const topItems = Object.entries(itemTotals).sort((a,b)=>b[1].revenue-a[1].revenue).slice(0,10);
+
+        doc.setTextColor(...dark); doc.setFontSize(9); doc.setFont('helvetica','bold');
+        doc.text('TOP 10 ITEMS BY REVENUE', 14, 26);
+        doc.autoTable({
+            startY: 29,
+            head: [['Item','Units Sold','Revenue TZS']],
+            body: topItems.map(([name,v])=>[name, String(v.qty), v.revenue.toLocaleString()]),
+            styles: { fontSize: 7, cellPadding: 2.5 },
+            headStyles: { fillColor: blue, textColor: 255, fontStyle: 'bold', fontSize: 7 },
+            alternateRowStyles: { fillColor: [245,248,252] },
+            margin: { left: 14, right: 14 },
+        });
+
+        // Full log
+        const afterTopY = doc.lastAutoTable.finalY + 8;
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...dark);
+        doc.text('FULL TRANSACTION LOG', 14, afterTopY);
+        const logRows = monthLog
+            .sort((a,b)=> (a.timestamp||'') > (b.timestamp||'') ? 1 : -1)
+            .map(r => [
+                (r.date||'').split('T')[0],
+                r.timestamp ? new Date(r.timestamp).toLocaleTimeString('en-TZ',{hour:'2-digit',minute:'2-digit'}) : '',
+                r.itemName||'',
+                String(r.qty||0),
+                (Number(r.unitPrice)||0).toLocaleString(),
+                (Number(r.subtotal)||0).toLocaleString(),
+            ]);
+        doc.autoTable({
+            startY: afterTopY + 3,
+            head: [['Date','Time','Item','Qty','Unit Price TZS','Subtotal TZS']],
+            body: logRows,
+            styles: { fontSize: 6.5, cellPadding: 2 },
+            headStyles: { fillColor: dark, textColor: gold, fontStyle: 'bold', fontSize: 7 },
+            alternateRowStyles: { fillColor: [245,248,252] },
+            margin: { left: 14, right: 14 },
+        });
+    }
+
+    doc.save('LaVida_' + m + '_FullReport.pdf');
+    showToast("📄 Full report downloaded!");
 }
 </script>
 </body>

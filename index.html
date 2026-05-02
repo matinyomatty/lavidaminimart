@@ -438,7 +438,7 @@
                 </select>
                 <input type="password" id="passInput" inputmode="numeric"
                     class="pass-input" placeholder="••••••" style="margin-bottom:0;"
-                    onkeypress="if(event.key='Enter') checkLogin()">
+                    onkeypress="if(event.key==='Enter') checkLogin()">
             </div>
             <button class="primary-cta" style="margin-bottom:0;" onclick="checkLogin()">UNLOCK</button>
             <div id="pinError"></div>
@@ -736,7 +736,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu4AfjNREvxGPL3eNBv
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
-    shop:  { pin: "1234",   role: "shop",   name: "Shop" },
+    shop:  { pin: "123456", role: "shop",   name: "Shop" },
 };
 let currentUser = null; // { name, role }
 

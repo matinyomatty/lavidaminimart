@@ -707,7 +707,7 @@
 // ════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDqLcc9kqXA8sH1cfdZ17asFXBXfZ8mwVpXXiPeZV-uesUw_KlIfquwZJsx2Q7pq00/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxe8euXkXnHnMthGXyx-wVIgQXeGFND5NGsbedrggvHtHtW4Uqi8t45WZcaqjakJ_0Z/exec";
 const PIN = "112511";
 
 // ── STATE ──
@@ -793,8 +793,7 @@ function unlockUI() {
     document.getElementById('mainApp').style.display = 'block';
     document.body.classList.add('unlocked');
     setHeaderDate();
-    fetchData();
-    fetchInventory();
+    fetchAll();
 }
 
 // ════════════════════════════════════════════════
@@ -823,7 +822,27 @@ function setHeaderDate() {
 }
 
 // ════════════════════════════════════════════════
-//  DATA — TRANSACTIONS
+//  DATA — COMBINED (fastest: 1 round-trip on startup)
+// ════════════════════════════════════════════════
+async function fetchAll() {
+    showLoader(true);
+    try {
+        const res = await fetch(SCRIPT_URL + '?action=getAll&t=' + Date.now());
+        const json = await res.json();
+        data      = Array.isArray(json.transactions) ? json.transactions : [];
+        inventory = Array.isArray(json.inventory)    ? json.inventory    : [];
+        render();
+        renderPOSItems();
+        renderInventoryPage();
+    } catch(e) {
+        console.error(e);
+        showToast("⚠️ Could not load data. Check connection.");
+    }
+    showLoader(false);
+}
+
+// ════════════════════════════════════════════════
+//  DATA — TRANSACTIONS (used after saves/deletes)
 // ════════════════════════════════════════════════
 async function fetchData() {
     showLoader(true);
@@ -839,7 +858,7 @@ async function fetchData() {
 }
 
 // ════════════════════════════════════════════════
-//  DATA — INVENTORY
+//  DATA — INVENTORY (used after item saves/restock)
 // ════════════════════════════════════════════════
 async function fetchInventory() {
     try {
@@ -1120,8 +1139,8 @@ async function confirmSale() {
         showToast(`✅ Sale recorded! ${fmt(total)}`);
         navigator.vibrate?.(80);
         clearCart();
-        // Refresh data
-        setTimeout(() => { fetchData(); fetchInventory(); }, 1400);
+        // Refresh both datasets in one call
+        setTimeout(fetchAll, 1400);
     } catch(e) {
         showToast("⚠️ Sale may not have saved. Check connection.");
     }

@@ -528,7 +528,11 @@
         <div class="pos-header">
             <div class="pos-header-top">
                 <div class="pos-header-logo">POS</div>
-                <div style="font-size:0.65rem; color:rgba(255,255,255,0.45); letter-spacing:0.5px;" id="posDate"></div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span id="posLoggedInUser" style="font-size:0.65rem;color:rgba(255,255,255,0.55);letter-spacing:1px;text-transform:uppercase;"></span>
+                    <div style="font-size:0.65rem; color:rgba(255,255,255,0.45); letter-spacing:0.5px;" id="posDate"></div>
+                    <button onclick="performLogout()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:0.7rem;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Logout">⏻</button>
+                </div>
             </div>
             <div class="pos-search-wrap">
                 <span class="pos-search-icon">🔍</span>
@@ -869,6 +873,8 @@ function applyRole() {
     // Show logged-in user name
     const nameEl = document.getElementById('loggedInUser');
     if (nameEl) nameEl.innerText = currentUser.name;
+    const posNameEl = document.getElementById('posLoggedInUser');
+    if (posNameEl) posNameEl.innerText = currentUser.name;
 }
 
 // ════════════════════════════════════════════════

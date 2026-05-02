@@ -16,7 +16,9 @@
             --gold: #d4af37;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-        html, body { height: 100%; }
+        
+        /* FIX: Changed from height: 100% to min-height: 100vh to prevent background color splitting */
+        html, body { min-height: 100vh; }
         html { background: var(--dark); }
         body { background: var(--dark); font-family: 'DM Sans', system-ui, sans-serif; color: var(--dark); }
         body.unlocked { background: var(--light); }
@@ -246,8 +248,11 @@
             text-transform: uppercase; letter-spacing: 0.5px;
             margin-bottom: 6px; display: block;
         }
+        
+        /* FIX: Added display: block and min-width: 0 to prevent mobile iOS inputs from overflowing */
         input[type=date], input[type=number], input[type=month], input[type=text], textarea {
-            width: 100%; padding: 13px; border: 1.5px solid #e0e6ef;
+            width: 100%; min-width: 0; display: block; box-sizing: border-box; 
+            padding: 13px; border: 1.5px solid #e0e6ef;
             border-radius: 12px; font-size: 0.95rem;
             background: #fafbfc; outline: none;
             font-family: 'DM Sans', sans-serif;
@@ -334,10 +339,12 @@
             <div class="today-stat">
                 <h4>Today Sales</h4>
                 <p id="daySales">— TZS</p>
+                <div id="heroSalesTrend" style="margin-top: 4px;"></div>
             </div>
             <div class="today-stat right">
                 <h4>All Balance</h4>
                 <p id="topBalance" style="color:var(--gold)">— TZS</p>
+                <div id="heroBalanceTrend" style="margin-top: 4px;"></div>
             </div>
         </div>
     </div>
@@ -455,13 +462,13 @@
 <script>
 // ── CONFIG ──────────────────────────────────────────────
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDqLcc9kqXA8sH1cfdZ17asFXBXfZ8mwVpXXiPeZV-uesUw_KlIfquwZJsx2Q7pq00/exec";
-const PIN = "112511"; // ⚠️ Move this to server-side when possible
+const PIN = "112511"; 
 
 let data = [];
 let displayLimit = 5;
 
 // ── SESSION & INACTIVITY TRACKING ───────────────────────
-const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes in milliseconds
+const INACTIVITY_LIMIT = 5 * 60 * 1000;
 
 function updateActivity() {
     if (localStorage.getItem('laVidaLoggedIn') === 'true') {
@@ -486,30 +493,27 @@ function performLogout() {
     showToast("🔒 Logged out due to inactivity");
 }
 
-// Track actions that indicate the user is active
 ['click', 'touchstart', 'scroll', 'keyup'].forEach(evt => {
     document.addEventListener(evt, updateActivity);
 });
 
 // ── INITIALIZATION ──────────────────────────────────────
 window.onload = () => {
-    // Check if session exists and is still valid
     if (localStorage.getItem('laVidaLoggedIn') === 'true') {
         const lastActivity = parseInt(localStorage.getItem('laVidaLastActivity')) || 0;
         if (Date.now() - lastActivity > INACTIVITY_LIMIT) {
-            performLogout(); // Expired while away/closed
+            performLogout();
         } else {
-            updateActivity(); // Refresh activity
-            unlockUI(); // Auto-login
+            updateActivity();
+            unlockUI();
         }
     }
-    // Check inactivity every 5 seconds
     setInterval(checkInactivity, 5000);
 };
 
 // ── HELPERS ─────────────────────────────────────────────
 function getLocalDateStr(d = new Date()) {
-    return d.toLocaleDateString('sv-SE'); // YYYY-MM-DD using local time
+    return d.toLocaleDateString('sv-SE');
 }
 
 function fmt(n) { return Number(n).toLocaleString() + " TZS"; }
@@ -559,7 +563,7 @@ function setHeaderDate() {
 async function fetchData() {
     showLoader(true);
     try {
-        const res = await fetch(SCRIPT_URL + '?t=' + Date.now()); // cache-bust
+        const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
         data = await res.json();
         render();
     } catch (e) {
@@ -579,65 +583,81 @@ function render() {
     let totalSales = 0, totalStock = 0, totalOther = 0, totalSavings = 0;
     let dayS = null, dayStock = 0, dayOther = 0;
     let runningBalance = 0;
+    let yesterdayBalance = 0; // Fix: Variable to track balance up to yesterday
 
     const todayStr = getLocalDateStr();
 
     // Sort ascending for running balance
     data.sort((a, b) => new Date(a.date) - new Date(b.date));
 
+    // Build a date→sales map for trend lookup
+    const salesByDate = {};
+    
     data.forEach(row => {
         const rowDate = (row.date || '').split('T')[0];
-        totalSales    += Number(row.sales)    || 0;
-        totalStock    += Number(row.stocking) || 0;
-        totalOther    += Number(row.other)    || 0;
-        totalSavings  += Number(row.savings)  || 0;
-        runningBalance = totalSales - totalStock - totalOther - totalSavings;
+        const rowSales = Number(row.sales) || 0;
+        const rowStock = Number(row.stocking) || 0;
+        const rowOther = Number(row.other) || 0;
+        const rowSavings = Number(row.savings) || 0;
+        const net = rowSales - rowStock - rowOther - rowSavings;
+
+        salesByDate[rowDate] = rowSales;
+
+        totalSales    += rowSales;
+        totalStock    += rowStock;
+        totalOther    += rowOther;
+        totalSavings  += rowSavings;
+        runningBalance += net;
+
+        // Capture balance purely up to yesterday for header trend
+        if (rowDate < todayStr) {
+            yesterdayBalance += net;
+        }
 
         if (rowDate === todayStr) {
-            dayS        = Number(row.sales)    || 0;
-            dayStock    = Number(row.stocking) || 0;
-            dayOther    = Number(row.other)    || 0;
+            dayS        = rowSales;
+            dayStock    = rowStock;
+            dayOther    = rowOther;
         }
     });
 
-    // Today panel with Business Logic & Alert Integration
+    // ── HEADER TREND LOGIC ──
+    const prevDateObj = new Date();
+    prevDateObj.setDate(prevDateObj.getDate() - 1);
+    const yesterdayStr = getLocalDateStr(prevDateObj);
+    const yesterdaySales = salesByDate[yesterdayStr] || 0;
+
+    function getTrendMarkup(curr, prev) {
+        if (!prev || prev === 0) return ''; // Hide badge if there's no previous data to compare
+        const diff = ((curr - prev) / Math.abs(prev)) * 100;
+        const arrow = diff >= 0 ? '↑' : '↓';
+        const cls = diff >= 0 ? 'trend-up' : 'trend-down';
+        return `<span class="trend-badge ${cls}">${arrow} ${Math.abs(diff).toFixed(0)}% vs yesterday</span>`;
+    }
+
+    // Today panel setup
     if (dayS !== null) {
         document.getElementById('daySales').innerText = fmt(dayS);
+        document.getElementById('heroSalesTrend').innerHTML = getTrendMarkup(dayS, yesterdaySales);
 
-        // ✅ SMART ALERT
         const alerts = [];
-
-        if (dayS >= DAILY_TARGET) {
-            alerts.push("✅ Target hit");
-        } else {
-            alerts.push("⚠️ Below target");
-        }
-
-        if ((dayStock + dayOther) > dayS) {
-            alerts.push("⚠️ Overspending");
-        }
-
-        if (alerts.length > 0) {
-            showToast(alerts.join(" • "));
-        }
+        if (dayS >= DAILY_TARGET) alerts.push("✅ Target hit");
+        else alerts.push("⚠️ Below target");
+        if ((dayStock + dayOther) > dayS) alerts.push("⚠️ Overspending");
+        if (alerts.length > 0) showToast(alerts.join(" • "));
     } else {
         document.getElementById('daySales').innerText = '— TZS';
+        document.getElementById('heroSalesTrend').innerHTML = '';
     }
     
     document.getElementById('topBalance').innerText = fmt(runningBalance);
+    document.getElementById('heroBalanceTrend').innerHTML = getTrendMarkup(runningBalance, yesterdayBalance);
 
     // Summary cards
     document.getElementById('totalSales').innerText   = fmt(totalSales);
     document.getElementById('totalStock').innerText   = fmt(totalStock);
     document.getElementById('totalOther').innerText   = fmt(totalOther);
     document.getElementById('totalSavings').innerText = fmt(totalSavings);
-
-    // Build a date→sales map for trend lookup
-    const salesByDate = {};
-    data.forEach(row => {
-        const d = (row.date || '').split('T')[0];
-        salesByDate[d] = Number(row.sales) || 0;
-    });
 
     // Transaction list (most recent first)
     const sorted = [...data].reverse();
@@ -654,11 +674,11 @@ function render() {
             const stk     = Number(row.stocking) || 0;
             const oth     = Number(row.other)    || 0;
 
-            // Sales trend vs previous day
             const prev = new Date(rowDate);
             prev.setDate(prev.getDate() - 1);
             const prevStr  = getLocalDateStr(prev);
             const prevSales = salesByDate[prevStr];
+            
             let trendHtml = '';
             if (prevSales !== undefined && prevSales > 0) {
                 const diff = ((sales - prevSales) / prevSales) * 100;
@@ -701,7 +721,6 @@ function openModal(type) {
         document.getElementById('date').value = getLocalDateStr();
         document.getElementById('overlayEntry').classList.add('active');
         
-        // ✅ AUTO FOCUS UX
         setTimeout(() => document.getElementById('sales').focus(), 300);
 
     } else if (type === 'search') {
@@ -718,7 +737,6 @@ function closeModals() {
 }
 
 function overlayClose(e, id) {
-    // Close when tapping the dark backdrop (not the modal card itself)
     if (e.target.id === id) closeModals();
 }
 
@@ -741,8 +759,6 @@ async function saveRecord() {
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
         showToast("✅ Record saved!");
-        
-        // ✅ VIBRATION
         navigator.vibrate?.(50);
     } catch (e) {
         showToast("⚠️ Save may have failed. Check your connection.");
@@ -784,8 +800,6 @@ async function deleteRow(d) {
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", date: d }) });
         showToast("🗑️ Record deleted.");
-        
-        // ✅ VIBRATION
         navigator.vibrate?.(50);
     } catch (e) {
         showToast("⚠️ Delete may have failed.");
@@ -806,7 +820,6 @@ function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-    // Header
     doc.setFillColor(0, 26, 51);
     doc.rect(0, 0, 210, 30, 'F');
     doc.setTextColor(212, 175, 55);
@@ -819,7 +832,6 @@ function generatePDF() {
     doc.text('Monthly Report — ' + m, 14, 22);
     doc.text('Generated: ' + new Date().toLocaleDateString(), 150, 22);
 
-    // Totals summary
     let totSales = 0, totStock = 0, totOther = 0, totSav = 0;
     filtered.forEach(r => {
         totSales += Number(r.sales)    || 0;
@@ -853,8 +865,8 @@ function generatePDF() {
     ];
 
     summaries.forEach((s, i) => {
-        const col = i % 4; // 4 columns
-        const row = Math.floor(i / 4); // 2 rows
+        const col = i % 4; 
+        const row = Math.floor(i / 4); 
         const x = 14 + (col * 45); 
         const y = summaryY + (row * 12);
         
@@ -864,7 +876,6 @@ function generatePDF() {
         doc.text(String(s[1]), x, y + 5);
     });
 
-    // Table
     const rows = filtered.map(r => {
         const s  = Number(r.sales)    || 0;
         const st = Number(r.stocking) || 0;

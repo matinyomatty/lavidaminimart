@@ -475,6 +475,16 @@
                     <div id="heroBalanceTrend" style="margin-top:4px;"></div>
                 </div>
             </div>
+            <div class="today-panel" style="margin-top:8px;">
+                <div class="today-stat">
+                    <h4>Total Savings</h4>
+                    <p id="heroTotalSavings" style="color:#4ade80">— TZS</p>
+                </div>
+                <div class="today-stat right">
+                    <h4>Today Savings</h4>
+                    <p id="heroDaySavings" style="color:#4ade80">— TZS</p>
+                </div>
+            </div>
         </div>
 
         <div class="container">
@@ -822,7 +832,7 @@ function setHeaderDate() {
 }
 
 // ════════════════════════════════════════════════
-//  DATA — COMBINED (fastest: 1 round-trip on startup)
+//  DATA — COMBINED (1 round-trip on startup)
 // ════════════════════════════════════════════════
 async function fetchAll() {
     showLoader(true);
@@ -842,7 +852,7 @@ async function fetchAll() {
 }
 
 // ════════════════════════════════════════════════
-//  DATA — TRANSACTIONS (used after saves/deletes)
+//  DATA — TRANSACTIONS (after saves/deletes)
 // ════════════════════════════════════════════════
 async function fetchData() {
     showLoader(true);
@@ -858,7 +868,7 @@ async function fetchData() {
 }
 
 // ════════════════════════════════════════════════
-//  DATA — INVENTORY (used after item saves/restock)
+//  DATA — INVENTORY (after item saves/restock)
 // ════════════════════════════════════════════════
 async function fetchInventory() {
     try {
@@ -880,7 +890,7 @@ function render() {
     list.innerHTML = '';
 
     let totalSales = 0, totalStock = 0, totalOther = 0, totalSavings = 0;
-    let dayS = null, dayStock = 0, dayOther = 0;
+    let dayS = null, dayStock = 0, dayOther = 0, daySavings = 0;
     let runningBalance = 0, yesterdayBalance = 0;
     const todayStr = getLocalDateStr();
     data.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -898,7 +908,7 @@ function render() {
         totalOther   += rowOther; totalSavings += rowSavings;
         runningBalance += net;
         if (rowDate < todayStr) yesterdayBalance += net;
-        if (rowDate === todayStr) { dayS = rowSales; dayStock = rowStock; dayOther = rowOther; }
+        if (rowDate === todayStr) { dayS = rowSales; dayStock = rowStock; dayOther = rowOther; daySavings = rowSavings; }
     });
 
     const prevDate = new Date(); prevDate.setDate(prevDate.getDate() - 1);
@@ -928,6 +938,8 @@ function render() {
 
     document.getElementById('topBalance').innerText = fmt(runningBalance);
     document.getElementById('heroBalanceTrend').innerHTML = getTrendMarkup(runningBalance, yesterdayBalance);
+    document.getElementById('heroTotalSavings').innerText = fmt(totalSavings);
+    document.getElementById('heroDaySavings').innerText   = dayS !== null ? fmt(daySavings) : '— TZS';
     document.getElementById('totalSales').innerText   = fmt(totalSales);
     document.getElementById('totalStock').innerText   = fmt(totalStock);
     document.getElementById('totalOther').innerText   = fmt(totalOther);
@@ -1139,7 +1151,7 @@ async function confirmSale() {
         showToast(`✅ Sale recorded! ${fmt(total)}`);
         navigator.vibrate?.(80);
         clearCart();
-        // Refresh both datasets in one call
+        // Refresh data
         setTimeout(fetchAll, 1400);
     } catch(e) {
         showToast("⚠️ Sale may not have saved. Check connection.");

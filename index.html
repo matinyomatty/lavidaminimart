@@ -14,10 +14,10 @@
             --gray: #6c757d;
             --red: #dc3545;
             --gold: #d4af37;
+            --ai-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         
-        /* FIX: Changed from height: 100% to min-height: 100vh to prevent background color splitting */
         html, body { min-height: 100vh; }
         html { background: var(--dark); }
         body { background: var(--dark); font-family: 'DM Sans', system-ui, sans-serif; color: var(--dark); }
@@ -66,7 +66,7 @@
         #pinError { color: var(--red); font-size: 0.78rem; min-height: 18px; margin-top: 8px; }
 
         /* ── MAIN APP ── */
-        #mainApp { display: none; }
+        #mainApp { display: none; padding-bottom: 80px; } /* Padding for FAB */
 
         /* ── STICKY HEADER ── */
         .header {
@@ -98,7 +98,6 @@
         }
         .today-stat p { font-size: 0.82rem; font-weight: 700; color: white; }
         .today-stat.right { text-align: right; }
-        .today-stat.center { text-align: center; }
 
         .trend-badge {
             display: inline-block; font-size: 0.55rem;
@@ -139,12 +138,6 @@
             text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
         }
         .stat-card p { font-size: 0.88rem; font-weight: 700; }
-        .stat-card.balance-card {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, #e8f0fe, #dbeafe);
-            border-left-color: var(--green);
-        }
-        .stat-card.balance-card p { font-size: 1rem; color: #1a5c2a; }
 
         /* ── SECONDARY ACTIONS ── */
         .secondary-actions { display: flex; gap: 10px; margin-bottom: 18px; }
@@ -176,7 +169,7 @@
         }
         .entry-date { font-size: 0.88rem; font-weight: 700; }
         .entry-meta { font-size: 0.72rem; color: var(--gray); margin-top: 3px; }
-        .entry-note { font-size: 0.68rem; color: var(--gray); font-style: italic; margin-top: 4px; }
+        .entry-note { font-size: 0.68rem; color: var(--gray); font-style: italic; margin-top: 4px; word-wrap: break-word; }
         
         .sales-trend {
             display: inline-block;
@@ -249,7 +242,6 @@
             margin-bottom: 6px; display: block;
         }
         
-        /* FIX: Added display: block and min-width: 0 to prevent mobile iOS inputs from overflowing */
         input[type=date], input[type=number], input[type=month], input[type=text], textarea {
             width: 100%; min-width: 0; display: block; box-sizing: border-box; 
             padding: 13px; border: 1.5px solid #e0e6ef;
@@ -267,7 +259,7 @@
             margin-top: 6px;
         }
 
-        /* ── LOADING OVERLAY ── */
+        /* ── LOADING OVERLAY & TOAST ── */
         .loading-overlay {
             display: none; position: fixed; inset: 0;
             background: rgba(0,26,51,0.8); z-index: 9999;
@@ -282,7 +274,6 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { font-size: 0.8rem; letter-spacing: 2px; opacity: 0.7; }
 
-        /* ── TOAST ── */
         .toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             background: var(--dark); color: white; padding: 12px 24px;
@@ -292,12 +283,57 @@
         }
         .toast.show { opacity: 1; }
 
-        /* ── EMPTY STATE ── */
         .empty-state {
             text-align: center; padding: 32px 20px;
             color: var(--gray); font-size: 0.85rem;
         }
         .empty-state .icon { font-size: 2rem; margin-bottom: 10px; }
+
+        /* ── FLOATING AI ANALYST ── */
+        .fab-ai {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--ai-grad);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 24px rgba(118, 75, 162, 0.4);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .fab-ai:active { transform: scale(0.85); }
+        .fab-ai::after { /* Glow effect */
+            content: ''; position: absolute; inset: -4px;
+            border-radius: 50%; background: var(--ai-grad);
+            filter: blur(8px); opacity: 0.4; z-index: -1;
+        }
+
+        /* AI Modal Styles */
+        .ai-header-title { font-family: 'Syne', sans-serif; color: #4a3479; text-align: center; font-size: 1.2rem; margin-bottom: 15px; }
+        .ai-bubble {
+            background: #f4f6fb;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 0.85rem;
+            color: #333;
+            line-height: 1.6;
+            border-left: 4px solid #764ba2;
+            margin-bottom: 15px;
+            word-wrap: break-word;
+        }
+        .ai-bubble strong { color: #2d1b4e; }
+        .ai-stat-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ddd; padding: 6px 0; }
+        .ai-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .ai-tag { background: #e0d8f0; color: #4a3479; padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; }
+        .ai-notes-box { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; font-size: 0.75rem; color: #555; font-style: italic; max-height: 120px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -389,6 +425,22 @@
 
     </div>
 
+    <!-- Floating AI Button -->
+    <button class="fab-ai" onclick="openModal('ai')" title="AI Analyst">✨</button>
+
+</div>
+
+<!-- ── MODAL: AI ANALYST ── -->
+<div class="modal-overlay" id="overlayAI" onclick="overlayClose(event,'overlayAI')">
+    <div class="modal" style="border-top-color: #764ba2;">
+        <div class="modal-handle"></div>
+        <div class="ai-header-title">✨ Vida AI Analyst</div>
+        <div id="aiOutput">
+            <!-- Dynamically populated by JS -->
+            <div style="text-align: center; padding: 20px; color: var(--gray);">Gathering 30-day insights...</div>
+        </div>
+        <button class="btn-sec" style="width:100%; border:none; margin-top:16px;" onclick="closeModals()">DISMISS</button>
+    </div>
 </div>
 
 <!-- ── MODAL: ENTRY FORM ── -->
@@ -583,14 +635,12 @@ function render() {
     let totalSales = 0, totalStock = 0, totalOther = 0, totalSavings = 0;
     let dayS = null, dayStock = 0, dayOther = 0;
     let runningBalance = 0;
-    let yesterdayBalance = 0; // Fix: Variable to track balance up to yesterday
+    let yesterdayBalance = 0;
 
     const todayStr = getLocalDateStr();
 
-    // Sort ascending for running balance
     data.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    // Build a date→sales map for trend lookup
     const salesByDate = {};
     
     data.forEach(row => {
@@ -609,7 +659,6 @@ function render() {
         totalSavings  += rowSavings;
         runningBalance += net;
 
-        // Capture balance purely up to yesterday for header trend
         if (rowDate < todayStr) {
             yesterdayBalance += net;
         }
@@ -621,21 +670,19 @@ function render() {
         }
     });
 
-    // ── HEADER TREND LOGIC ──
     const prevDateObj = new Date();
     prevDateObj.setDate(prevDateObj.getDate() - 1);
     const yesterdayStr = getLocalDateStr(prevDateObj);
     const yesterdaySales = salesByDate[yesterdayStr] || 0;
 
     function getTrendMarkup(curr, prev) {
-        if (!prev || prev === 0) return ''; // Hide badge if there's no previous data to compare
+        if (!prev || prev === 0) return '';
         const diff = ((curr - prev) / Math.abs(prev)) * 100;
         const arrow = diff >= 0 ? '↑' : '↓';
         const cls = diff >= 0 ? 'trend-up' : 'trend-down';
         return `<span class="trend-badge ${cls}">${arrow} ${Math.abs(diff).toFixed(0)}% vs yesterday</span>`;
     }
 
-    // Today panel setup
     if (dayS !== null) {
         document.getElementById('daySales').innerText = fmt(dayS);
         document.getElementById('heroSalesTrend').innerHTML = getTrendMarkup(dayS, yesterdaySales);
@@ -653,13 +700,11 @@ function render() {
     document.getElementById('topBalance').innerText = fmt(runningBalance);
     document.getElementById('heroBalanceTrend').innerHTML = getTrendMarkup(runningBalance, yesterdayBalance);
 
-    // Summary cards
     document.getElementById('totalSales').innerText   = fmt(totalSales);
     document.getElementById('totalStock').innerText   = fmt(totalStock);
     document.getElementById('totalOther').innerText   = fmt(totalOther);
     document.getElementById('totalSavings').innerText = fmt(totalSavings);
 
-    // Transaction list (most recent first)
     const sorted = [...data].reverse();
     const visible = sorted.slice(0, displayLimit);
 
@@ -712,6 +757,90 @@ function render() {
 
 function loadMore() { displayLimit += 5; render(); }
 
+// ── AI ANALYST LOGIC ──────────────────────────────────────
+function generateAIReport() {
+    const now = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+    const thirtyStr = getLocalDateStr(thirtyDaysAgo);
+
+    const recent = data.filter(d => (d.date || '').split('T')[0] >= thirtyStr);
+
+    if(recent.length === 0) {
+        document.getElementById('aiOutput').innerHTML = `<div class="ai-bubble">Not enough data recorded in the last 30 days. Add some entries!</div>`;
+        return;
+    }
+
+    let tSales = 0, tExp = 0, tSav = 0;
+    let notesArr = [];
+    let bestDay = recent[0], worstDay = recent[0];
+
+    // Word frequency logic for notes
+    let wordMap = {};
+    const ignoreWords = ['and','the','to','a','of','in','for','is','on','that','by','this','with','i','you','it','not','or','be','are','from','at','as','your','all','have'];
+
+    recent.forEach(r => {
+        let s = Number(r.sales) || 0;
+        let e = (Number(r.stocking) || 0) + (Number(r.other) || 0);
+        tSales += s;
+        tExp += e;
+        tSav += (Number(r.savings) || 0);
+
+        if(s > (Number(bestDay.sales)||0)) bestDay = r;
+        if(s < (Number(worstDay.sales)||0)) worstDay = r;
+
+        if(r.note && r.note.trim()) {
+            let noteStr = r.note.trim();
+            notesArr.push(`<b>${(r.date||'').split('T')[0]}:</b> ${noteStr}`);
+            
+            let words = noteStr.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/);
+            words.forEach(w => {
+                if(w.length > 2 && !ignoreWords.includes(w)) {
+                    wordMap[w] = (wordMap[w] || 0) + 1;
+                }
+            });
+        }
+    });
+
+    const topKeywords = Object.keys(wordMap).sort((a,b) => wordMap[b] - wordMap[a]).slice(0, 5);
+    const keywordHtml = topKeywords.length > 0 
+        ? topKeywords.map(w => `<span class="ai-tag">#${w}</span>`).join('') 
+        : '<span style="font-size: 0.75rem; color: #888;">No recurring trends found in notes.</span>';
+
+    const net = tSales - tExp;
+    const avg = tSales / recent.length;
+
+    let insights = '';
+    if (net > 0 && tSav > 0) insights = "Excellent period! You maintained profitability and actively saved money.";
+    else if (net > 0) insights = "You generated a profit over the last 30 days. Consider allocating some margins to your savings.";
+    else insights = "Expenses are outpacing sales. Review your stocking overhead and ensure daily targets are being met.";
+
+    document.getElementById('aiOutput').innerHTML = `
+        <div class="ai-bubble">
+            <p>Here is your 30-Day performance breakdown (<b>${recent.length} days active</b>). ${insights}</p>
+        </div>
+
+        <div class="ai-bubble">
+            <div class="ai-stat-row"><span>Total Revenue:</span> <strong>${fmt(tSales)}</strong></div>
+            <div class="ai-stat-row"><span>Total Expenses:</span> <strong style="color:var(--red)">${fmt(tExp)}</strong></div>
+            <div class="ai-stat-row"><span>Net Margin:</span> <strong style="color:${net >= 0 ? 'var(--green)' : 'var(--red)'}">${fmt(net)}</strong></div>
+            <div class="ai-stat-row" style="border:none;"><span>Daily Average:</span> <strong>${fmt(avg.toFixed(0))}</strong></div>
+        </div>
+
+        <div class="ai-bubble">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: #888; font-weight: 700; margin-bottom:6px;">Performance Extremes</div>
+            <p>📈 <strong>Highest:</strong> ${(bestDay.date||'').split('T')[0]} (${fmt(bestDay.sales)})</p>
+            <p style="margin-top:4px;">📉 <strong>Lowest:</strong> ${(worstDay.date||'').split('T')[0]} (${fmt(worstDay.sales)})</p>
+        </div>
+
+        <div class="ai-bubble">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: #888; font-weight: 700; margin-bottom:6px;">Notes & Keyword Extraction</div>
+            <div class="ai-tags" style="margin-bottom: 10px;">${keywordHtml}</div>
+            ${notesArr.length > 0 ? `<div class="ai-notes-box">${notesArr.join('<br><br>')}</div>` : '<p style="font-size:0.8rem;">No textual context logged in the last 30 days.</p>'}
+        </div>
+    `;
+}
+
 // ── MODALS ───────────────────────────────────────────────
 function openModal(type) {
     closeModals();
@@ -720,15 +849,17 @@ function openModal(type) {
         document.querySelectorAll('#overlayEntry input, #overlayEntry textarea').forEach(i => i.value = '');
         document.getElementById('date').value = getLocalDateStr();
         document.getElementById('overlayEntry').classList.add('active');
-        
         setTimeout(() => document.getElementById('sales').focus(), 300);
-
     } else if (type === 'search') {
         document.getElementById('overlaySearch').classList.add('active');
     } else if (type === 'report') {
         const now = new Date();
         document.getElementById('reportMonth').value = getLocalDateStr(now).slice(0, 7);
         document.getElementById('overlayReport').classList.add('active');
+    } else if (type === 'ai') {
+        document.getElementById('overlayAI').classList.add('active');
+        document.getElementById('aiOutput').innerHTML = `<div style="text-align: center; padding: 20px; color: var(--gray);">Gathering 30-day insights...</div>`;
+        setTimeout(generateAIReport, 400); // Slight delay for smooth animation
     }
 }
 

@@ -489,7 +489,7 @@
 
         <div class="container">
             <button class="primary-cta" onclick="openModal('entry')" style="margin-top:14px;">
-                ➕ ADD DAILY ENTRY
+                💰 SAVINGS & EXPENSES
             </button>
             <div class="summary-grid">
                 <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
@@ -587,13 +587,13 @@
 <div class="modal-overlay" id="overlayEntry" onclick="overlayClose(event,'overlayEntry')">
     <div class="modal">
         <div class="modal-handle"></div>
-        <div class="modal-title" id="formTitle">New Entry</div>
+        <div class="modal-title" id="formTitle">Daily Entry</div>
         <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
-        <div class="field-group"><span class="field-label">Sales (TZS)</span><input type="number" id="sales" placeholder="0" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Stocking (TZS)</span><input type="number" id="stock" placeholder="0" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Other Expenses (TZS)</span><input type="number" id="other" placeholder="0" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Savings (TZS)</span><input type="number" id="savings" placeholder="0" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Note (optional)</span><textarea id="note" placeholder="e.g. slow day, public holiday..."></textarea></div>
+        <input type="hidden" id="sales" value="0">
+        <input type="hidden" id="stock" value="0">
+        <div class="field-group"><span class="field-label">Other Expenses (TZS)</span><input type="number" id="other" placeholder="e.g. electricity, transport..." inputmode="decimal"></div>
+        <div class="field-group"><span class="field-label">Savings (TZS)</span><input type="number" id="savings" placeholder="Amount set aside today" inputmode="decimal"></div>
+        <div class="field-group"><span class="field-label">Note (optional)</span><textarea id="note" placeholder="e.g. public holiday, slow day..."></textarea></div>
         <div class="save-bar">
             <button class="primary-cta" style="margin-bottom:10px;" onclick="saveRecord()">SAVE RECORD</button>
             <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
@@ -717,7 +717,7 @@
 // ════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxe8euXkXnHnMthGXyx-wVIgQXeGFND5NGsbedrggvHtHtW4Uqi8t45WZcaqjakJ_0Z/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzrtdB3hlPj2Rupcwm2OYGl-h0MWMTizvlD0DotIFLcfmtoINAaelpdJhHjbUvv87ja/exec";
 const PIN = "112511";
 
 // ── STATE ──
@@ -973,7 +973,7 @@ function render() {
             div.innerHTML = `
                 <div style="min-width:0; flex:1;">
                     <div class="entry-date">${rowDate}${isToday ? '<span class="tag-today">TODAY</span>' : ''}</div>
-                    <div class="entry-meta">Sales: ${sales.toLocaleString()} TZS | Exp: ${(stk+oth).toLocaleString()} TZS</div>
+                    <div class="entry-meta">${sales > 0 ? `🛒 Sales: ${sales.toLocaleString()} TZS &nbsp;` : ''}${(stk+oth) > 0 ? `Exp: ${(stk+oth).toLocaleString()} TZS` : ''}${oth > 0 && stk === 0 ? ` (other)` : ''}</div>
                     ${trendHtml}
                     ${row.note ? `<div class="entry-note">"${row.note}"</div>` : ''}
                 </div>
@@ -1152,7 +1152,7 @@ async function confirmSale() {
         navigator.vibrate?.(80);
         clearCart();
         // Refresh data
-        setTimeout(fetchAll, 1400);
+        setTimeout(fetchAll, 4000);
     } catch(e) {
         showToast("⚠️ Sale may not have saved. Check connection.");
     }
@@ -1252,7 +1252,7 @@ async function saveInventoryItem() {
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "saveInventoryItem", item }) });
         showToast(id ? "✅ Item updated!" : "✅ Item added!");
-        setTimeout(fetchInventory, 1400);
+        setTimeout(fetchInventory, 4000);
     } catch(e) {
         showToast("⚠️ Could not save item.");
     }
@@ -1300,7 +1300,7 @@ async function confirmRestock() {
             body: JSON.stringify({ action: "restockItem", itemId, qty, cost, date: getLocalDateStr() })
         });
         showToast(`✅ Stock updated! +${qty} units`);
-        setTimeout(fetchInventory, 1400);
+        setTimeout(fetchInventory, 4000);
     } catch(e) {
         showToast("⚠️ Could not update stock.");
     }
@@ -1400,10 +1400,10 @@ function openModal(type) {
     closeModals();
     if (type === 'entry') {
         document.getElementById('formTitle').innerText = "New Entry";
-        document.querySelectorAll('#overlayEntry input, #overlayEntry textarea').forEach(i => i.value = '');
+        document.getElementById('other').value = ''; document.getElementById('savings').value = ''; document.getElementById('note').value = '';
         document.getElementById('date').value = getLocalDateStr();
         document.getElementById('overlayEntry').classList.add('active');
-        setTimeout(() => document.getElementById('sales').focus(), 300);
+        setTimeout(() => document.getElementById('savings').focus(), 300);
     } else if (type === 'search') {
         document.getElementById('overlaySearch').classList.add('active');
     } else if (type === 'report') {
@@ -1451,7 +1451,7 @@ async function saveRecord() {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
         showToast("✅ Record saved!"); navigator.vibrate?.(50);
     } catch(e) { showToast("⚠️ Save may have failed."); }
-    setTimeout(fetchData, 1400);
+    setTimeout(fetchData, 4000);
 }
 
 function editRow(date) {
@@ -1459,8 +1459,6 @@ function editRow(date) {
     if (!found) { showToast("Record not found."); return; }
     document.getElementById('formTitle').innerText = "Editing: " + date;
     document.getElementById('date').value    = date;
-    document.getElementById('sales').value   = found.sales    || '';
-    document.getElementById('stock').value   = found.stocking || '';
     document.getElementById('other').value   = found.other    || '';
     document.getElementById('savings').value = found.savings  || '';
     document.getElementById('note').value    = found.note     || '';
@@ -1482,7 +1480,7 @@ async function deleteRow(d) {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", date: d }) });
         showToast("🗑️ Record deleted."); navigator.vibrate?.(50);
     } catch(e) { showToast("⚠️ Delete may have failed."); }
-    setTimeout(fetchData, 1400);
+    setTimeout(fetchData, 4000);
 }
 
 // ════════════════════════════════════════════════

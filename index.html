@@ -602,6 +602,7 @@
                 <div style="display:flex;align-items:center;gap:8px;">
                     <span id="posLoggedInUser" style="font-size:0.65rem;color:rgba(255,255,255,0.55);letter-spacing:1px;text-transform:uppercase;"></span>
                     <div style="font-size:0.65rem; color:rgba(255,255,255,0.45); letter-spacing:0.5px;" id="posDate"></div>
+                    <button onclick="forceUpdate()" title="Force update" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.75rem;cursor:pointer;padding:2px 6px;border-radius:6px;">🔄</button>
                     <button onclick="performLogout()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:0.7rem;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Logout">⏻</button>
                 </div>
             </div>
@@ -644,9 +645,12 @@
         <div class="inv-page-header">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div class="inv-page-logo">STOCK</div>
-                <button onclick="openModal('addItem')" style="background:var(--gold); border:none; border-radius:10px; padding:8px 14px; font-size:0.72rem; font-weight:800; cursor:pointer; font-family:'DM Sans',sans-serif; letter-spacing:0.5px;">
-                    + ADD ITEM
-                </button>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button onclick="forceUpdate()" title="Force update" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.85rem;cursor:pointer;padding:4px 8px;border-radius:8px;">🔄</button>
+                    <button onclick="openModal('addItem')" style="background:var(--gold); border:none; border-radius:10px; padding:8px 14px; font-size:0.72rem; font-weight:800; cursor:pointer; font-family:'DM Sans',sans-serif; letter-spacing:0.5px;">
+                        + ADD ITEM
+                    </button>
+                </div>
             </div>
         </div>
         <div class="inv-summary-strip" id="invSummaryStrip"></div>

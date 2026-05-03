@@ -899,7 +899,7 @@
 const CALLMEBOT_PHONE  = "255712897863";
 const CALLMEBOT_APIKEY = "8390915";
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTkfT_O9Q4egXYyxJAMXl95uTI3_cTxqe6U6K11_Up9aqWTOnakMQm7W1D384GNo-4/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPvHnej3It9lUzpJuQBuOathbWMk0tCdElVQDXwVlgOBqKhWD47x5G6aVGkGKgXWMT/exec";
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
@@ -911,6 +911,7 @@ let currentUser = null; // { name, role }
 let data = [];            // Transactions
 let inventory = [];       // Inventory items
 let salesLog = [];        // Sales_Log entries
+let accountingLog = [];   // Accounting_Log entries
 let cart = {};            // { itemId: qty }
 let displayLimit = 5;
 let activeCat = 'All';
@@ -1090,9 +1091,10 @@ async function fetchAll() {
             showToast("⚠️ " + json.error);
             showLoader(false); return;
         }
-        data      = Array.isArray(json.transactions) ? json.transactions : [];
-        inventory = Array.isArray(json.inventory)    ? json.inventory    : [];
-        salesLog  = Array.isArray(json.salesLog)     ? json.salesLog     : [];
+        data          = Array.isArray(json.transactions)  ? json.transactions  : [];
+        inventory     = Array.isArray(json.inventory)      ? json.inventory      : [];
+        salesLog      = Array.isArray(json.salesLog)       ? json.salesLog       : [];
+        accountingLog = Array.isArray(json.accountingLog)  ? json.accountingLog  : [];
         render();
         renderPOSItems();
         renderInventoryPage();
@@ -1946,26 +1948,27 @@ async function saveRecord() {
     if (!dateVal) { showToast("⚠️ Please select a date."); return; }
     const expCat  = document.getElementById('expenseCategory')?.value || '';
     const expAmt  = parseFloat(document.getElementById('other').value) || 0;
+    const bankAmt = parseFloat(document.getElementById('savings').value) || 0;
     const noteVal = document.getElementById('note').value.trim();
-    // Prepend expense category to note so it's stored and visible in history
-    const fullNote = expCat && expAmt > 0
-        ? (expCat + (noteVal ? ': ' + noteVal : ''))
-        : noteVal;
+
+    if (expAmt === 0 && bankAmt === 0) {
+        showToast("⚠️ Enter an expense or banking amount."); return;
+    }
+
     const record = {
         action:   "saveTransaction",
         date:     dateVal,
-        sales:    parseFloat(document.getElementById('sales').value)   || 0,
-        stocking: parseFloat(document.getElementById('stock').value)   || 0,
         other:    expAmt,
-        savings:  parseFloat(document.getElementById('savings').value) || 0,
-        note:     fullNote
+        savings:  bankAmt,
+        category: expCat,
+        note:     noteVal
     };
     closeModals(); showLoader(true);
     try {
         await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
-        showToast("✅ Record saved!"); navigator.vibrate?.(50);
+        showToast("✅ Entry saved!"); navigator.vibrate?.(50);
     } catch(e) { showToast("⚠️ Save may have failed."); }
-    setTimeout(fetchData, 4000);
+    setTimeout(fetchAll, 4000);
 }
 
 function editRow(date) {
@@ -2032,24 +2035,27 @@ function executeSearch() {
         </div>`;
 
     // ── 2. Accounting entries (Expenses & Banking) — each editable individually ──
-    const hasAccounting = other > 0 || savings > 0 || row.note;
+    // Individual accounting entries from accountingLog
+    const dayAccEntries = (accountingLog||[]).filter(r => (r.date||'').split('T')[0] === d)
+        .sort((a,b) => a.timestamp > b.timestamp ? 1 : -1);
+    const hasAccounting = dayAccEntries.length > 0;
     const accountingHtml = hasAccounting ? `
-        ${sectionLabel('📒 Accounting Entry')}
-        <div style="background:#fffbeb;border-radius:14px;padding:12px 14px;border-left:3px solid var(--gold);">
-            ${other > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.8rem;padding:4px 0;border-bottom:1px solid #fef3c7;">
-                <span style="color:var(--gray);">💸 Expenses</span>
-                <strong style="color:var(--red);">${other.toLocaleString()} TZS</strong></div>` : ''}
-            ${savings > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.8rem;padding:4px 0;border-bottom:1px solid #fef3c7;">
-                <span style="color:var(--gray);">🏦 Banking</span>
-                <strong style="color:var(--blue);">${savings.toLocaleString()} TZS</strong></div>` : ''}
-            ${row.note ? `<div style="font-size:0.72rem;color:var(--gray);font-style:italic;padding:6px 0 2px;">"${row.note}"</div>` : ''}
-            ${actionBtns(
-                `closeModals(); editRow('${d}')`,
-                `closeModals(); deleteAccountingRow('${d}')`,
-                '✏️ Edit Accounting',
-                '🗑️ Delete Accounting'
-            )}
-        </div>` : '';
+        ${sectionLabel(`📒 Accounting Entries (${dayAccEntries.length})`)}
+        ${dayAccEntries.map(entry => `
+        <div style="background:#fffbeb;border-radius:12px;padding:10px 14px;margin-bottom:8px;border-left:3px solid ${entry.type==='banking'?'var(--blue)':'var(--gold)'};">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <span style="font-size:0.72rem;color:var(--gray);font-weight:600;">
+                    ${entry.type==='banking'?'🏦 Banking':'💸 '+( entry.category||'Expense')}
+                    · ${entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('en-TZ',{hour:'2-digit',minute:'2-digit'}) : ''}
+                </span>
+                <strong style="color:${entry.type==='banking'?'var(--blue)':'var(--red)'};">${(Number(entry.amount)||0).toLocaleString()} TZS</strong>
+            </div>
+            ${entry.note ? `<div style="font-size:0.72rem;color:var(--gray);font-style:italic;">"${entry.note}"</div>` : ''}
+            <div style="display:flex;justify-content:flex-end;margin-top:6px;">
+                <button class="btn-sec" style="font-size:0.68rem;padding:5px 12px;color:var(--red);"
+                    onclick="deleteAccountingEntry('${entry.id}', '${d}')">🗑️ Delete</button>
+            </div>
+        </div>`).join('')}` : '';
 
     // ── 3. POS Sales — each sale transaction individually editable ──
     const dayLog = (salesLog || []).filter(r => (r.date || '').split('T')[0] === d);
@@ -2092,17 +2098,24 @@ function executeSearch() {
     `;
 }
 
-// Edit an accounting entry (expenses / banking) for a date
-function deleteAccountingRow(d) {
-    if (!confirm("Clear the Expenses and Banking entries for " + d + "?\n\nSales data will remain untouched.")) return;
-    // Post a patch that zeros out other and savings only
+async function deleteAccountingEntry(entryId, date) {
+    if (!confirm("Delete this entry?")) return;
     showLoader(true);
-    fetch(SCRIPT_URL, {
-        method: "POST", mode: "no-cors",
-        body: JSON.stringify({ action: "patchRecord", date: d, fields: { other: 0, savings: 0, note: "" } })
-    }).then(() => {
-        setTimeout(() => { fetchData(); showToast("🗑️ Accounting entries cleared."); showLoader(false); }, 4000);
-    }).catch(() => showLoader(false));
+    try {
+        await fetch(SCRIPT_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ action: "deleteAccountingEntry", entryId, date })
+        });
+        setTimeout(() => {
+            fetchAll();
+            showToast("🗑️ Entry deleted.");
+            // Refresh search results
+            if (document.getElementById('overlaySearch').classList.contains('active')) {
+                setTimeout(executeSearch, 500);
+            }
+            showLoader(false);
+        }, 4000);
+    } catch(e) { showLoader(false); }
 }
 
 // Edit a specific POS sale — opens a detail view allowing quantity correction

@@ -554,11 +554,11 @@
             </div>
             <div class="today-panel role-admin" style="margin-top:8px;">
                 <div class="today-stat">
-                    <h4>Total Savings</h4>
+                    <h4>Total Banking</h4>
                     <p id="heroTotalSavings" style="color:#4ade80">— TZS</p>
                 </div>
                 <div class="today-stat right">
-                    <h4>Today Savings</h4>
+                    <h4>Today Banking</h4>
                     <p id="heroDaySavings" style="color:#4ade80">— TZS</p>
                 </div>
             </div>
@@ -566,13 +566,13 @@
 
         <div class="container">
             <button class="primary-cta role-admin" onclick="openModal('entry')" style="margin-top:14px;">
-                💰 SAVINGS & EXPENSES
+                📒 ACCOUNTING
             </button>
             <div class="summary-grid role-admin">
                 <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
                 <div class="stat-card"><h4>Stocking Expenses</h4><p id="totalStock">...</p></div>
-                <div class="stat-card"><h4>Other Expenses</h4><p id="totalOther">...</p></div>
-                <div class="stat-card"><h4>Total Savings</h4><p id="totalSavings">...</p></div>
+                <div class="stat-card"><h4>Expenses</h4><p id="totalOther">...</p></div>
+                <div class="stat-card"><h4>Total Banking</h4><p id="totalSavings">...</p></div>
             </div>
             <div class="secondary-actions role-admin">
                 <button class="btn-sec" onclick="openModal('search')">🔍 FIND DATE</button>
@@ -668,12 +668,12 @@
 <div class="modal-overlay" id="overlayEntry" onclick="overlayClose(event,'overlayEntry')">
     <div class="modal">
         <div class="modal-handle"></div>
-        <div class="modal-title" id="formTitle">Daily Entry</div>
+        <div class="modal-title" id="formTitle">📒 Accounting</div>
         <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
         <input type="hidden" id="sales" value="0">
         <input type="hidden" id="stock" value="0">
-        <div class="field-group"><span class="field-label">Other Expenses (TZS)</span><input type="number" id="other" placeholder="e.g. electricity, transport..." inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Savings (TZS)</span><input type="number" id="savings" placeholder="Amount set aside today" inputmode="decimal"></div>
+        <div class="field-group"><span class="field-label">Expenses (TZS)</span><input type="number" id="other" placeholder="e.g. electricity, transport, repairs..." inputmode="decimal"></div>
+        <div class="field-group"><span class="field-label">Banking (TZS)</span><input type="number" id="savings" placeholder="Amount banked or set aside today" inputmode="decimal"></div>
         <div class="field-group"><span class="field-label">Note (optional)</span><textarea id="note" placeholder="e.g. public holiday, slow day..."></textarea></div>
         <div class="save-bar">
             <button class="primary-cta" style="margin-bottom:10px;" onclick="saveRecord()">SAVE RECORD</button>
@@ -1594,7 +1594,7 @@ async function saveRecord() {
 function editRow(date) {
     const found = data.find(d => (d.date || '').split('T')[0] === date);
     if (!found) { showToast("Record not found."); return; }
-    document.getElementById('formTitle').innerText = "Editing: " + date;
+    document.getElementById('formTitle').innerText = "✏️ Edit: " + date;
     document.getElementById('date').value    = date;
     document.getElementById('other').value   = found.other    || '';
     document.getElementById('savings').value = found.savings  || '';
@@ -1617,18 +1617,65 @@ function executeSearch() {
         return;
     }
 
-    const row      = dayData[0];
-    const sales    = Number(row.sales)    || 0;
-    const stocking = Number(row.stocking) || 0;
-    const other    = Number(row.other)    || 0;
-    const savings  = Number(row.savings)  || 0;
-    const net      = sales - stocking - other - savings;
+    const row     = dayData[0];
+    const sales   = Number(row.sales)   || 0;
+    const other   = Number(row.other)   || 0;
+    const savings = Number(row.savings) || 0;
+    const net     = sales - other - savings;
 
-    // Build individual POS sale lines from salesLog (in-memory, loaded with inventory)
-    // We group Sales_Log entries by timestamp — each confirmSale() is one transaction
+    // ── Section label helper ──
+    const sectionLabel = (txt) =>
+        `<div style="font-size:0.65rem;font-weight:700;color:var(--gray);text-transform:uppercase;
+         letter-spacing:1px;margin:14px 0 6px;">${txt}</div>`;
+
+    // ── Action buttons helper ──
+    const actionBtns = (editFn, deleteFn, editLabel='✏️ Edit', deleteLabel='🗑️ Delete') => `
+        <div style="display:flex;gap:6px;margin-top:8px;">
+            <button class="btn-sec" style="flex:1;font-size:0.72rem;padding:7px 0;" onclick="${editFn}">${editLabel}</button>
+            <button class="btn-sec" style="flex:1;font-size:0.72rem;padding:7px 0;color:var(--red);" onclick="${deleteFn}">${deleteLabel}</button>
+        </div>`;
+
+    // ── 1. Day Summary card ──
+    const summaryHtml = `
+        ${sectionLabel('📊 Day Summary')}
+        <div style="background:#f8fafc;border-radius:14px;padding:14px;">
+            ${sales > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="font-size:0.8rem;color:var(--gray);">🛒 Total Sales</span>
+                <strong style="color:var(--green);">+${sales.toLocaleString()} TZS</strong></div>` : ''}
+            ${other > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="font-size:0.8rem;color:var(--gray);">💸 Expenses</span>
+                <strong style="color:var(--red);">-${other.toLocaleString()} TZS</strong></div>` : ''}
+            ${savings > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="font-size:0.8rem;color:var(--gray);">🏦 Banking</span>
+                <strong style="color:var(--blue);">-${savings.toLocaleString()} TZS</strong></div>` : ''}
+            <div style="display:flex;justify-content:space-between;padding:8px 0 0;">
+                <span style="font-size:0.85rem;font-weight:700;">Net Balance</span>
+                <strong style="font-size:0.95rem;color:${net>=0?'var(--green)':'var(--red)'};">${net>=0?'+':''}${net.toLocaleString()} TZS</strong>
+            </div>
+        </div>`;
+
+    // ── 2. Accounting entries (Expenses & Banking) — each editable individually ──
+    const hasAccounting = other > 0 || savings > 0 || row.note;
+    const accountingHtml = hasAccounting ? `
+        ${sectionLabel('📒 Accounting Entry')}
+        <div style="background:#fffbeb;border-radius:14px;padding:12px 14px;border-left:3px solid var(--gold);">
+            ${other > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.8rem;padding:4px 0;border-bottom:1px solid #fef3c7;">
+                <span style="color:var(--gray);">💸 Expenses</span>
+                <strong style="color:var(--red);">${other.toLocaleString()} TZS</strong></div>` : ''}
+            ${savings > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.8rem;padding:4px 0;border-bottom:1px solid #fef3c7;">
+                <span style="color:var(--gray);">🏦 Banking</span>
+                <strong style="color:var(--blue);">${savings.toLocaleString()} TZS</strong></div>` : ''}
+            ${row.note ? `<div style="font-size:0.72rem;color:var(--gray);font-style:italic;padding:6px 0 2px;">"${row.note}"</div>` : ''}
+            ${actionBtns(
+                `closeModals(); editRow('${d}')`,
+                `closeModals(); deleteAccountingRow('${d}')`,
+                '✏️ Edit Accounting',
+                '🗑️ Delete Accounting'
+            )}
+        </div>` : '';
+
+    // ── 3. POS Sales — each sale transaction individually editable ──
     const dayLog = (salesLog || []).filter(r => (r.date || '').split('T')[0] === d);
-
-    // Group by saleTotal+timestamp to reconstruct individual sales
     const salesMap = {};
     dayLog.forEach(r => {
         const key = r.timestamp || r.saleTotal;
@@ -1638,53 +1685,69 @@ function executeSearch() {
     const salesEntries = Object.values(salesMap).sort((a,b) => a.timestamp > b.timestamp ? 1 : -1);
 
     const posHtml = salesEntries.length > 0 ? `
-        <div style="font-size:0.68rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px;">
-            🛒 POS Sales (${salesEntries.length} transaction${salesEntries.length>1?'s':''})
-        </div>
+        ${sectionLabel(`🛒 POS Sales — ${salesEntries.length} transaction${salesEntries.length>1?'s':''}`)}
         ${salesEntries.map((sale, si) => `
         <div style="background:#f0fdf4;border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:3px solid var(--pos-green);">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                <span style="font-size:0.72rem;color:var(--gray);">Sale #${si+1} · ${sale.timestamp ? new Date(sale.timestamp).toLocaleTimeString('en-TZ',{hour:'2-digit',minute:'2-digit'}) : ''}</span>
+                <span style="font-size:0.72rem;color:var(--gray);font-weight:600;">Sale #${si+1}
+                    ${sale.timestamp ? '· ' + new Date(sale.timestamp).toLocaleTimeString('en-TZ',{hour:'2-digit',minute:'2-digit'}) : ''}</span>
                 <strong style="color:var(--pos-green);font-size:0.85rem;">${sale.total.toLocaleString()} TZS</strong>
             </div>
             ${sale.items.map(it => `
-            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#555;padding:2px 0;">
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#444;padding:2px 0;">
                 <span>${it.itemName} × ${it.qty}</span>
                 <span>${(Number(it.subtotal)||0).toLocaleString()} TZS</span>
             </div>`).join('')}
+            ${actionBtns(
+                `editSaleEntry('${d}', ${si})`,
+                `deleteSaleEntry('${d}', ${si}, ${sale.total})`,
+                '✏️ Edit Sale',
+                '🗑️ Delete Sale'
+            )}
         </div>`).join('')}` : '';
 
     container.innerHTML = `
-        <div style="font-size:0.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">${fmtDate}</div>
-
-        <!-- Day Summary -->
-        <div style="background:#f8fafc;border-radius:14px;padding:14px;margin-bottom:4px;">
-            ${sales > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
-                <span style="font-size:0.8rem;color:var(--gray);">🛒 Total Sales</span>
-                <strong style="color:var(--green);">+${sales.toLocaleString()} TZS</strong></div>` : ''}
-            ${stocking > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
-                <span style="font-size:0.8rem;color:var(--gray);">📦 Stocking Cost</span>
-                <strong style="color:var(--red);">-${stocking.toLocaleString()} TZS</strong></div>` : ''}
-            ${other > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
-                <span style="font-size:0.8rem;color:var(--gray);">💸 Other Expenses</span>
-                <strong style="color:var(--red);">-${other.toLocaleString()} TZS</strong></div>` : ''}
-            ${savings > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
-                <span style="font-size:0.8rem;color:var(--gray);">🏦 Savings</span>
-                <strong style="color:var(--blue);">-${savings.toLocaleString()} TZS</strong></div>` : ''}
-            <div style="display:flex;justify-content:space-between;padding:8px 0 0;">
-                <span style="font-size:0.85rem;font-weight:700;">Net Balance</span>
-                <strong style="font-size:0.95rem;color:${net>=0?'var(--green)':'var(--red)'};">${net>=0?'+':''}${net.toLocaleString()} TZS</strong>
-            </div>
-        </div>
-
+        <div style="font-size:0.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">${fmtDate}</div>
+        ${summaryHtml}
+        ${accountingHtml}
         ${posHtml}
+        ${!hasAccounting && salesEntries.length === 0 ? `<div style="font-size:0.78rem;color:var(--gray);text-align:center;padding:12px 0;">Only automated data for this day.</div>` : ''}
+    `;
+}
 
-        ${row.note ? `<div style="font-size:0.75rem;color:var(--gray);font-style:italic;margin:10px 0;">"${row.note}"</div>` : ''}
+// Edit an accounting entry (expenses / banking) for a date
+function deleteAccountingRow(d) {
+    if (!confirm("Clear the Expenses and Banking entries for " + d + "?
 
-        <div style="display:flex;gap:8px;margin-top:12px;">
-            <button class="btn-sec" style="flex:1;" onclick="closeModals(); editRow('${d}')">✏️ Edit Entry</button>
-            <button class="btn-sec" style="flex:1;color:var(--red);" onclick="closeModals(); deleteRow('${d}')">🗑️ Delete Entry</button>
-        </div>`;
+Sales data will remain untouched.")) return;
+    // Post a patch that zeros out other and savings only
+    showLoader(true);
+    fetch(SCRIPT_URL, {
+        method: "POST", mode: "no-cors",
+        body: JSON.stringify({ action: "patchRecord", date: d, fields: { other: 0, savings: 0, note: "" } })
+    }).then(() => {
+        setTimeout(() => { fetchData(); showToast("🗑️ Accounting entries cleared."); showLoader(false); }, 4000);
+    }).catch(() => showLoader(false));
+}
+
+// Edit a specific POS sale — opens a detail view allowing quantity correction
+function editSaleEntry(d, saleIndex) {
+    showToast("💡 To correct a POS sale, delete it and re-enter via POS. Coming soon: inline edit.");
+}
+
+// Delete a specific POS sale entry
+async function deleteSaleEntry(d, saleIndex, saleTotal) {
+    if (!confirm(`Delete Sale #${saleIndex+1} (${Number(saleTotal).toLocaleString()} TZS) on ${d}?
+
+This will subtract this amount from today's sales total.`)) return;
+    showLoader(true);
+    try {
+        await fetch(SCRIPT_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ action: "deleteSale", date: d, saleIndex, saleTotal })
+        });
+        setTimeout(() => { fetchAll(); showToast("🗑️ Sale deleted."); showLoader(false); }, 4000);
+    } catch(e) { showLoader(false); }
 }
 
 async function deleteRow(d) {
@@ -1746,9 +1809,9 @@ function previewReport() {
             <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
                 <span style="color:var(--gray);">📦 Stocking Cost</span><strong style="color:var(--red);">${totStock.toLocaleString()} TZS</strong></div>
             <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
-                <span style="color:var(--gray);">💸 Other Expenses</span><strong style="color:var(--red);">${totOther.toLocaleString()} TZS</strong></div>
+                <span style="color:var(--gray);">💸 Expenses</span><strong style="color:var(--red);">${totOther.toLocaleString()} TZS</strong></div>
             <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
-                <span style="color:var(--gray);">🏦 Savings</span><strong style="color:var(--blue);">${totSav.toLocaleString()} TZS</strong></div>
+                <span style="color:var(--gray);">🏦 Banking</span><strong style="color:var(--blue);">${totSav.toLocaleString()} TZS</strong></div>
             <div style="display:flex;justify-content:space-between;padding:7px 0 0;">
                 <strong>Net Profit</strong>
                 <strong style="color:${netProfit>=0?'var(--green)':'var(--red)'};">${netProfit.toLocaleString()} TZS (${margin}%)</strong></div>
@@ -1806,7 +1869,7 @@ function generatePDF() {
         {label:'Total Sales',    val:totSales.toLocaleString()+' TZS',   color:[40,167,69]},
         {label:'Stocking Cost',  val:totStock.toLocaleString()+' TZS',   color:[220,53,69]},
         {label:'Other Expenses', val:totOther.toLocaleString()+' TZS',   color:[220,53,69]},
-        {label:'Savings',        val:totSav.toLocaleString()+' TZS',     color:[0,64,133]},
+        {label:'Banking',        val:totSav.toLocaleString()+' TZS',     color:[0,64,133]},
         {label:'Net Profit',     val:netProfit.toLocaleString()+' TZS',  color:netProfit>=0?[40,167,69]:[220,53,69]},
         {label:'Profit Margin',  val:margin+'%',                          color:netProfit>=0?[40,167,69]:[220,53,69]},
         {label:'Avg Daily Sales',val:Number(avgDaily).toLocaleString()+' TZS', color:[0,26,51]},
@@ -1841,7 +1904,7 @@ function generatePDF() {
 
     doc.autoTable({
         startY: y,
-        head: [['Date','Sales TZS','Stocking TZS','Other Exp TZS','Savings TZS','Net TZS','Note']],
+        head: [['Date','Sales TZS','Stocking TZS','Expenses TZS','Banking TZS','Net TZS','Note']],
         body: txRows,
         styles: { fontSize: 7, cellPadding: 2.5 },
         headStyles: { fillColor: blue, textColor: 255, fontStyle: 'bold', fontSize: 7 },

@@ -899,7 +899,7 @@
 const CALLMEBOT_PHONE  = "255712897863";
 const CALLMEBOT_APIKEY = "8390915";
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT6kV9h8DsjqsMZr7_lEX0iHy5Amg_pyyHnJgHorztSBaPuLG4VNkoat8x2Y8I7MH3/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx7zw2p3FrY1gmYlReyUxJrNTjwcVUIYk4-B4ARaRPoBjdVjF_0L5ATS3e964a4VCVX/exec";
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
@@ -1079,8 +1079,25 @@ function setHeaderDate() {
 async function fetchAll() {
     showLoader(true);
     try {
-        const res = await fetch(SCRIPT_URL + '?action=getAll&t=' + Date.now());
-        const json = await res.json();
+        const res = await fetch(SCRIPT_URL + '?action=getAll&t=' + Date.now(), {
+            method: 'GET',
+            redirect: 'follow',
+        });
+        if (!res.ok) {
+            showToast("⚠️ Server error " + res.status + ". Redeploy Apps Script.");
+            showLoader(false); return;
+        }
+        const text = await res.text();
+        let json;
+        try { json = JSON.parse(text); } catch(pe) {
+            console.error("Bad JSON:", text.slice(0,200));
+            showToast("⚠️ Bad response from server. Check deployment.");
+            showLoader(false); return;
+        }
+        if (json.error) {
+            showToast("⚠️ Script error: " + json.error);
+            showLoader(false); return;
+        }
         data      = Array.isArray(json.transactions) ? json.transactions : [];
         inventory = Array.isArray(json.inventory)    ? json.inventory    : [];
         salesLog  = Array.isArray(json.salesLog)     ? json.salesLog     : [];
@@ -1089,7 +1106,7 @@ async function fetchAll() {
         renderInventoryPage();
     } catch(e) {
         console.error(e);
-        showToast("⚠️ Could not load data. Check connection.");
+        showToast("⚠️ Connection failed: " + (e.message || 'Check internet'));
     }
     showLoader(false);
 }

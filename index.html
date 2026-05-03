@@ -42,8 +42,8 @@
         }
         #loginInner { display: table-cell; vertical-align: middle; text-align: center; padding: 24px; }
         .login-card {
-            background: white; width: 100%; max-width: 300px; margin: 0 auto;
-            padding: 40px 24px 28px; border-radius: 24px; text-align: center;
+            background: white; width: 100%; max-width: 360px; margin: 0 auto;
+            padding: 40px 28px 28px; border-radius: 24px; text-align: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
         .login-logo { font-family: 'Syne', sans-serif; font-size: 2.2rem; letter-spacing: 8px; color: var(--dark); margin-bottom: 6px; }
@@ -51,7 +51,7 @@
         .pass-input {
             width: 100%; padding: 15px; border: 2px solid #dde3ea;
             border-radius: 14px; font-size: 1.4rem; text-align: center;
-            letter-spacing: 10px; background: #f8fafc; outline: none;
+            letter-spacing: 6px; background: #f8fafc; outline: none;
             font-family: 'DM Sans', sans-serif; margin-bottom: 16px;
             -webkit-appearance: none; appearance: none; display: block; transition: border-color 0.2s;
         }
@@ -495,7 +495,7 @@
             <div class="login-logo">LA VIDA</div>
             <div class="login-sub">Authorized Access Only</div>
             <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
-                <select id="userSelect" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:1rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;-webkit-appearance:none;appearance:none;text-align:center;">
+                <select id="userSelect" onkeydown="if(event.key==='Enter') document.getElementById('passInput').focus()" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:1rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;cursor:pointer;">
                     <option value="">— Select User —</option>
                     <option value="matt">Matt</option>
                     <option value="vida">Vida</option>
@@ -503,7 +503,7 @@
                 </select>
                 <input type="password" id="passInput" inputmode="numeric"
                     class="pass-input" placeholder="••••••" style="margin-bottom:0;"
-                    onkeypress="if(event.key==='Enter') checkLogin()">
+                    onkeydown="if(event.key==='Enter') checkLogin()">
             </div>
             <button class="primary-cta" style="margin-bottom:0;" onclick="checkLogin()">UNLOCK</button>
             <div id="pinError"></div>
@@ -801,7 +801,7 @@
 // ════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu4AfjNREvxGPL3eNBv6hhZknGgNSSAyUAEX0P9IVsvpVgQ38k3Z_rEXGVIKZpg96e/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyospmGbaw-wX-dctTgUk4wW-q4Qfo0rAa0ZRo9x3JAcMx9kdrBky9qVZWk8PVspb4G/exec";
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
@@ -878,8 +878,8 @@ function showLoader(on) {
 //  LOGIN
 // ════════════════════════════════════════════════
 function checkLogin() {
-    const userKey = document.getElementById('userSelect').value;
-    const entered = document.getElementById('passInput').value;
+    const userKey = (document.getElementById('userSelect').value || '').trim();
+    const entered = (document.getElementById('passInput').value || '').trim();
     const err = document.getElementById('pinError');
 
     if (!userKey) {

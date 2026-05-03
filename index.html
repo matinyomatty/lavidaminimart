@@ -541,6 +541,8 @@
                 <div style="display:flex;align-items:center;gap:8px;">
                     <span id="loggedInUser" style="font-size:0.65rem;color:rgba(255,255,255,0.55);letter-spacing:1px;text-transform:uppercase;"></span>
                     <div class="header-date" id="headerDate"></div>
+                    <button onclick="forceUpdate()" id="updateBtn" title="Force update app" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.75rem;cursor:pointer;padding:2px 6px;border-radius:6px;">🔄</button>
+                    <button onclick="forceUpdate()" title="Force update app" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.75rem;cursor:pointer;padding:2px 6px;border-radius:6px;">🔄</button>
                     <button onclick="performLogout()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:0.7rem;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Logout">⏻</button>
                 </div>
             </div>
@@ -2088,43 +2090,54 @@ function generatePDF() {
      PWA: Service Worker + Offline Logic
 ═══════════════════════════════════════ -->
 <script>
-// ── Service Worker Registration ──
-// Force clear old service worker caches on every load
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-        regs.forEach(reg => reg.unregister());
-    });
-    if (window.caches) {
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-    }
-}
+// ── Service Worker ──
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
             .then(reg => {
-                console.log('[PWA] Service Worker registered:', reg.scope);
-                // Listen for updates
+                // Check for updates every time app loads
+                reg.update();
                 reg.addEventListener('updatefound', () => {
                     const newWorker = reg.installing;
                     newWorker.addEventListener('statechange', () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            showToast('🔄 App updated! Refresh for latest version.');
+                            showToast('🔄 Update ready — tap 🔄 to apply');
                         }
                     });
                 });
             })
             .catch(err => console.warn('[PWA] SW registration failed:', err));
 
-        // Listen for sync complete message from SW
         navigator.serviceWorker.addEventListener('message', e => {
             if (e.data && e.data.type === 'SYNC_COMPLETE') {
                 showSyncBanner();
                 updateQueueBadge(0);
-                // Refresh data after sync
                 setTimeout(fetchAll, 1500);
             }
         });
     });
+}
+
+// ── Force Update — clears all caches and hard reloads ──
+async function forceUpdate() {
+    const btn = document.getElementById('updateBtn');
+    if (btn) btn.innerText = '⏳';
+    try {
+        // 1. Unregister all service workers
+        if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+        }
+        // 2. Clear all caches
+        if (window.caches) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+        }
+        // 3. Hard reload — bypass browser cache completely
+        window.location.reload(true);
+    } catch(e) {
+        window.location.reload(true);
+    }
 }
 
 // ── Offline / Online Detection ──

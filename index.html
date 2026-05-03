@@ -178,6 +178,8 @@
         }
         .modal-overlay.active { display: flex; }
         body.modal-open { overflow: hidden; position: fixed; width: 100%; }
+        #invSearchInput::placeholder { color: rgba(255,255,255,0.45); }
+        #invSearchInput:focus { border-color: var(--gold); background: rgba(0,0,0,0.5); }
         .modal {
             background: white; width: 100%; max-width: 480px;
             border-radius: 28px 28px 0 0; border-top: 5px solid var(--blue);
@@ -583,6 +585,9 @@
                 <button class="btn-sec" onclick="openModal('search')">🔍 FIND DATE</button>
                 <button class="btn-sec" onclick="openModal('report')">📄 REPORTS</button>
             </div>
+            <button class="btn-sec role-admin" onclick="openCloseDay()" style="width:100%;margin-top:8px;border-color:#dc3545;color:#dc3545;">
+                🔒 CLOSE DAY
+            </button>
             <span class="section-label role-admin">Transaction History</span>
             <div id="entryList" class="role-admin"></div>
             <button id="loadMoreBtn" class="btn-sec role-admin" style="width:100%; margin-top:4px; display:none;" onclick="loadMore()">VIEW MORE</button>
@@ -646,6 +651,9 @@
                 <div class="inv-page-logo">STOCK</div>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <button onclick="forceUpdate()" title="Force update" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.85rem;cursor:pointer;padding:4px 8px;border-radius:8px;">🔄</button>
+                    <button onclick="openModal('stocktake')" style="background:rgba(255,255,255,0.1); border:none; border-radius:10px; padding:8px 14px; font-size:0.72rem; font-weight:800; cursor:pointer; font-family:'DM Sans',sans-serif; letter-spacing:0.5px; color:white;">
+                        📋 STOCKTAKE
+                    </button>
                     <button onclick="openModal('addItem')" style="background:var(--gold); border:none; border-radius:10px; padding:8px 14px; font-size:0.72rem; font-weight:800; cursor:pointer; font-family:'DM Sans',sans-serif; letter-spacing:0.5px;">
                         + ADD ITEM
                     </button>
@@ -657,9 +665,10 @@
             <div style="position:relative; margin-bottom:10px;">
                 <input type="text" id="invSearchInput" placeholder="🔍  Search items..."
                     oninput="filterInventory(this.value)"
-                    style="width:100%; padding:11px 14px; border:none; border-radius:12px;
-                           background:rgba(255,255,255,0.08); color:white; font-size:0.85rem;
-                           font-family:'DM Sans',sans-serif; outline:none; box-sizing:border-box;">
+                    style="width:100%; padding:11px 14px; border:2px solid rgba(255,255,255,0.15); border-radius:12px;
+                           background:rgba(0,0,0,0.35); color:white; font-size:0.85rem;
+                           font-family:'DM Sans',sans-serif; outline:none; box-sizing:border-box;
+                           -webkit-text-fill-color:white;">
             </div>
             <span class="section-label" style="color:rgba(255,255,255,0.4); margin-bottom:8px; display:block;" id="invListLabel">All Stock Items</span>
             <div id="invList"></div>
@@ -669,6 +678,19 @@
 </div>
 
 <!-- ════════════════ MODALS ════════════════ -->
+
+<!-- Close Day Modal -->
+<div class="modal-overlay" id="overlayCloseDay" onclick="overlayClose(event,'overlayCloseDay')">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">🔒 Close Day</div>
+        <div id="closeDaySummary" style="margin-bottom:16px;"></div>
+        <div class="save-bar">
+            <button class="primary-cta" style="margin-bottom:10px;background:#25D366;border:none;" onclick="shareWhatsApp()">📲 SHARE ON WHATSAPP</button>
+            <button class="btn-sec" style="width:100%;border:none;" onclick="closeModals()">CLOSE</button>
+        </div>
+    </div>
+</div>
 
 <!-- AI Modal -->
 <div class="modal-overlay" id="overlayAI" onclick="overlayClose(event,'overlayAI')">
@@ -680,6 +702,20 @@
     </div>
 </div>
 
+<!-- Stocktake Modal -->
+<div class="modal-overlay" id="overlayStocktake" onclick="overlayClose(event,'overlayStocktake')">
+    <div class="modal" style="max-height:92vh;">
+        <div class="modal-handle"></div>
+        <div class="modal-title">📋 Daily Stocktake</div>
+        <div style="font-size:0.72rem;color:var(--gray);margin-bottom:12px;">Enter actual count for each item. Leave blank to skip.</div>
+        <div id="stocktakeList" style="max-height:55vh;overflow-y:auto;margin-bottom:12px;"></div>
+        <div class="save-bar">
+            <button class="primary-cta" style="margin-bottom:10px;" onclick="confirmStocktake()">✅ SAVE STOCKTAKE</button>
+            <button class="btn-sec" style="width:100%;border:none;" onclick="closeModals()">CANCEL</button>
+        </div>
+    </div>
+</div>
+
 <!-- Entry Modal -->
 <div class="modal-overlay" id="overlayEntry" onclick="overlayClose(event,'overlayEntry')">
     <div class="modal">
@@ -688,7 +724,20 @@
         <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
         <input type="hidden" id="sales" value="0">
         <input type="hidden" id="stock" value="0">
-        <div class="field-group"><span class="field-label">Expenses (TZS)</span><input type="number" id="other" placeholder="e.g. electricity, transport, repairs..." inputmode="decimal"></div>
+        <div class="field-group">
+            <span class="field-label">Expense Category</span>
+            <select id="expenseCategory" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
+                <option value="">— No expense —</option>
+                <option value="Electricity">⚡ Electricity</option>
+                <option value="Transport">🚗 Transport</option>
+                <option value="Supplier">📦 Supplier / Restock</option>
+                <option value="Repairs">🔧 Repairs & Maintenance</option>
+                <option value="Rent">🏠 Rent</option>
+                <option value="Salaries">👷 Salaries / Labour</option>
+                <option value="Other">📝 Other</option>
+            </select>
+        </div>
+        <div class="field-group"><span class="field-label">Expense Amount (TZS)</span><input type="number" id="other" placeholder="0" inputmode="decimal"></div>
         <div class="field-group"><span class="field-label">Banking (TZS)</span><input type="number" id="savings" placeholder="Amount banked or set aside today" inputmode="decimal"></div>
         <div class="field-group"><span class="field-label">Note (optional)</span><textarea id="note" placeholder="e.g. public holiday, slow day..."></textarea></div>
         <div class="save-bar">
@@ -817,7 +866,7 @@
 // ════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyospmGbaw-wX-dctTgUk4wW-q4Qfo0rAa0ZRo9x3JAcMx9kdrBky9qVZWk8PVspb4G/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHzOugSYNze2n0ooJd_3jV9EoLOT2sZBMyzb2qBatJ9Dopa4C3vDcqCbbfV8qElOHt/exec";
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
@@ -1599,7 +1648,7 @@ function openModal(type) {
     closeModals();
     if (type === 'entry') {
         document.getElementById('formTitle').innerText = "New Entry";
-        document.getElementById('other').value = ''; document.getElementById('savings').value = ''; document.getElementById('note').value = '';
+        document.getElementById('other').value = ''; document.getElementById('savings').value = ''; document.getElementById('note').value = ''; if(document.getElementById('expenseCategory')) document.getElementById('expenseCategory').value = '';
         document.getElementById('date').value = getLocalDateStr();
         document.getElementById('overlayEntry').classList.add('active');
         setTimeout(() => document.getElementById('savings').focus(), 300);
@@ -1616,6 +1665,10 @@ function openModal(type) {
     } else if (type === 'cart') {
         renderCartModal();
         document.getElementById('overlayCart').classList.add('active');
+    } else if (type === 'stocktake') {
+        openStocktake(); return; // handles its own overlay
+    } else if (type === 'closeDay') {
+        openCloseDay(); return;
     } else if (type === 'addItem') {
         document.getElementById('addItemTitle').innerText = "Add New Item";
         document.getElementById('editItemId').value = '';
@@ -1634,6 +1687,157 @@ function closeModals() {
     document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('active'));
     document.body.classList.remove('modal-open');
 }
+
+// ════════════════════════════════════════════════
+//  FEATURE 1 — STOCKTAKE
+// ════════════════════════════════════════════════
+function openStocktake() {
+    const list = document.getElementById('stocktakeList');
+    const sorted = [...inventory].sort((a,b) => a.name.localeCompare(b.name));
+    list.innerHTML = sorted.map(item => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0;gap:10px;">
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:0.82rem;font-weight:700;color:#001a33;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    ${item.emoji||'📦'} ${item.name}
+                </div>
+                <div style="font-size:0.68rem;color:var(--gray);">System: <strong>${item.stock||0}</strong> units</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                <span style="font-size:0.68rem;color:var(--gray);">Actual:</span>
+                <input type="number" inputmode="numeric" placeholder="${item.stock||0}"
+                    data-itemid="${item.id}" data-systemstock="${item.stock||0}"
+                    style="width:72px;padding:7px 10px;border:2px solid #dde3ea;border-radius:10px;
+                           font-size:0.85rem;text-align:center;font-family:DM Sans,sans-serif;outline:none;">
+            </div>
+        </div>`).join('');
+    document.getElementById('overlayStocktake').classList.add('active');
+    document.body.classList.add('modal-open');
+}
+
+async function confirmStocktake() {
+    const inputs = document.querySelectorAll('#stocktakeList input[data-itemid]');
+    const adjustments = [];
+    inputs.forEach(inp => {
+        const val = inp.value.trim();
+        if (val === '') return; // skip blanks
+        const actual = parseInt(val);
+        const system = parseInt(inp.dataset.systemstock) || 0;
+        if (actual !== system) {
+            adjustments.push({ id: inp.dataset.itemid, actual, system, diff: actual - system });
+        }
+    });
+
+    if (adjustments.length === 0) {
+        showToast("No changes detected."); closeModals(); return;
+    }
+
+    closeModals(); showLoader(true);
+    try {
+        await fetch(SCRIPT_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ action: "stocktake", adjustments, date: getLocalDateStr() })
+        });
+        const msg = adjustments.map(a =>
+            `${a.id}: ${a.system} → ${a.actual} (${a.diff > 0 ? '+' : ''}${a.diff})`
+        ).join(', ');
+        showToast(`✅ Stocktake saved — ${adjustments.length} item(s) adjusted`);
+        setTimeout(fetchInventory, 4000);
+    } catch(e) {
+        showToast("⚠️ Stocktake may not have saved.");
+    }
+    showLoader(false);
+}
+
+// ════════════════════════════════════════════════
+//  FEATURE 6 — CLOSE DAY
+// ════════════════════════════════════════════════
+function openCloseDay() {
+    const today = getLocalDateStr();
+    const todayData = data.find(r => (r.date||'').split('T')[0] === today);
+    const sales    = Number(todayData?.sales)   || 0;
+    const other    = Number(todayData?.other)   || 0;
+    const savings  = Number(todayData?.savings) || 0;
+    const net      = sales - other - savings;
+
+    const dayLog   = (salesLog||[]).filter(r => (r.date||'').split('T')[0] === today);
+    const txCount  = new Set(dayLog.map(r => r.timestamp)).size;
+
+    const fmtDate  = new Date(today + 'T12:00:00').toLocaleDateString('en-TZ',
+        {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+    const lowItems = inventory.filter(i => (i.stock||0) <= (i.reorderLevel||5) && (i.stock||0) > 0);
+    const outItems = inventory.filter(i => (i.stock||0) <= 0);
+
+    document.getElementById('closeDaySummary').innerHTML = `
+        <div style="font-size:0.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">${fmtDate}</div>
+        <div style="background:#f8fafc;border-radius:14px;padding:14px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="font-size:0.8rem;color:var(--gray);">🛒 Total Sales</span>
+                <strong style="color:var(--green);">+${sales.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="font-size:0.8rem;color:var(--gray);">💸 Expenses</span>
+                <strong style="color:var(--red);">-${other.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="font-size:0.8rem;color:var(--gray);">🏦 Banking</span>
+                <strong style="color:var(--blue);">-${savings.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0 0;">
+                <strong>Net Balance</strong>
+                <strong style="font-size:1rem;color:${net>=0?'var(--green)':'var(--red)'};">${net>=0?'+':''}${net.toLocaleString()} TZS</strong>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <div style="flex:1;background:#f0fdf4;border-radius:12px;padding:10px;text-align:center;">
+                <div style="font-size:1.2rem;font-weight:800;color:var(--pos-green);">${txCount}</div>
+                <div style="font-size:0.65rem;color:var(--gray);">POS Sales</div>
+            </div>
+            <div style="flex:1;background:${outItems.length>0?'#fff5f5':'#fffbeb'};border-radius:12px;padding:10px;text-align:center;">
+                <div style="font-size:1.2rem;font-weight:800;color:${outItems.length>0?'var(--red)':'#f59e0b'};">${outItems.length}</div>
+                <div style="font-size:0.65rem;color:var(--gray);">Out of Stock</div>
+            </div>
+            <div style="flex:1;background:#fffbeb;border-radius:12px;padding:10px;text-align:center;">
+                <div style="font-size:1.2rem;font-weight:800;color:#f59e0b;">${lowItems.length}</div>
+                <div style="font-size:0.65rem;color:var(--gray);">Low Stock</div>
+            </div>
+        </div>
+        ${outItems.length > 0 ? `<div style="font-size:0.72rem;color:var(--red);background:#fff5f5;border-radius:10px;padding:8px 12px;margin-bottom:8px;">
+            🚨 Out of stock: ${outItems.slice(0,5).map(i=>i.name).join(', ')}${outItems.length>5?' +more':''}
+        </div>` : ''}`;
+
+    // Store today summary for WhatsApp
+    window._closeDaySummary = { fmtDate, sales, other, savings, net, txCount, outItems, lowItems, todayData };
+
+    document.getElementById('overlayCloseDay').classList.add('active');
+    document.body.classList.add('modal-open');
+}
+
+// ════════════════════════════════════════════════
+//  FEATURE 10 — WHATSAPP SHARE
+// ════════════════════════════════════════════════
+function shareWhatsApp() {
+    const s = window._closeDaySummary;
+    if (!s) return;
+
+    const expCat = s.todayData?.expenseCategory ? `\n💸 ${s.todayData.expenseCategory}: ` : '\n💸 Expenses: ';
+    const note   = s.todayData?.note ? `\n📝 ${s.todayData.note}` : '';
+    const out    = s.outItems.length > 0 ? `\n\n🚨 *Out of Stock (${s.outItems.length}):*\n${s.outItems.slice(0,8).map(i=>'• '+i.name).join('\n')}` : '';
+    const low    = s.lowItems.length > 0 ? `\n⚠️ Low stock: ${s.lowItems.slice(0,5).map(i=>i.name).join(', ')}` : '';
+
+    const msg = `🏪 *LA VIDA MINIMART — Daily Close*
+📅 ${s.fmtDate}
+
+💰 *SUMMARY*
+🛒 Sales: *${s.sales.toLocaleString()} TZS*${expCat}*${s.other.toLocaleString()} TZS*
+🏦 Banking: *${s.savings.toLocaleString()} TZS*
+━━━━━━━━━━━━
+✅ Net: *${s.net >= 0 ? '+' : ''}${s.net.toLocaleString()} TZS*
+
+🧾 POS Transactions: ${s.txCount}${note}${out}${low}
+
+_Sent from La Vida System_`;
+
+    const encoded = encodeURIComponent(msg);
+    window.open(`https://wa.me/?text=${encoded}`, '_blank');
+}
 function overlayClose(e, id) { if (e.target.id === id) closeModals(); }
 
 // ════════════════════════════════════════════════
@@ -1642,14 +1846,21 @@ function overlayClose(e, id) { if (e.target.id === id) closeModals(); }
 async function saveRecord() {
     const dateVal = document.getElementById('date').value;
     if (!dateVal) { showToast("⚠️ Please select a date."); return; }
+    const expCat  = document.getElementById('expenseCategory')?.value || '';
+    const expAmt  = parseFloat(document.getElementById('other').value) || 0;
+    const noteVal = document.getElementById('note').value.trim();
+    // Prepend expense category to note so it's stored and visible in history
+    const fullNote = expCat && expAmt > 0
+        ? (expCat + (noteVal ? ': ' + noteVal : ''))
+        : noteVal;
     const record = {
         action:   "saveTransaction",
         date:     dateVal,
         sales:    parseFloat(document.getElementById('sales').value)   || 0,
         stocking: parseFloat(document.getElementById('stock').value)   || 0,
-        other:    parseFloat(document.getElementById('other').value)   || 0,
+        other:    expAmt,
         savings:  parseFloat(document.getElementById('savings').value) || 0,
-        note:     document.getElementById('note').value.trim() || ""
+        note:     fullNote
     };
     closeModals(); showLoader(true);
     try {

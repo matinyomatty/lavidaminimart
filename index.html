@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>La Vida Minimart</title>
+    <title>La Vida Minimart v2.5</title>
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
@@ -174,6 +177,7 @@
             z-index: 1500; backdrop-filter: blur(3px); justify-content: center; align-items: flex-end;
         }
         .modal-overlay.active { display: flex; }
+        body.modal-open { overflow: hidden; position: fixed; width: 100%; }
         .modal {
             background: white; width: 100%; max-width: 480px;
             border-radius: 28px 28px 0 0; border-top: 5px solid var(--blue);
@@ -645,7 +649,14 @@
         </div>
         <div class="inv-summary-strip" id="invSummaryStrip"></div>
         <div class="inv-list-container">
-            <span class="section-label" style="color:rgba(255,255,255,0.4); margin-bottom:8px; display:block;">All Stock Items</span>
+            <div style="position:relative; margin-bottom:10px;">
+                <input type="text" id="invSearchInput" placeholder="🔍  Search items..."
+                    oninput="filterInventory(this.value)"
+                    style="width:100%; padding:11px 14px; border:none; border-radius:12px;
+                           background:rgba(255,255,255,0.08); color:white; font-size:0.85rem;
+                           font-family:'DM Sans',sans-serif; outline:none; box-sizing:border-box;">
+            </div>
+            <span class="section-label" style="color:rgba(255,255,255,0.4); margin-bottom:8px; display:block;" id="invListLabel">All Stock Items</span>
             <div id="invList"></div>
         </div>
     </div>
@@ -751,7 +762,7 @@
                 <input type="number" id="itemSellPrice" placeholder="0" inputmode="decimal">
             </div>
             <div class="field-group" style="margin-bottom:0;">
-                <span class="field-label">Cost / Unit (TZS)</span>
+                <span class="field-label" id="itemCostLabel">Cost / Unit (TZS)</span>
                 <input type="number" id="itemCostPrice" placeholder="0" inputmode="decimal">
             </div>
         </div>
@@ -784,7 +795,7 @@
             <input type="number" id="restockQty" placeholder="0" inputmode="decimal">
         </div>
         <div class="field-group">
-            <span class="field-label">Cost of this Restock (TZS)</span>
+            <span class="field-label" id="restockCostLabel">Cost per Package (TZS)</span>
             <input type="number" id="restockCost" placeholder="0" inputmode="decimal">
         </div>
         <div class="save-bar">
@@ -1307,6 +1318,47 @@ async function confirmSale() {
 // ════════════════════════════════════════════════
 //  RENDER — INVENTORY PAGE
 // ════════════════════════════════════════════════
+function renderInvList(items) {
+    const list = document.getElementById('invList');
+    if (!list) return;
+    if (items.length === 0) {
+        list.innerHTML = `<div class="empty-state" style="color:rgba(255,255,255,0.4);">
+            <div class="icon">📦</div>No items found.</div>`;
+        return;
+    }
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    list.innerHTML = items.map(item => {
+        const isOut = (item.stock || 0) <= 0;
+        const isLow = !isOut && item.stock <= (item.reorderLevel || 5);
+        const stockClass = isOut ? 'out' : isLow ? 'low' : '';
+        const rowClass   = isOut ? 'out-of-stock' : isLow ? 'low-stock' : '';
+        return `
+        <div class="inv-item-row ${rowClass}">
+            <span class="inv-item-emoji">${item.emoji || '📦'}</span>
+            <div class="inv-item-info">
+                <div class="inv-item-name">${item.name}</div>
+                <div class="inv-item-detail">${item.category || ''} · Sell: ${(item.sellPrice||0).toLocaleString()} TZS${isAdmin ? ' · Cost: '+(item.costPrice||0).toLocaleString()+' TZS' : ''}</div>
+            </div>
+            <div class="inv-item-stock">
+                <div class="inv-item-stock-num ${stockClass}">${item.stock || 0}</div>
+                <div class="inv-item-stock-label">units</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px; flex-shrink:0; margin-left:8px;">
+                <button class="btn-circle" title="Restock" onclick="openRestockModal('${item.id}')" style="font-size:0.8rem; width:34px; height:34px;">📥</button>
+                <button class="btn-circle" title="Edit" onclick="openEditItem('${item.id}')" style="font-size:0.8rem; width:34px; height:34px;">✏️</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function filterInventory(query) {
+    const q = (query || '').toLowerCase().trim();
+    const label = document.getElementById('invListLabel');
+    const filtered = q ? inventory.filter(i => i.name.toLowerCase().includes(q) || (i.category||'').toLowerCase().includes(q)) : [...inventory].sort((a,b)=>(a.stock||0)-(b.stock||0));
+    if (label) label.innerText = q ? `Results for "${query}" (${filtered.length})` : 'All Stock Items';
+    renderInvList(filtered);
+}
+
 function renderInventoryPage() {
     if (!document.getElementById('page-inventory').classList.contains('active') &&
         !document.getElementById('invList')) return;
@@ -1325,39 +1377,16 @@ function renderInventoryPage() {
             <div class="inv-strip-card"><h4>Stock Value</h4><p style="font-size:0.72rem;">${fmt(totalValue)}</p></div>`;
     }
 
-    const list = document.getElementById('invList');
-    if (!list) return;
-
     if (inventory.length === 0) {
-        list.innerHTML = `<div class="empty-state" style="color:rgba(255,255,255,0.4);">
-            <div class="icon">📦</div>No items yet.<br>Tap <strong>+ ADD ITEM</strong> to get started.
-        </div>`;
+        const list = document.getElementById('invList');
+        if (list) list.innerHTML = `<div class="empty-state" style="color:rgba(255,255,255,0.4);">
+            <div class="icon">📦</div>No items yet.<br>Tap <strong>+ ADD ITEM</strong> to get started.</div>`;
         return;
     }
 
-    const sorted = [...inventory].sort((a, b) => (a.stock || 0) - (b.stock || 0));
-    list.innerHTML = sorted.map(item => {
-        const isOut = (item.stock || 0) <= 0;
-        const isLow = !isOut && item.stock <= (item.reorderLevel || 5);
-        const stockClass = isOut ? 'out' : isLow ? 'low' : '';
-        const rowClass = isOut ? 'out-of-stock' : isLow ? 'low-stock' : '';
-        return `
-        <div class="inv-item-row ${rowClass}">
-            <span class="inv-item-emoji">${item.emoji || '📦'}</span>
-            <div class="inv-item-info">
-                <div class="inv-item-name">${item.name}</div>
-                <div class="inv-item-detail">${item.category || ''} · Sell: ${(item.sellPrice||0).toLocaleString()} TZS · Cost: ${(item.costPrice||0).toLocaleString()} TZS</div>
-            </div>
-            <div class="inv-item-stock">
-                <div class="inv-item-stock-num ${stockClass}">${item.stock || 0}</div>
-                <div class="inv-item-stock-label">units</div>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:4px; flex-shrink:0; margin-left:8px;">
-                <button class="btn-circle" title="Restock" onclick="openRestockModal('${item.id}')" style="font-size:0.8rem; width:34px; height:34px;">📥</button>
-                <button class="btn-circle" title="Edit" onclick="openEditItem('${item.id}')" style="font-size:0.8rem; width:34px; height:34px;">✏️</button>
-            </div>
-        </div>`;
-    }).join('');
+    // Respect active search query
+    const query = (document.getElementById('invSearchInput')?.value || '').trim();
+    filterInventory(query);
 }
 
 // ════════════════════════════════════════════════
@@ -1408,6 +1437,11 @@ function openEditItem(itemId) {
     const item = inventory.find(i => i.id === itemId);
     if (!item) return;
     document.getElementById('addItemTitle').innerText = "Edit Item";
+    const isShopEdit = currentUser && currentUser.role === 'shop';
+    const cpFieldE = document.getElementById('itemCostPrice');
+    const cpLabelE = document.getElementById('itemCostLabel');
+    if (cpFieldE) cpFieldE.style.display = isShopEdit ? 'none' : '';
+    if (cpLabelE) cpLabelE.style.display = isShopEdit ? 'none' : '';
     document.getElementById('editItemId').value = item.id;
     document.getElementById('itemName').value = item.name || '';
     document.getElementById('itemCategory').value = item.category || '';
@@ -1427,8 +1461,22 @@ function openRestockModal(itemId) {
     document.getElementById('restockInfo').innerHTML =
         `<strong>${item.emoji || '📦'} ${item.name}</strong><br>Current stock: <strong>${item.stock || 0} units</strong> · Reorder at: ${item.reorderLevel || 5}`;
     document.getElementById('restockQty').value = '';
-    document.getElementById('restockCost').value = '';
+
+    const isShop = currentUser && currentUser.role === 'shop';
+    const costField = document.getElementById('restockCost');
+    const costLabel = document.getElementById('restockCostLabel');
+    if (isShop) {
+        costField.style.display = 'none';
+        if (costLabel) costLabel.style.display = 'none';
+        costField.value = item.costPrice || 0;
+    } else {
+        costField.style.display = '';
+        if (costLabel) costLabel.style.display = '';
+        costField.value = '';
+    }
+
     document.getElementById('overlayRestock').classList.add('active');
+    setTimeout(() => document.getElementById('restockQty').focus(), 300);
 }
 
 async function confirmRestock() {
@@ -1542,6 +1590,7 @@ function generateAIReport() {
 //  MODALS
 // ════════════════════════════════════════════════
 function openModal(type) {
+    document.body.classList.add('modal-open');
     closeModals();
     if (type === 'entry') {
         document.getElementById('formTitle').innerText = "New Entry";
@@ -1567,12 +1616,18 @@ function openModal(type) {
         document.getElementById('editItemId').value = '';
         document.querySelectorAll('#overlayAddItem input[type=text], #overlayAddItem input[type=number]').forEach(i => i.value = '');
         selectedEmoji = '📦'; buildEmojiPicker();
+        const isShopAdd = currentUser && currentUser.role === 'shop';
+        const cpField = document.getElementById('itemCostPrice');
+        const cpLabel = document.getElementById('itemCostLabel');
+        if (cpField) cpField.style.display = isShopAdd ? 'none' : '';
+        if (cpLabel) cpLabel.style.display = isShopAdd ? 'none' : '';
         document.getElementById('overlayAddItem').classList.add('active');
     }
 }
 
 function closeModals() {
     document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('active'));
+    document.body.classList.remove('modal-open');
 }
 function overlayClose(e, id) { if (e.target.id === id) closeModals(); }
 
@@ -2034,6 +2089,15 @@ function generatePDF() {
 ═══════════════════════════════════════ -->
 <script>
 // ── Service Worker Registration ──
+// Force clear old service worker caches on every load
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(reg => reg.unregister());
+    });
+    if (window.caches) {
+        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    }
+}
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')

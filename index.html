@@ -1079,23 +1079,15 @@ function setHeaderDate() {
 async function fetchAll() {
     showLoader(true);
     try {
-        const res = await fetch(SCRIPT_URL + '?action=getAll&t=' + Date.now(), {
-            method: 'GET',
-            redirect: 'follow',
-        });
-        if (!res.ok) {
-            showToast("⚠️ Server error " + res.status + ". Redeploy Apps Script.");
-            showLoader(false); return;
-        }
+        const res  = await fetch(SCRIPT_URL + '?action=getAll&t=' + Date.now());
         const text = await res.text();
         let json;
         try { json = JSON.parse(text); } catch(pe) {
-            console.error("Bad JSON:", text.slice(0,200));
-            showToast("⚠️ Bad response from server. Check deployment.");
+            showToast("⚠️ Bad server response. Try 🔄");
             showLoader(false); return;
         }
         if (json.error) {
-            showToast("⚠️ Script error: " + json.error);
+            showToast("⚠️ " + json.error);
             showLoader(false); return;
         }
         data      = Array.isArray(json.transactions) ? json.transactions : [];
@@ -1467,6 +1459,7 @@ function renderInventoryPage() {
     if (!document.getElementById('page-inventory').classList.contains('active') &&
         !document.getElementById('invList')) return;
 
+    const isAdmin    = currentUser && currentUser.role === 'admin';
     const totalItems = inventory.length;
     const lowItems   = inventory.filter(i => i.stock > 0 && i.stock <= (i.reorderLevel || 5)).length;
     const outItems   = inventory.filter(i => (i.stock || 0) <= 0).length;
@@ -1478,7 +1471,7 @@ function renderInventoryPage() {
             <div class="inv-strip-card"><h4>Items</h4><p>${totalItems}</p></div>
             <div class="inv-strip-card ${lowItems > 0 ? 'alert' : ''}"><h4>Low Stock</h4><p>${lowItems}</p></div>
             <div class="inv-strip-card ${outItems > 0 ? 'alert' : ''}"><h4>Out of Stock</h4><p>${outItems}</p></div>
-            ${isAdmin ? `<div class="inv-strip-card"><h4>Stock Value</h4><p style="font-size:0.72rem;">${fmt(totalValue)}</p></div>` : ''}`; 
+            ${isAdmin ? `<div class="inv-strip-card"><h4>Stock Value</h4><p style="font-size:0.72rem;">${fmt(totalValue)}</p></div>` : ''}`;
     }
 
     if (inventory.length === 0) {

@@ -824,21 +824,35 @@ const EMOJI_OPTIONS = ['🍞','🥛','🍫','🍬','🥤','💧','🧃','🍺','
 const INACTIVITY_LIMIT = 5 * 60 * 1000;
 
 // ════════════════════════════════════════════════
+//  SAFE STORAGE — falls back to memory if localStorage
+//  is blocked (Safari private, desktop strict mode)
+// ════════════════════════════════════════════════
+const _memStore = {};
+function sGet(k) {
+    try { return localStorage.getItem(k); } catch(e) { return _memStore[k] || null; }
+}
+function sSet(k, v) {
+    try { localStorage.setItem(k, v); } catch(e) { _memStore[k] = String(v); }
+}
+function sDel(k) {
+    try { localStorage.removeItem(k); } catch(e) { delete _memStore[k]; }
+}
+
+// ════════════════════════════════════════════════
 //  SESSION / INACTIVITY
 // ════════════════════════════════════════════════
 function updateActivity() {
-    if (localStorage.getItem('laVidaLoggedIn') === 'true')
-        localStorage.setItem('laVidaLastActivity', Date.now());
+    if (sGet('laVidaLoggedIn') === 'true') sSet('laVidaLastActivity', Date.now());
 }
 function checkInactivity() {
-    if (localStorage.getItem('laVidaLoggedIn') === 'true') {
-        const last = parseInt(localStorage.getItem('laVidaLastActivity')) || 0;
+    if (sGet('laVidaLoggedIn') === 'true') {
+        const last = parseInt(sGet('laVidaLastActivity')) || 0;
         if (Date.now() - last > INACTIVITY_LIMIT) performLogout();
     }
 }
 function performLogout() {
-    localStorage.removeItem('laVidaLoggedIn');
-    localStorage.removeItem('laVidaUser');
+    sDel('laVidaLoggedIn');
+    sDel('laVidaUser');
     currentUser = null;
     document.getElementById('loginPage').style.display = 'table';
     document.getElementById('mainApp').style.display = 'none';
@@ -851,8 +865,8 @@ function performLogout() {
 //  INIT
 // ════════════════════════════════════════════════
 window.onload = () => {
-    if (localStorage.getItem('laVidaLoggedIn') === 'true') {
-        const last = parseInt(localStorage.getItem('laVidaLastActivity')) || 0;
+    if (sGet('laVidaLoggedIn') === 'true') {
+        const last = parseInt(sGet('laVidaLastActivity')) || 0;
         if (Date.now() - last > INACTIVITY_LIMIT) performLogout();
         else { updateActivity(); unlockUI(); }
     }
@@ -895,9 +909,9 @@ function checkLogin() {
         return;
     }
     currentUser = { name: user.name, role: user.role };
-    localStorage.setItem('laVidaLoggedIn', 'true');
-    localStorage.setItem('laVidaUser', userKey);
-    localStorage.setItem('laVidaLastActivity', Date.now());
+    sSet('laVidaLoggedIn', 'true');
+    sSet('laVidaUser', userKey);
+    sSet('laVidaLastActivity', Date.now());
     document.getElementById('passInput').value = '';
     document.getElementById('userSelect').value = '';
     unlockUI();
@@ -905,7 +919,7 @@ function checkLogin() {
 function unlockUI() {
     // Restore user from session if page was refreshed
     if (!currentUser) {
-        const saved = localStorage.getItem('laVidaUser');
+        const saved = sGet('laVidaUser');
         if (saved && USERS[saved]) {
             currentUser = { name: USERS[saved].name, role: USERS[saved].role };
         } else {
@@ -2148,7 +2162,7 @@ window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredInstallPrompt = e;
     // Only show if not already installed & not dismissed
-    if (!localStorage.getItem('pwaInstallDismissed')) {
+    if (!sGet('pwaInstallDismissed')) {
         setTimeout(() => {
             document.getElementById('installBanner').classList.add('show');
         }, 4000); // show after 4s
@@ -2168,13 +2182,13 @@ function doInstall() {
 
 function dismissInstall() {
     document.getElementById('installBanner').classList.remove('show');
-    localStorage.setItem('pwaInstallDismissed', '1');
+    sSet('pwaInstallDismissed', '1');
 }
 
 // Hide install banner if already running as installed PWA
 if (window.matchMedia('(display-mode: standalone)').matches ||
     window.navigator.standalone === true) {
-    localStorage.setItem('pwaInstallDismissed', '1');
+    sSet('pwaInstallDismissed', '1');
 }
 
 // ── Periodic queue check ──

@@ -1085,7 +1085,12 @@ function setHeaderDate() {
 async function fetchAll() {
     showLoader(true);
     try {
-        const res  = await fetch(SCRIPT_URL + '?action=getAll&t=' + Date.now());
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 25000); // 25s timeout
+        const res  = await fetch(SCRIPT_URL + '?action=getAll&t=' + Date.now(), {
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
         const text = await res.text();
         let json;
         try { json = JSON.parse(text); } catch(pe) {
@@ -1104,8 +1109,12 @@ async function fetchAll() {
         renderPOSItems();
         renderInventoryPage();
     } catch(e) {
+        if (e.name === 'AbortError') {
+            showToast("⚠️ Load timed out. Tap 🔄 to retry.");
+        } else {
+            showToast("⚠️ Load failed: " + (e.message || 'Check internet'));
+        }
         console.error(e);
-        showToast("⚠️ Connection failed: " + (e.message || 'Check internet'));
     }
     showLoader(false);
 }

@@ -178,7 +178,8 @@
             z-index: 1500; backdrop-filter: blur(3px); justify-content: center; align-items: flex-end;
         }
         .modal-overlay.active { display: flex; }
-        body.modal-open { overflow: hidden; position: fixed; width: 100%; }
+        body.modal-open { overflow: hidden; }
+        html.modal-open  { overflow: hidden; }
         #invSearchInput::placeholder { color: rgba(255,255,255,0.45); }
         #invSearchInput:focus { border-color: var(--gold); background: rgba(0,0,0,0.5); }
         .modal {
@@ -693,8 +694,12 @@
         <div id="closeDayStep1">
             <div style="background:#fff8e1;border-radius:14px;padding:16px;margin-bottom:16px;text-align:center;">
                 <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
-                <div style="font-weight:700;font-size:0.95rem;color:#001a33;margin-bottom:6px;">Close Today's Records?</div>
-                <div style="font-size:0.78rem;color:var(--gray);">Before closing, enter the actual cash and bank balance at end of day.</div>
+                <div style="font-weight:700;font-size:0.95rem;color:#001a33;margin-bottom:6px;">Close Day Summary</div>
+                <div style="font-size:0.78rem;color:var(--gray);">Select a date and enter end-of-day balances.</div>
+            </div>
+            <div class="field-group">
+                <span class="field-label">📅 Date</span>
+                <input type="date" id="closeDayDate">
             </div>
             <div class="field-group">
                 <span class="field-label">💵 Cash in Hand (TZS)</span>
@@ -899,7 +904,7 @@
 const CALLMEBOT_PHONE  = "255712897863";
 const CALLMEBOT_APIKEY = "8390915";
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPvHnej3It9lUzpJuQBuOathbWMk0tCdElVQDXwVlgOBqKhWD47x5G6aVGkGKgXWMT/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmI4Zaj6uLXvJ9RyTnIgqK1qFQoUpZynrXsml3XirgFGB1Osc_mWpxJxdnoInVNPvq/exec";
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
@@ -1689,7 +1694,7 @@ function generateAIReport() {
 //  MODALS
 // ════════════════════════════════════════════════
 function openModal(type) {
-    document.body.classList.add('modal-open');
+    document.body.classList.add('modal-open'); document.documentElement.classList.add('modal-open');
     closeModals();
     if (type === 'entry') {
         document.getElementById('formTitle').innerText = "New Entry";
@@ -1730,7 +1735,7 @@ function openModal(type) {
 
 function closeModals() {
     document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('active'));
-    document.body.classList.remove('modal-open');
+    document.body.classList.remove('modal-open'); document.documentElement.classList.remove('modal-open');
 }
 
 // ════════════════════════════════════════════════
@@ -1756,7 +1761,7 @@ function openStocktake() {
             </div>
         </div>`).join('');
     document.getElementById('overlayStocktake').classList.add('active');
-    document.body.classList.add('modal-open');
+    document.body.classList.add('modal-open'); document.documentElement.classList.add('modal-open');
 }
 
 async function confirmStocktake() {
@@ -1803,7 +1808,7 @@ function openCloseDay() {
     document.getElementById('closeCash').value = '';
     document.getElementById('closeBank').value = '';
     document.getElementById('overlayCloseDay').classList.add('active');
-    document.body.classList.add('modal-open');
+    document.body.classList.add('modal-open'); document.documentElement.classList.add('modal-open');
     setTimeout(() => document.getElementById('closeCash').focus(), 300);
 }
 
@@ -1811,7 +1816,7 @@ function confirmCloseDay() {
     const cash = parseFloat(document.getElementById('closeCash').value) || 0;
     const bank = parseFloat(document.getElementById('closeBank').value) || 0;
 
-    const today     = getLocalDateStr();
+    const today     = document.getElementById('closeDayDate')?.value || getLocalDateStr();
     const todayData = data.find(r => (r.date||'').split('T')[0] === today);
     const sales     = Number(todayData?.sales)   || 0;
     const other     = Number(todayData?.other)   || 0;

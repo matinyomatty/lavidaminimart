@@ -904,7 +904,7 @@
 const CALLMEBOT_PHONE  = "255712897863";
 const CALLMEBOT_APIKEY = "8390915";
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbZsXXWPnNcq2QtGYfBctZAYX4qAWAwLo-HC8DA3Yz4jeeollkxgd89l-rJq2EhT7u/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6h4s_6rPQOR_gQbhBnmq3ADwB9ycPrUSHLe9aTwdLw1GpKMK9vg6U6xCMIMJYYoc_/exec";
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
@@ -1082,41 +1082,50 @@ function setHeaderDate() {
 // ════════════════════════════════════════════════
 //  DATA — COMBINED (1 round-trip on startup)
 // ════════════════════════════════════════════════
+async function apiFetch(action) {
+    const res  = await fetch(SCRIPT_URL + '?action=' + action + '&t=' + Date.now());
+    const text = await res.text();
+    try { return JSON.parse(text); } catch(e) { return null; }
+}
+
 async function fetchAll() {
     showLoader(true);
     try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 25000); // 25s timeout
-        const res  = await fetch(SCRIPT_URL + '?action=getAll&t=' + Date.now(), {
-            signal: controller.signal
-        });
-        clearTimeout(timeout);
-        const text = await res.text();
-        let json;
-        try { json = JSON.parse(text); } catch(pe) {
-            showToast("⚠️ Bad server response. Try 🔄");
+        // Phase 1 — fast: only transactions + inventory (~3-5s)
+        const json = await apiFetch('getAll');
+        if (!json || json.error) {
+            showToast("⚠️ " + (json?.error || 'Load failed. Tap 🔄'));
             showLoader(false); return;
         }
-        if (json.error) {
-            showToast("⚠️ " + json.error);
-            showLoader(false); return;
-        }
-        data          = Array.isArray(json.transactions)  ? json.transactions  : [];
-        inventory     = Array.isArray(json.inventory)      ? json.inventory      : [];
-        salesLog      = Array.isArray(json.salesLog)       ? json.salesLog       : [];
-        accountingLog = Array.isArray(json.accountingLog)  ? json.accountingLog  : [];
+        data      = Array.isArray(json.transactions) ? json.transactions : [];
+        inventory = Array.isArray(json.inventory)    ? json.inventory    : [];
+        showLoader(false);
         render();
         renderPOSItems();
         renderInventoryPage();
+
+        // Phase 2 — background: load logs after UI is shown
+        loadLogsInBackground();
     } catch(e) {
-        if (e.name === 'AbortError') {
-            showToast("⚠️ Load timed out. Tap 🔄 to retry.");
-        } else {
-            showToast("⚠️ Load failed: " + (e.message || 'Check internet'));
-        }
+        showToast("⚠️ Load failed. Tap 🔄 to retry.");
         console.error(e);
+        showLoader(false);
     }
-    showLoader(false);
+}
+
+async function loadLogsInBackground() {
+    try {
+        const [slJson, alJson] = await Promise.all([
+            apiFetch('getSalesLog'),
+            apiFetch('getAccountingLog')
+        ]);
+        if (Array.isArray(slJson)) salesLog = slJson;
+        if (Array.isArray(alJson)) accountingLog = alJson;
+        // Re-render dashboard with full data
+        render();
+    } catch(e) {
+        console.warn('Background log load failed:', e);
+    }
 }
 
 // ════════════════════════════════════════════════

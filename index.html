@@ -577,9 +577,14 @@
         </div>
 
         <div class="container">
-            <button class="primary-cta role-admin" onclick="openModal('entry')" style="margin-top:14px;">
-                📒 ACCOUNTING
-            </button>
+            <div class="role-admin" style="display:flex;gap:8px;margin-top:14px;">
+                <button class="primary-cta" onclick="openModal('entry')" style="flex:1;margin-top:0;">
+                    📒 ACCOUNTING
+                </button>
+                <button class="primary-cta" onclick="openModal('manualSale')" style="flex:1;margin-top:0;background:var(--pos-green);">
+                    🛒 MANUAL SALE
+                </button>
+            </div>
             <div class="summary-grid role-admin">
                 <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
                 <div class="stat-card"><h4>Stocking Expenses</h4><p id="totalStock">...</p></div>
@@ -758,6 +763,22 @@
         <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
         <input type="hidden" id="sales" value="0">
         <input type="hidden" id="stock" value="0">
+
+        <!-- Manual Sale — admin only -->
+        <div id="manualSaleSection" style="display:none;">
+            <div style="font-size:0.68rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🛒 Manual Sale (Outside POS)</div>
+            <div style="background:#f0fdf4;border-radius:14px;padding:12px 14px;margin-bottom:12px;border-left:3px solid var(--pos-green);">
+                <div class="field-group" style="margin-bottom:10px;">
+                    <span class="field-label">Sale Amount (TZS)</span>
+                    <input type="number" id="manualSaleAmount" placeholder="0" inputmode="decimal">
+                </div>
+                <div class="field-group" style="margin-bottom:0;">
+                    <span class="field-label">Description</span>
+                    <input type="text" id="manualSaleDesc" placeholder="e.g. Bulk order, delivery sale...">
+                </div>
+            </div>
+        </div>
+
         <div class="field-group">
             <span class="field-label">Expense Category</span>
             <select id="expenseCategory" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
@@ -777,6 +798,30 @@
         <div class="save-bar">
             <button class="primary-cta" style="margin-bottom:10px;" onclick="saveRecord()">SAVE RECORD</button>
             <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
+        </div>
+    </div>
+</div>
+
+<!-- Manual Sale Modal (Admin Only) -->
+<div class="modal-overlay" id="overlayManualSale" onclick="overlayClose(event,'overlayManualSale')">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">💰 Record Manual Sale <span style="font-size:0.6rem;color:var(--gray);font-weight:400;">(Admin Only)</span></div>
+        <div class="field-group">
+            <span class="field-label">📅 Date</span>
+            <input type="date" id="manualSaleDate">
+        </div>
+        <div class="field-group">
+            <span class="field-label">💵 Sale Amount (TZS)</span>
+            <input type="number" id="manualSaleAmount" placeholder="e.g., 25000" inputmode="decimal">
+        </div>
+        <div class="field-group">
+            <span class="field-label">📝 Note (Reason / Customer)</span>
+            <textarea id="manualSaleDesc" placeholder="e.g., Cash walk-in, Bulk discount, Credit sale..." style="height:80px;"></textarea>
+        </div>
+        <div class="save-bar">
+            <button class="primary-cta" style="margin-bottom:10px;background:var(--pos-green);" onclick="saveManualSale()">✅ ADD MANUAL SALE</button>
+            <button class="btn-sec" style="width:100%;border:none;" onclick="closeModals()">CANCEL</button>
         </div>
     </div>
 </div>
@@ -904,7 +949,7 @@
 const CALLMEBOT_PHONE  = "255712897863";
 const CALLMEBOT_APIKEY = "8390915";
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6h4s_6rPQOR_gQbhBnmq3ADwB9ycPrUSHLe9aTwdLw1GpKMK9vg6U6xCMIMJYYoc_/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8x3EeQ0hgGZq30V9HNgjbcoPxv3nXKJYno31CyhzPiHUoOlUkifO136yrRzqFabH4/exec";
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
@@ -1733,6 +1778,15 @@ function openModal(type) {
     } else if (type === 'cart') {
         renderCartModal();
         document.getElementById('overlayCart').classList.add('active');
+    } else if (type === 'manualSale') {
+        if (!currentUser || currentUser.role !== 'admin') { showToast("⚠️ Admin access only."); return; }
+        document.getElementById('manualSaleDate').value = getLocalDateStr();
+        document.getElementById('manualSaleAmount').value = '';
+        document.getElementById('manualSaleDesc').value = '';
+        document.getElementById('overlayManualSale').classList.add('active');
+        document.body.classList.add('modal-open'); document.documentElement.classList.add('modal-open');
+        setTimeout(() => document.getElementById('manualSaleAmount').focus(), 300);
+        return;
     } else if (type === 'stocktake') {
         openStocktake(); return; // handles its own overlay
     } else if (type === 'closeDay') {
@@ -1819,6 +1873,32 @@ async function confirmStocktake() {
 // ════════════════════════════════════════════════
 //  FEATURE 6 — CLOSE DAY
 // ════════════════════════════════════════════════
+// ════════════════════════════════════════════════
+//  MANUAL SALE (Admin only)
+// ════════════════════════════════════════════════
+async function saveManualSale() {
+    const dateVal = document.getElementById('manualSaleDate').value;
+    const amount  = parseFloat(document.getElementById('manualSaleAmount').value) || 0;
+    const desc    = document.getElementById('manualSaleDesc').value.trim() || 'Manual sale';
+
+    if (!dateVal) { showToast("⚠️ Select a date."); return; }
+    if (amount <= 0) { showToast("⚠️ Enter a valid amount."); return; }
+
+    closeModals(); showLoader(true);
+    try {
+        await fetch(SCRIPT_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ action: "recordManualSale", date: dateVal, amount, note: desc })
+        });
+        showToast("✅ Manual sale of " + fmt(amount) + " recorded!");
+        navigator.vibrate?.(80);
+    } catch(e) {
+        showToast("⚠️ Save may have failed.");
+    }
+    setTimeout(fetchAll, 4000);
+    showLoader(false);
+}
+
 function openCloseDay() {
     // Reset to Step 1
     document.getElementById('closeDayStep1').style.display = '';
@@ -1904,26 +1984,46 @@ function confirmCloseDay() {
 function buildDailyMessage() {
     const s = window._closeDaySummary;
     if (!s) return '';
+
     const note = s.todayData?.note ? `\n📝 Note: ${s.todayData.note}` : '';
     const out  = s.outItems.length > 0
         ? `\n\n🚨 Out of Stock (${s.outItems.length}):\n${s.outItems.slice(0,8).map(i=>'• '+i.name).join('\n')}` : '';
     const low  = s.lowItems.length > 0
-        ? `\n⚠️ Low stock: ${s.lowItems.slice(0,5).map(i=>i.name).join(', ')}` : '';
-    const cash = s.cash > 0 ? `\n💵 Cash in Hand: ${s.cash.toLocaleString()} TZS` : '';
-    const bank = s.bank > 0 ? `\n🏦 Bank Balance: ${s.bank.toLocaleString()} TZS` : '';
+        ? `\n⚠️ Low: ${s.lowItems.slice(0,5).map(i=>i.name).join(', ')}` : '';
+
+    // Supplier/stocking from today's accountingLog
+    const todayStr  = (s.todayData?.date || '').split('T')[0] || '';
+    const dayAcc    = (accountingLog||[]).filter(r => (r.date||'').split('T')[0] === todayStr);
+    const supplier  = dayAcc.filter(r=>r.type==='expense'&&(r.category||'').toLowerCase()==='supplier')
+                           .reduce((t,r)=>t+(Number(r.amount)||0),0);
+    const expenses  = dayAcc.filter(r=>r.type==='expense'&&(r.category||'').toLowerCase()!=='supplier')
+                           .reduce((t,r)=>t+(Number(r.amount)||0),0);
+
+    // Reconciliation
+    const sysCash   = s.net;
+    const diffCash  = s.cash > 0 ? (s.cash - sysCash) : null;
+    const diffBank  = s.bank > 0 ? (s.bank - s.savings) : null;
+    const reconCash = diffCash !== null
+        ? `\n💵 Cash: ${s.cash.toLocaleString()} TZS (System: ${sysCash.toLocaleString()} | ${diffCash >= 0 ? '+' : ''}${diffCash.toLocaleString()})`
+        : (s.cash > 0 ? `\n💵 Cash in Hand: ${s.cash.toLocaleString()} TZS` : '');
+    const reconBank = diffBank !== null
+        ? `\n🏦 Bank: ${s.bank.toLocaleString()} TZS (Banked today: ${s.savings.toLocaleString()} | ${diffBank >= 0 ? '+' : ''}${diffBank.toLocaleString()})`
+        : (s.bank > 0 ? `\n🏦 Bank Balance: ${s.bank.toLocaleString()} TZS` : '');
+
     return `🏪 *LA VIDA MINIMART — Daily Close*
 📅 ${s.fmtDate}
 
 💰 DAILY SUMMARY
 🛒 Sales: ${s.sales.toLocaleString()} TZS
-💸 Expenses: ${s.other.toLocaleString()} TZS
+📦 Supplier/Restock: ${supplier.toLocaleString()} TZS
+💸 Other Expenses: ${expenses.toLocaleString()} TZS
 🏦 Banked: ${s.savings.toLocaleString()} TZS
 ━━━━━━━━━━━━
 ✅ Net: ${s.net >= 0 ? '+' : ''}${s.net.toLocaleString()} TZS
 
-💼 END OF DAY BALANCES${cash}${bank}
+📊 RECONCILIATION${reconCash}${reconBank}
 
-🧾 POS Transactions: ${s.txCount}${note}${out}${low}
+🧾 POS: ${s.txCount} transactions${note}${out}${low}
 
 _Sent from La Vida System_`;
 }
@@ -1967,30 +2067,54 @@ function overlayClose(e, id) { if (e.target.id === id) closeModals(); }
 //  SAVE / EDIT / DELETE TRANSACTION
 // ════════════════════════════════════════════════
 async function saveRecord() {
-    const dateVal = document.getElementById('date').value;
+    const dateVal    = document.getElementById('date').value;
     if (!dateVal) { showToast("⚠️ Please select a date."); return; }
-    const expCat  = document.getElementById('expenseCategory')?.value || '';
-    const expAmt  = parseFloat(document.getElementById('other').value) || 0;
-    const bankAmt = parseFloat(document.getElementById('savings').value) || 0;
-    const noteVal = document.getElementById('note').value.trim();
+    const expCat     = document.getElementById('expenseCategory')?.value || '';
+    const expAmt     = parseFloat(document.getElementById('other').value)   || 0;
+    const bankAmt    = parseFloat(document.getElementById('savings').value) || 0;
+    const noteVal    = document.getElementById('note').value.trim();
+    const manualAmt  = parseFloat(document.getElementById('manualSaleAmount')?.value) || 0;
+    const manualDesc = document.getElementById('manualSaleDesc')?.value.trim() || 'Manual sale';
 
-    if (expAmt === 0 && bankAmt === 0) {
-        showToast("⚠️ Enter an expense or banking amount."); return;
+    if (expAmt === 0 && bankAmt === 0 && manualAmt === 0) {
+        showToast("⚠️ Enter at least one amount."); return;
     }
 
-    const record = {
-        action:   "saveTransaction",
-        date:     dateVal,
-        other:    expAmt,
-        savings:  bankAmt,
-        category: expCat,
-        note:     noteVal
-    };
     closeModals(); showLoader(true);
+
     try {
-        await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(record) });
+        // Save manual sale if entered (admin only)
+        if (manualAmt > 0 && currentUser && currentUser.role === 'admin') {
+            await fetch(SCRIPT_URL, {
+                method: "POST", mode: "no-cors",
+                body: JSON.stringify({
+                    action:    "recordManualSale",
+                    date:      dateVal,
+                    amount:    manualAmt,
+                    note:      manualDesc
+                })
+            });
+        }
+
+        // Save accounting entry if any
+        if (expAmt > 0 || bankAmt > 0) {
+            await fetch(SCRIPT_URL, {
+                method: "POST", mode: "no-cors",
+                body: JSON.stringify({
+                    action:   "saveTransaction",
+                    date:     dateVal,
+                    other:    expAmt,
+                    savings:  bankAmt,
+                    category: expCat,
+                    note:     noteVal
+                })
+            });
+        }
+
         showToast("✅ Entry saved!"); navigator.vibrate?.(50);
-    } catch(e) { showToast("⚠️ Save may have failed."); }
+    } catch(e) {
+        showToast("⚠️ Save may have failed.");
+    }
     setTimeout(fetchAll, 4000);
 }
 

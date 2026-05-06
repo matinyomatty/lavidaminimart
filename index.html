@@ -1999,16 +1999,27 @@ function buildDailyMessage() {
     const expenses  = dayAcc.filter(r=>r.type==='expense'&&(r.category||'').toLowerCase()!=='supplier')
                            .reduce((t,r)=>t+(Number(r.amount)||0),0);
 
-    // Reconciliation
-    const sysCash   = s.net;
-    const diffCash  = s.cash > 0 ? (s.cash - sysCash) : null;
-    const diffBank  = s.bank > 0 ? (s.bank - s.savings) : null;
-    const reconCash = diffCash !== null
-        ? `\n💵 Cash: ${s.cash.toLocaleString()} TZS (System: ${sysCash.toLocaleString()} | ${diffCash >= 0 ? '+' : ''}${diffCash.toLocaleString()})`
-        : (s.cash > 0 ? `\n💵 Cash in Hand: ${s.cash.toLocaleString()} TZS` : '');
-    const reconBank = diffBank !== null
-        ? `\n🏦 Bank: ${s.bank.toLocaleString()} TZS (Banked today: ${s.savings.toLocaleString()} | ${diffBank >= 0 ? '+' : ''}${diffBank.toLocaleString()})`
-        : (s.bank > 0 ? `\n🏦 Bank Balance: ${s.bank.toLocaleString()} TZS` : '');
+    // Reconciliation — compare physical counts vs system running balance
+    // System cash balance = all-time (sales - expenses - banking)
+    const sysCashBalance = data.reduce((t, r) => {
+        const d   = (r.date||'').split('T')[0];
+        const sal = (salesLog||[]).filter(x=>(x.date||'').split('T')[0]===d).reduce((s,x)=>s+(Number(x.subtotal)||0),0) || Number(r.sales)||0;
+        const stk = Number(r.stocking)||0;
+        const oth = Number(r.other)||0;
+        const sav = Number(r.savings)||0;
+        return t + sal - stk - oth - sav;
+    }, 0);
+    const diffCash = s.cash > 0 ? (s.cash - sysCashBalance) : null;
+    const diffBank = s.bank > 0 ? (s.bank - s.savings)      : null;
+    const reconCash = s.cash > 0
+        ? `\n💵 Cash on Hand: ${s.cash.toLocaleString()} TZS\n   System Cash Balance: ${sysCashBalance.toLocaleString()} TZS\n   Difference: ${diffCash >= 0 ? '+' : ''}${diffCash.toLocaleString()} TZS`
+        : '';
+    // System bank balance = all-time cumulative banking (savings)
+    const sysBankBalance = data.reduce((t, r) => t + (Number(r.savings)||0), 0);
+    const diffBankVsSys  = s.bank > 0 ? (s.bank - sysBankBalance) : null;
+    const reconBank = s.bank > 0
+        ? `\n🏦 Bank Balance (Manual): ${s.bank.toLocaleString()} TZS\n   System Bank Balance: ${sysBankBalance.toLocaleString()} TZS\n   Difference: ${diffBankVsSys >= 0 ? '+' : ''}${diffBankVsSys.toLocaleString()} TZS`
+        : '';
 
     return `🏪 *LA VIDA MINIMART — Daily Close*
 📅 ${s.fmtDate}

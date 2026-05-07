@@ -934,7 +934,7 @@
 const CALLMEBOT_PHONE  = "255712897863";
 const CALLMEBOT_APIKEY = "8390915";
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8x3EeQ0hgGZq30V9HNgjbcoPxv3nXKJYno31CyhzPiHUoOlUkifO136yrRzqFabH4/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcbbzVF13zfgSVNtLUBFaf0xVA4-TseP4NSURjUnbV-3mhvZz7eQZuWEZ6QhZMCI_3/exec";
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
@@ -1209,7 +1209,7 @@ function render() {
         const rowStock    = Number(row.stocking) || 0;
         const rowOther    = Number(row.other)    || 0;
         const rowSavings  = Number(row.savings)  || 0;
-        const net = rowSales - rowStock - rowOther - rowSavings;
+        const net = rowSales - rowStock - rowOther; // banking is profit, not deducted
         salesByDate[rowDate] = rowSales;
         totalSales   += rowSales; totalStock  += rowStock;
         totalOther   += rowOther; totalSavings += rowSavings;
@@ -1904,7 +1904,7 @@ function confirmCloseDay() {
     const sales     = Number(todayData?.sales)   || 0;
     const other     = Number(todayData?.other)   || 0;
     const savings   = Number(todayData?.savings) || 0;
-    const net       = sales - other - savings;
+    const net       = sales - other; // banking = profit saved
 
     const dayLog  = (salesLog||[]).filter(r => (r.date||'').split('T')[0] === today);
     const txCount = new Set(dayLog.map(r => r.timestamp)).size;
@@ -1986,13 +1986,13 @@ function buildDailyMessage() {
 
     // Reconciliation — compare physical counts vs system running balance
     // System cash balance = all-time (sales - expenses - banking)
+    // System cash = sales - stocking - other (banking is NOT deducted — it is profit banked)
     const sysCashBalance = data.reduce((t, r) => {
         const d   = (r.date||'').split('T')[0];
         const sal = (salesLog||[]).filter(x=>(x.date||'').split('T')[0]===d).reduce((s,x)=>s+(Number(x.subtotal)||0),0) || Number(r.sales)||0;
         const stk = Number(r.stocking)||0;
         const oth = Number(r.other)||0;
-        const sav = Number(r.savings)||0;
-        return t + sal - stk - oth - sav;
+        return t + sal - stk - oth;
     }, 0);
     const diffCash = s.cash > 0 ? (s.cash - sysCashBalance) : null;
     const diffBank = s.bank > 0 ? (s.bank - s.savings)      : null;
@@ -2076,6 +2076,20 @@ async function saveRecord() {
     closeModals(); showLoader(true);
 
     try {
+        // If editing an existing date, delete all old accounting entries first
+        const editDate = document.getElementById('overlayEntry')?.getAttribute('data-edit-date');
+        if (editDate && editDate === dateVal) {
+            const oldEntries = (accountingLog||[]).filter(r => (r.date||'').split('T')[0] === editDate);
+            for (const entry of oldEntries) {
+                await fetch(SCRIPT_URL, {
+                    method: "POST", mode: "no-cors",
+                    body: JSON.stringify({ action: "deleteAccountingEntry", entryId: entry.id, date: editDate })
+                });
+            }
+            await new Promise(r => setTimeout(r, 1000)); // small wait for deletes
+        }
+        document.getElementById('overlayEntry')?.removeAttribute('data-edit-date');
+
         await fetch(SCRIPT_URL, {
             method: "POST", mode: "no-cors",
             body: JSON.stringify({
@@ -2095,14 +2109,20 @@ async function saveRecord() {
 }
 
 function editRow(date) {
-    const found = data.find(d => (d.date || '').split('T')[0] === date);
-    if (!found) { showToast("Record not found."); return; }
+    // Get current accounting totals for this date from accountingLog
+    const dayAcc = (accountingLog||[]).filter(r => (r.date||'').split('T')[0] === date);
+    const curOther   = dayAcc.filter(r=>r.type==='expense').reduce((s,r)=>s+(Number(r.amount)||0),0);
+    const curSavings = dayAcc.filter(r=>r.type==='banking').reduce((s,r)=>s+(Number(r.amount)||0),0);
+    const curNote    = dayAcc.find(r=>r.note)?.note || '';
+
     document.getElementById('formTitle').innerText = "✏️ Edit: " + date;
     document.getElementById('date').value    = date;
-    document.getElementById('other').value   = found.other    || '';
-    document.getElementById('savings').value = found.savings  || '';
-    document.getElementById('note').value    = found.note     || '';
+    document.getElementById('other').value   = curOther   || '';
+    document.getElementById('savings').value = curSavings || '';
+    document.getElementById('note').value    = curNote;
+    document.getElementById('overlayEntry').setAttribute('data-edit-date', date);
     document.getElementById('overlayEntry').classList.add('active');
+    document.body.classList.add('modal-open'); document.documentElement.classList.add('modal-open');
 }
 
 function executeSearch() {
@@ -2124,7 +2144,7 @@ function executeSearch() {
     const sales   = Number(row.sales)   || 0;
     const other   = Number(row.other)   || 0;
     const savings = Number(row.savings) || 0;
-    const net     = sales - other - savings;
+    const net     = sales - other; // banking is savings/profit, not an expense
 
     // ── Section label helper ──
     const sectionLabel = (txt) =>
@@ -2298,7 +2318,7 @@ function previewReport() {
         totSales += Number(r.sales)||0; totStock += Number(r.stocking)||0;
         totOther += Number(r.other)||0; totSav   += Number(r.savings)||0;
     });
-    const netProfit = totSales - totStock - totOther - totSav;
+    const netProfit = totSales - totStock - totOther; // banking is profit, not expense
     const margin = totSales > 0 ? ((netProfit/totSales)*100).toFixed(1) : 0;
 
     // Top 5 selling items from salesLog this month
@@ -2366,7 +2386,7 @@ function generatePDF() {
         if(s>(Number(bestDay.sales)||0)) bestDay=r;
         if(s<(Number(worstDay.sales)||0)) worstDay=r;
     });
-    const netProfit = totSales - totStock - totOther - totSav;
+    const netProfit = totSales - totStock - totOther; // banking is profit, not expense
     const margin = totSales>0?((netProfit/totSales)*100).toFixed(1):0;
     const avgDaily = filtered.length>0?(totSales/filtered.length).toFixed(0):0;
 

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,478 +9,482 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>La Vida Minimart v2.5</title>
 
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="La Vida">
-    <meta name="theme-color" content="#001a33">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+```
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="La Vida">
+<meta name="theme-color" content="#001a33">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --blue: #004085;
-            --dark: #001a33;
-            --light: #f0f4f8;
-            --green: #28a745;
-            --gray: #6c757d;
-            --red: #dc3545;
-            --gold: #d4af37;
-            --ai-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --pos-green: #00875a;
-            --pos-green-light: #e6f6f0;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-        html, body { min-height: 100vh; }
-        html { background: var(--dark); }
-        body { background: var(--dark); font-family: 'DM Sans', system-ui, sans-serif; color: var(--dark); }
-        body.unlocked { background: var(--light); }
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --blue: #004085;
+        --dark: #001a33;
+        --light: #f0f4f8;
+        --green: #28a745;
+        --gray: #6c757d;
+        --red: #dc3545;
+        --gold: #d4af37;
+        --ai-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --pos-green: #00875a;
+        --pos-green-light: #e6f6f0;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    html, body { min-height: 100vh; }
+    html { background: var(--dark); }
+    body { background: var(--dark); font-family: 'DM Sans', system-ui, sans-serif; color: var(--dark); }
+    body.unlocked { background: var(--light); }
 
-        /* ── LOGIN ── */
-        #loginPage {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--dark); display: table; width: 100%; height: 100%; z-index: 100;
-        }
-        #loginInner { display: table-cell; vertical-align: middle; text-align: center; padding: 24px; }
-        .login-card {
-            background: white; width: 100%; max-width: 360px; margin: 0 auto;
-            padding: 40px 28px 28px; border-radius: 24px; text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        }
-        .login-logo { font-family: 'Syne', sans-serif; font-size: 2.2rem; letter-spacing: 8px; color: var(--dark); margin-bottom: 6px; }
-        .login-sub { color: var(--gray); font-size: 0.75rem; margin-bottom: 28px; }
-        .pass-input {
-            width: 100%; padding: 15px; border: 2px solid #dde3ea;
-            border-radius: 14px; font-size: 1.4rem; text-align: center;
-            letter-spacing: 6px; background: #f8fafc; outline: none;
-            font-family: 'DM Sans', sans-serif; margin-bottom: 16px;
-            -webkit-appearance: none; appearance: none; display: block; transition: border-color 0.2s;
-        }
-        .pass-input:focus { border-color: var(--blue); background: white; }
-        #pinError { color: var(--red); font-size: 0.78rem; min-height: 18px; margin-top: 8px; }
+    /* ── LOGIN ── */
+    #loginPage {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: var(--dark); display: table; width: 100%; height: 100%; z-index: 100;
+    }
+    #loginInner { display: table-cell; vertical-align: middle; text-align: center; padding: 24px; }
+    .login-card {
+        background: white; width: 100%; max-width: 360px; margin: 0 auto;
+        padding: 40px 28px 28px; border-radius: 24px; text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .login-logo { font-family: 'Syne', sans-serif; font-size: 2.2rem; letter-spacing: 8px; color: var(--dark); margin-bottom: 6px; }
+    .login-sub { color: var(--gray); font-size: 0.75rem; margin-bottom: 28px; }
+    .pass-input {
+        width: 100%; padding: 15px; border: 2px solid #dde3ea;
+        border-radius: 14px; font-size: 1.4rem; text-align: center;
+        letter-spacing: 6px; background: #f8fafc; outline: none;
+        font-family: 'DM Sans', sans-serif; margin-bottom: 16px;
+        -webkit-appearance: none; appearance: none; display: block; transition: border-color 0.2s;
+    }
+    .pass-input:focus { border-color: var(--blue); background: white; }
+    #pinError { color: var(--red); font-size: 0.78rem; min-height: 18px; margin-top: 8px; }
 
-        /* ── MAIN APP ── */
-        #mainApp { display: none; }
+    /* ── MAIN APP ── */
+    #mainApp { display: none; }
 
-        /* ── TAB NAVIGATION ── */
-        .tab-nav {
-            position: sticky; top: 0; z-index: 600;
-            background: var(--dark);
-            display: flex; border-bottom: 3px solid var(--gold);
-        }
-        .tab-btn {
-            flex: 1; padding: 0; border: none; background: transparent; cursor: pointer;
-            font-family: 'DM Sans', sans-serif; font-size: 0.62rem; font-weight: 700;
-            color: rgba(255,255,255,0.45); letter-spacing: 1px; text-transform: uppercase;
-            transition: color 0.2s, background 0.2s;
-            display: flex; flex-direction: column; align-items: center; gap: 3px;
-            padding: 10px 4px 8px;
-        }
-        .tab-btn .tab-icon { font-size: 1.1rem; }
-        .tab-btn.active { color: var(--gold); background: rgba(212,175,55,0.07); }
-        .tab-btn:active { background: rgba(255,255,255,0.05); }
+    /* ── TAB NAVIGATION ── */
+    .tab-nav {
+        position: sticky; top: 0; z-index: 600;
+        background: var(--dark);
+        display: flex; border-bottom: 3px solid var(--gold);
+    }
+    .tab-btn {
+        flex: 1; padding: 0; border: none; background: transparent; cursor: pointer;
+        font-family: 'DM Sans', sans-serif; font-size: 0.62rem; font-weight: 700;
+        color: rgba(255,255,255,0.45); letter-spacing: 1px; text-transform: uppercase;
+        transition: color 0.2s, background 0.2s;
+        display: flex; flex-direction: column; align-items: center; gap: 3px;
+        padding: 10px 4px 8px;
+    }
+    .tab-btn .tab-icon { font-size: 1.1rem; }
+    .tab-btn.active { color: var(--gold); background: rgba(212,175,55,0.07); }
+    .tab-btn:active { background: rgba(255,255,255,0.05); }
 
-        /* ── TAB PAGES ── */
-        .tab-page { display: none; padding-bottom: 90px; }
-        .tab-page.active { display: block; }
+    /* ── TAB PAGES ── */
+    .tab-page { display: none; padding-bottom: 90px; }
+    .tab-page.active { display: block; }
 
-        /* ── DASHBOARD HEADER ── */
-        .header {
-            background: var(--dark); color: white;
-            padding: 14px 16px 16px;
-            border-bottom: 3px solid rgba(212,175,55,0.3);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-            position: sticky; top: 48px; z-index: 500;
-        }
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .header-logo { font-family: 'Syne', sans-serif; font-size: 1.3rem; letter-spacing: 4px; color: var(--gold); }
-        .header-date { font-size: 0.65rem; color: rgba(255,255,255,0.5); text-align: right; }
-        .today-panel {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(212,175,55,0.2);
-            border-radius: 14px; padding: 10px 12px;
-        }
-        .today-stat h4 { font-size: 0.5rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
-        .today-stat p { font-size: 0.82rem; font-weight: 700; color: white; }
-        .today-stat.right { text-align: right; }
-        .trend-badge { display: inline-block; font-size: 0.55rem; padding: 1px 5px; border-radius: 4px; font-weight: 800; }
-        .trend-up { background: rgba(40,167,69,0.25); color: #4ade80; }
-        .trend-down { background: rgba(220,53,69,0.25); color: #f87171; }
+    /* ── DASHBOARD HEADER ── */
+    .header {
+        background: var(--dark); color: white;
+        padding: 14px 16px 16px;
+        border-bottom: 3px solid rgba(212,175,55,0.3);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        position: sticky; top: 48px; z-index: 500;
+    }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .header-logo { font-family: 'Syne', sans-serif; font-size: 1.3rem; letter-spacing: 4px; color: var(--gold); }
+    .header-date { font-size: 0.65rem; color: rgba(255,255,255,0.5); text-align: right; }
+    .today-panel {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+        background: rgba(255,255,255,0.04); border: 1px solid rgba(212,175,55,0.2);
+        border-radius: 14px; padding: 10px 12px;
+    }
+    .today-stat h4 { font-size: 0.5rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+    .today-stat p { font-size: 0.82rem; font-weight: 700; color: white; }
+    .today-stat.right { text-align: right; }
+    .trend-badge { display: inline-block; font-size: 0.55rem; padding: 1px 5px; border-radius: 4px; font-weight: 800; }
+    .trend-up { background: rgba(40,167,69,0.25); color: #4ade80; }
+    .trend-down { background: rgba(220,53,69,0.25); color: #f87171; }
 
-        /* ── CONTAINER ── */
-        .container { padding: 16px; max-width: 480px; margin: auto; }
+    /* ── CONTAINER ── */
+    .container { padding: 16px; max-width: 480px; margin: auto; }
 
-        /* ── PRIMARY CTA ── */
-        .primary-cta {
-            background: var(--blue); color: white; width: 100%;
-            padding: 17px; border: none; border-radius: 16px;
-            font-size: 1rem; font-weight: 800; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            margin-bottom: 16px; box-shadow: 0 8px 20px rgba(0,64,133,0.3);
-            font-family: 'DM Sans', sans-serif; letter-spacing: 1.5px; text-transform: uppercase;
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-        .primary-cta:active { transform: scale(0.98); box-shadow: 0 4px 10px rgba(0,64,133,0.2); }
-        .primary-cta.green-cta { background: var(--pos-green); box-shadow: 0 8px 20px rgba(0,135,90,0.3); }
-        .primary-cta.green-cta:active { box-shadow: 0 4px 10px rgba(0,135,90,0.2); }
+    /* ── PRIMARY CTA ── */
+    .primary-cta {
+        background: var(--blue); color: white; width: 100%;
+        padding: 17px; border: none; border-radius: 16px;
+        font-size: 1rem; font-weight: 800; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        margin-bottom: 16px; box-shadow: 0 8px 20px rgba(0,64,133,0.3);
+        font-family: 'DM Sans', sans-serif; letter-spacing: 1.5px; text-transform: uppercase;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .primary-cta:active { transform: scale(0.98); box-shadow: 0 4px 10px rgba(0,64,133,0.2); }
+    .primary-cta.green-cta { background: var(--pos-green); box-shadow: 0 8px 20px rgba(0,135,90,0.3); }
+    .primary-cta.green-cta:active { box-shadow: 0 4px 10px rgba(0,135,90,0.2); }
 
-        /* ── SUMMARY GRID ── */
-        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-        .stat-card {
-            background: white; padding: 14px; border-radius: 16px;
-            border-left: 4px solid var(--blue); box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
-        .stat-card h4 { font-size: 0.58rem; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-        .stat-card p { font-size: 0.88rem; font-weight: 700; }
+    /* ── SUMMARY GRID ── */
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .stat-card {
+        background: white; padding: 14px; border-radius: 16px;
+        border-left: 4px solid var(--blue); box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .stat-card h4 { font-size: 0.58rem; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .stat-card p { font-size: 0.88rem; font-weight: 700; }
 
-        /* ── SECONDARY ACTIONS ── */
-        .secondary-actions { display: flex; gap: 10px; margin-bottom: 18px; }
-        .btn-sec {
-            flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #dde3ea;
-            background: white; font-weight: 700; cursor: pointer;
-            font-size: 0.75rem; font-family: 'DM Sans', sans-serif; transition: background 0.15s;
-        }
-        .btn-sec:active { background: #f0f0f0; }
+    /* ── SECONDARY ACTIONS ── */
+    .secondary-actions { display: flex; gap: 10px; margin-bottom: 18px; }
+    .btn-sec {
+        flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #dde3ea;
+        background: white; font-weight: 700; cursor: pointer;
+        font-size: 0.75rem; font-family: 'DM Sans', sans-serif; transition: background 0.15s;
+    }
+    .btn-sec:active { background: #f0f0f0; }
 
-        /* ── TRANSACTION HISTORY ── */
-        .section-label {
-            font-size: 0.65rem; font-weight: 700; color: var(--gray);
-            text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 10px;
-        }
-        .entry-item {
-            background: white; padding: 14px 14px 14px 16px; border-radius: 16px; margin-bottom: 10px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-left: 4px solid #e0e6ef; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-        }
-        .entry-item.is-today { border-left-color: var(--gold); background: #fffdf5; }
-        .entry-date { font-size: 0.88rem; font-weight: 700; }
-        .entry-meta { font-size: 0.72rem; color: var(--gray); margin-top: 3px; }
-        .entry-note { font-size: 0.68rem; color: var(--gray); font-style: italic; margin-top: 4px; word-wrap: break-word; }
-        .sales-trend { display: inline-block; font-size: 0.68rem; font-weight: 700; margin-top: 4px; padding: 2px 7px; border-radius: 6px; }
-        .tag-today {
-            display: inline-block; background: var(--gold); color: var(--dark);
-            font-size: 0.45rem; padding: 2px 6px; border-radius: 4px; font-weight: 900;
-            margin-left: 6px; vertical-align: middle; letter-spacing: 0.5px;
-        }
-        .action-btns { display: flex; gap: 8px; flex-shrink: 0; }
-        .btn-circle {
-            border: none; background: #f0f3f6; width: 38px; height: 38px; border-radius: 50%;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            font-size: 0.95rem; transition: background 0.15s;
-        }
-        .btn-circle:active { background: #e0e3e6; }
+    /* ── TRANSACTION HISTORY ── */
+    .section-label {
+        font-size: 0.65rem; font-weight: 700; color: var(--gray);
+        text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 10px;
+    }
+    .entry-item {
+        background: white; padding: 14px 14px 14px 16px; border-radius: 16px; margin-bottom: 10px;
+        display: flex; justify-content: space-between; align-items: center;
+        border-left: 4px solid #e0e6ef; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .entry-item.is-today { border-left-color: var(--gold); background: #fffdf5; }
+    .entry-date { font-size: 0.88rem; font-weight: 700; }
+    .entry-meta { font-size: 0.72rem; color: var(--gray); margin-top: 3px; }
+    .entry-note { font-size: 0.68rem; color: var(--gray); font-style: italic; margin-top: 4px; word-wrap: break-word; }
+    .sales-trend { display: inline-block; font-size: 0.68rem; font-weight: 700; margin-top: 4px; padding: 2px 7px; border-radius: 6px; }
+    .tag-today {
+        display: inline-block; background: var(--gold); color: var(--dark);
+        font-size: 0.45rem; padding: 2px 6px; border-radius: 4px; font-weight: 900;
+        margin-left: 6px; vertical-align: middle; letter-spacing: 0.5px;
+    }
+    .action-btns { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-circle {
+        border: none; background: #f0f3f6; width: 38px; height: 38px; border-radius: 50%;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        font-size: 0.95rem; transition: background 0.15s;
+    }
+    .btn-circle:active { background: #e0e3e6; }
 
-        /* ── MODAL OVERLAY ── */
-        .modal-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
-            z-index: 1500; backdrop-filter: blur(3px); justify-content: center; align-items: flex-end;
-        }
-        .modal-overlay.active { display: flex; }
-        body.modal-open { overflow: hidden; }
-        html.modal-open  { overflow: hidden; }
-        #invSearchInput::placeholder { color: rgba(255,255,255,0.45); }
-        #invSearchInput:focus { border-color: var(--gold); background: rgba(0,0,0,0.5); }
-        .modal {
-            background: white; width: 100%; max-width: 480px;
-            border-radius: 28px 28px 0 0; border-top: 5px solid var(--blue);
-            padding: 24px 20px 36px; max-height: 92vh; overflow-y: auto;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.2); animation: slideUp 0.25s ease;
-        }
-        .modal.green-modal { border-top-color: var(--pos-green); }
-        @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .modal-handle { width: 36px; height: 4px; border-radius: 2px; background: #ddd; margin: 0 auto 20px; }
-        .modal-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; text-align: center; margin-bottom: 20px; color: var(--dark); }
-        .field-group { margin-bottom: 14px; }
-        .field-label { font-size: 0.65rem; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
-        input[type=date], input[type=number], input[type=month], input[type=text], textarea {
-            width: 100%; min-width: 0; display: block; box-sizing: border-box;
-            padding: 13px; border: 1.5px solid #e0e6ef; border-radius: 12px; font-size: 0.95rem;
-            background: #fafbfc; outline: none; font-family: 'DM Sans', sans-serif; transition: border-color 0.15s;
-        }
-        input:focus, textarea:focus { border-color: var(--blue); background: white; }
-        textarea { height: 64px; resize: none; }
-        .save-bar { position: sticky; bottom: 0; background: white; padding-top: 12px; margin-top: 6px; }
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+        z-index: 1500; backdrop-filter: blur(3px); justify-content: center; align-items: flex-end;
+    }
+    .modal-overlay.active { display: flex; }
+    body.modal-open { overflow: hidden; }
+    html.modal-open  { overflow: hidden; }
+    #invSearchInput::placeholder { color: rgba(255,255,255,0.45); }
+    #invSearchInput:focus { border-color: var(--gold); background: rgba(0,0,0,0.5); }
+    .modal {
+        background: white; width: 100%; max-width: 480px;
+        border-radius: 28px 28px 0 0; border-top: 5px solid var(--blue);
+        padding: 24px 20px 36px; max-height: 92vh; overflow-y: auto;
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.2); animation: slideUp 0.25s ease;
+    }
+    .modal.green-modal { border-top-color: var(--pos-green); }
+    @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-handle { width: 36px; height: 4px; border-radius: 2px; background: #ddd; margin: 0 auto 20px; }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; text-align: center; margin-bottom: 20px; color: var(--dark); }
+    .field-group { margin-bottom: 14px; }
+    .field-label { font-size: 0.65rem; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
+    input[type=date], input[type=number], input[type=month], input[type=text], textarea {
+        width: 100%; min-width: 0; display: block; box-sizing: border-box;
+        padding: 13px; border: 1.5px solid #e0e6ef; border-radius: 12px; font-size: 0.95rem;
+        background: #fafbfc; outline: none; font-family: 'DM Sans', sans-serif; transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus { border-color: var(--blue); background: white; }
+    textarea { height: 64px; resize: none; }
+    .save-bar { position: sticky; bottom: 0; background: white; padding-top: 12px; margin-top: 6px; }
 
-        /* ── LOADING & TOAST ── */
-        .loading-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,26,51,0.8);
-            z-index: 9999; justify-content: center; align-items: center;
-            flex-direction: column; gap: 14px; color: white;
-        }
-        .spinner {
-            width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.2);
-            border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text { font-size: 0.8rem; letter-spacing: 2px; opacity: 0.7; }
-        .toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: var(--dark); color: white; padding: 12px 24px;
-            border-radius: 12px; font-size: 0.82rem; font-weight: 600;
-            z-index: 9998; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
-        }
-        .toast.show { opacity: 1; }
-        .empty-state { text-align: center; padding: 32px 20px; color: var(--gray); font-size: 0.85rem; }
-        .empty-state .icon { font-size: 2rem; margin-bottom: 10px; }
+    /* ── LOADING & TOAST ── */
+    .loading-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(0,26,51,0.8);
+        z-index: 9999; justify-content: center; align-items: center;
+        flex-direction: column; gap: 14px; color: white;
+    }
+    .spinner {
+        width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.2);
+        border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 0.8rem; letter-spacing: 2px; opacity: 0.7; }
+    .toast {
+        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+        background: var(--dark); color: white; padding: 12px 24px;
+        border-radius: 12px; font-size: 0.82rem; font-weight: 600;
+        z-index: 9998; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+    .empty-state { text-align: center; padding: 32px 20px; color: var(--gray); font-size: 0.85rem; }
+    .empty-state .icon { font-size: 2rem; margin-bottom: 10px; }
 
-        /* ── FLOATING AI ── */
-        .fab-ai {
-            position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px;
-            border-radius: 50%; background: var(--ai-grad); color: white; border: none;
-            box-shadow: 0 8px 24px rgba(118,75,162,0.4); font-size: 1.5rem;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            z-index: 1000; transition: transform 0.2s cubic-bezier(0.175,0.885,0.32,1.275);
-        }
-        .fab-ai:active { transform: scale(0.85); }
-        .fab-ai::after {
-            content: ''; position: absolute; inset: -4px; border-radius: 50%;
-            background: var(--ai-grad); filter: blur(8px); opacity: 0.4; z-index: -1;
-        }
+    /* ── FLOATING AI ── */
+    .fab-ai {
+        position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px;
+        border-radius: 50%; background: var(--ai-grad); color: white; border: none;
+        box-shadow: 0 8px 24px rgba(118,75,162,0.4); font-size: 1.5rem;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+        z-index: 1000; transition: transform 0.2s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+    .fab-ai:active { transform: scale(0.85); }
+    .fab-ai::after {
+        content: ''; position: absolute; inset: -4px; border-radius: 50%;
+        background: var(--ai-grad); filter: blur(8px); opacity: 0.4; z-index: -1;
+    }
 
-        /* AI styles */
-        .ai-header-title { font-family: 'Syne', sans-serif; color: #4a3479; text-align: center; font-size: 1.2rem; margin-bottom: 15px; }
-        .ai-bubble { background: #f4f6fb; border-radius: 16px; padding: 16px; font-size: 0.85rem; color: #333; line-height: 1.6; border-left: 4px solid #764ba2; margin-bottom: 15px; word-wrap: break-word; }
-        .ai-bubble strong { color: #2d1b4e; }
-        .ai-stat-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ddd; padding: 6px 0; }
-        .ai-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-        .ai-tag { background: #e0d8f0; color: #4a3479; padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; }
-        .ai-notes-box { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; font-size: 0.75rem; color: #555; font-style: italic; max-height: 120px; overflow-y: auto; }
+    /* AI styles */
+    .ai-header-title { font-family: 'Syne', sans-serif; color: #4a3479; text-align: center; font-size: 1.2rem; margin-bottom: 15px; }
+    .ai-bubble { background: #f4f6fb; border-radius: 16px; padding: 16px; font-size: 0.85rem; color: #333; line-height: 1.6; border-left: 4px solid #764ba2; margin-bottom: 15px; word-wrap: break-word; }
+    .ai-bubble strong { color: #2d1b4e; }
+    .ai-stat-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ddd; padding: 6px 0; }
+    .ai-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .ai-tag { background: #e0d8f0; color: #4a3479; padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; }
+    .ai-notes-box { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; font-size: 0.75rem; color: #555; font-style: italic; max-height: 120px; overflow-y: auto; }
 
-        /* ══════════════════════════════════════
-           POS STYLES
-        ══════════════════════════════════════ */
+    /* ══════════════════════════════════════
+       POS STYLES
+    ══════════════════════════════════════ */
 
-        /* POS Header */
-        .pos-header {
-            background: var(--dark); color: white;
-            padding: 14px 16px 12px;
-            border-bottom: 3px solid var(--pos-green);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-            position: sticky; top: 48px; z-index: 500;
-        }
-        .pos-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .pos-header-logo { font-family: 'Syne', sans-serif; font-size: 1.1rem; letter-spacing: 3px; color: #4ade80; }
-        .pos-search-wrap { position: relative; }
-        .pos-search {
-            width: 100%; padding: 11px 14px 11px 38px; border: 1.5px solid rgba(255,255,255,0.15);
-            border-radius: 12px; background: rgba(255,255,255,0.07); color: white;
-            font-size: 0.9rem; font-family: 'DM Sans', sans-serif; outline: none;
-            transition: border-color 0.2s;
-        }
-        .pos-search::placeholder { color: rgba(255,255,255,0.35); }
-        .pos-search:focus { border-color: #4ade80; background: rgba(255,255,255,0.1); }
-        .pos-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 1rem; opacity: 0.5; }
+    /* POS Header */
+    .pos-header {
+        background: var(--dark); color: white;
+        padding: 14px 16px 12px;
+        border-bottom: 3px solid var(--pos-green);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        position: sticky; top: 48px; z-index: 500;
+    }
+    .pos-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .pos-header-logo { font-family: 'Syne', sans-serif; font-size: 1.1rem; letter-spacing: 3px; color: #4ade80; }
+    .pos-search-wrap { position: relative; }
+    .pos-search {
+        width: 100%; padding: 11px 14px 11px 38px; border: 1.5px solid rgba(255,255,255,0.15);
+        border-radius: 12px; background: rgba(255,255,255,0.07); color: white;
+        font-size: 0.9rem; font-family: 'DM Sans', sans-serif; outline: none;
+        transition: border-color 0.2s;
+    }
+    .pos-search::placeholder { color: rgba(255,255,255,0.35); }
+    .pos-search:focus { border-color: #4ade80; background: rgba(255,255,255,0.1); }
+    .pos-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 1rem; opacity: 0.5; }
 
-        /* Category filter */
-        .cat-filter {
-            display: flex; gap: 6px; padding: 10px 16px; overflow-x: auto;
-            background: var(--dark); scrollbar-width: none;
-        }
-        .cat-filter::-webkit-scrollbar { display: none; }
-        .cat-chip {
-            flex-shrink: 0; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);
-            background: transparent; color: rgba(255,255,255,0.55); font-size: 0.7rem; font-weight: 700;
-            cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s;
-            white-space: nowrap;
-        }
-        .cat-chip.active { background: #4ade80; color: var(--dark); border-color: #4ade80; }
-        .cat-chip:active { opacity: 0.7; }
+    /* Category filter */
+    .cat-filter {
+        display: flex; gap: 6px; padding: 10px 16px; overflow-x: auto;
+        background: var(--dark); scrollbar-width: none;
+    }
+    .cat-filter::-webkit-scrollbar { display: none; }
+    .cat-chip {
+        flex-shrink: 0; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);
+        background: transparent; color: rgba(255,255,255,0.55); font-size: 0.7rem; font-weight: 700;
+        cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+        white-space: nowrap;
+    }
+    .cat-chip.active { background: #4ade80; color: var(--dark); border-color: #4ade80; }
+    .cat-chip:active { opacity: 0.7; }
 
-        /* Items grid */
-        .pos-items-container { padding: 12px 12px 0; max-width: 480px; margin: auto; }
-        .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    /* Items grid */
+    .pos-items-container { padding: 12px 12px 0; max-width: 480px; margin: auto; }
+    .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-        .item-card {
-            background: white; border-radius: 16px; padding: 14px 12px 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
-            transition: transform 0.12s, box-shadow 0.12s; position: relative;
-            border: 2px solid transparent; overflow: hidden;
-        }
-        .item-card:active { transform: scale(0.96); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-        .item-card.in-cart { border-color: var(--pos-green); background: var(--pos-green-light); }
-        .item-card.out-of-stock { opacity: 0.5; cursor: not-allowed; }
-        .item-card-emoji { font-size: 1.6rem; margin-bottom: 6px; display: block; }
-        .item-card-name { font-size: 0.8rem; font-weight: 700; color: var(--dark); margin-bottom: 2px; line-height: 1.2; }
-        .item-card-price { font-size: 0.75rem; color: var(--pos-green); font-weight: 700; }
-        .item-card-stock { font-size: 0.62rem; color: var(--gray); margin-top: 3px; }
-        .item-card-badge {
-            position: absolute; top: 8px; right: 8px;
-            background: var(--pos-green); color: white;
-            width: 22px; height: 22px; border-radius: 50%;
-            font-size: 0.7rem; font-weight: 800;
-            display: none; align-items: center; justify-content: center;
-        }
-        .item-card.in-cart .item-card-badge { display: flex; }
-        .item-low-stock {
-            position: absolute; top: 8px; left: 8px;
-            background: #ff8c00; color: white;
-            font-size: 0.5rem; font-weight: 800; padding: 2px 5px; border-radius: 4px;
-        }
+    .item-card {
+        background: white; border-radius: 16px; padding: 14px 12px 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
+        transition: transform 0.12s, box-shadow 0.12s; position: relative;
+        border: 2px solid transparent; overflow: hidden;
+    }
+    .item-card:active { transform: scale(0.96); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .item-card.in-cart { border-color: var(--pos-green); background: var(--pos-green-light); }
+    .item-card.out-of-stock { opacity: 0.5; cursor: not-allowed; }
+    .item-card-emoji { font-size: 1.6rem; margin-bottom: 6px; display: block; }
+    .item-card-name { font-size: 0.8rem; font-weight: 700; color: var(--dark); margin-bottom: 2px; line-height: 1.2; }
+    .item-card-price { font-size: 0.75rem; color: var(--pos-green); font-weight: 700; }
+    .item-card-stock { font-size: 0.62rem; color: var(--gray); margin-top: 3px; }
+    .item-card-badge {
+        position: absolute; top: 8px; right: 8px;
+        background: var(--pos-green); color: white;
+        width: 22px; height: 22px; border-radius: 50%;
+        font-size: 0.7rem; font-weight: 800;
+        display: none; align-items: center; justify-content: center;
+    }
+    .item-card.in-cart .item-card-badge { display: flex; }
+    .item-low-stock {
+        position: absolute; top: 8px; left: 8px;
+        background: #ff8c00; color: white;
+        font-size: 0.5rem; font-weight: 800; padding: 2px 5px; border-radius: 4px;
+    }
 
-        /* Cart bar */
-        .cart-bar {
-            position: fixed; bottom: 0; left: 0; right: 0; z-index: 800;
-            display: none; justify-content: center;
-            padding: 10px 16px 16px;
-            background: linear-gradient(to top, rgba(240,244,248,1) 70%, transparent);
-            pointer-events: none;
-        }
-        .cart-bar.has-items { display: flex; }
-        .cart-bar-inner {
-            width: 100%; max-width: 448px;
-            background: var(--dark); color: white;
-            border-radius: 20px; padding: 14px 16px;
-            display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 8px 32px rgba(0,26,51,0.35);
-            pointer-events: all; cursor: pointer;
-            transition: transform 0.15s;
-        }
-        .cart-bar-inner:active { transform: scale(0.98); }
-        .cart-bar-left { display: flex; align-items: center; gap: 12px; }
-        .cart-count-bubble {
-            background: var(--gold); color: var(--dark);
-            width: 32px; height: 32px; border-radius: 50%;
-            font-size: 0.9rem; font-weight: 800;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .cart-bar-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-        .cart-bar-sublabel { font-size: 0.65rem; color: rgba(255,255,255,0.5); margin-top: 1px; }
-        .cart-bar-total { font-size: 1rem; font-weight: 800; color: var(--gold); }
+    /* Cart bar */
+    .cart-bar {
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 800;
+        display: none; justify-content: center;
+        padding: 10px 16px 16px;
+        background: linear-gradient(to top, rgba(240,244,248,1) 70%, transparent);
+        pointer-events: none;
+    }
+    .cart-bar.has-items { display: flex; }
+    .cart-bar-inner {
+        width: 100%; max-width: 448px;
+        background: var(--dark); color: white;
+        border-radius: 20px; padding: 14px 16px;
+        display: flex; align-items: center; justify-content: space-between;
+        box-shadow: 0 8px 32px rgba(0,26,51,0.35);
+        pointer-events: all; cursor: pointer;
+        transition: transform 0.15s;
+    }
+    .cart-bar-inner:active { transform: scale(0.98); }
+    .cart-bar-left { display: flex; align-items: center; gap: 12px; }
+    .cart-count-bubble {
+        background: var(--gold); color: var(--dark);
+        width: 32px; height: 32px; border-radius: 50%;
+        font-size: 0.9rem; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .cart-bar-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+    .cart-bar-sublabel { font-size: 0.65rem; color: rgba(255,255,255,0.5); margin-top: 1px; }
+    .cart-bar-total { font-size: 1rem; font-weight: 800; color: var(--gold); }
 
-        /* Inventory management styles */
-        .inv-page-header {
-            background: var(--dark); padding: 14px 16px 12px;
-            border-bottom: 3px solid rgba(212,175,55,0.3);
-            position: sticky; top: 48px; z-index: 500;
-        }
-        .inv-page-logo { font-family: 'Syne', sans-serif; font-size: 1.1rem; letter-spacing: 3px; color: var(--gold); }
-        .inv-summary-strip {
-            display: flex; gap: 8px; padding: 10px 16px;
-            background: var(--dark); overflow-x: auto; scrollbar-width: none;
-            position: sticky; top: calc(48px + 70px); z-index: 499;
-        }
-        .inv-summary-strip::-webkit-scrollbar { display: none; }
-        .inv-strip-card {
-            flex-shrink: 0; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px; padding: 8px 14px; min-width: 90px;
-        }
-        .inv-strip-card h4 { font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
-        .inv-strip-card p { font-size: 0.82rem; font-weight: 700; color: white; }
-        .inv-strip-card.alert p { color: #f87171; }
+    /* Inventory management styles */
+    .inv-page-header {
+        background: var(--dark); padding: 14px 16px 12px;
+        border-bottom: 3px solid rgba(212,175,55,0.3);
+        position: sticky; top: 48px; z-index: 500;
+    }
+    .inv-page-logo { font-family: 'Syne', sans-serif; font-size: 1.1rem; letter-spacing: 3px; color: var(--gold); }
+    .inv-summary-strip {
+        display: flex; gap: 8px; padding: 10px 16px;
+        background: var(--dark); overflow-x: auto; scrollbar-width: none;
+        position: sticky; top: calc(48px + 70px); z-index: 499;
+    }
+    .inv-summary-strip::-webkit-scrollbar { display: none; }
+    .inv-strip-card {
+        flex-shrink: 0; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px; padding: 8px 14px; min-width: 90px;
+    }
+    .inv-strip-card h4 { font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .inv-strip-card p { font-size: 0.82rem; font-weight: 700; color: white; }
+    .inv-strip-card.alert p { color: #f87171; }
 
-        .inv-list-container { padding: 12px 16px; max-width: 480px; margin: auto; }
-        .inv-item-row {
-            background: white; border-radius: 14px; margin-bottom: 8px;
-            padding: 12px 14px; display: flex; align-items: center; gap: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04); border-left: 4px solid #e0e6ef;
-        }
-        .inv-item-row.low-stock { border-left-color: #ff8c00; }
-        .inv-item-row.out-of-stock { border-left-color: var(--red); background: #fff5f5; }
-        .inv-item-emoji { font-size: 1.4rem; flex-shrink: 0; }
-        .inv-item-info { flex: 1; min-width: 0; }
-        .inv-item-name { font-size: 0.85rem; font-weight: 700; }
-        .inv-item-detail { font-size: 0.67rem; color: var(--gray); margin-top: 2px; }
-        .inv-item-stock { text-align: right; flex-shrink: 0; }
-        .inv-item-stock-num { font-size: 0.95rem; font-weight: 800; }
-        .inv-item-stock-num.low { color: #ff8c00; }
-        .inv-item-stock-num.out { color: var(--red); }
-        .inv-item-stock-label { font-size: 0.58rem; color: var(--gray); }
+    .inv-list-container { padding: 12px 16px; max-width: 480px; margin: auto; }
+    .inv-item-row {
+        background: white; border-radius: 14px; margin-bottom: 8px;
+        padding: 12px 14px; display: flex; align-items: center; gap: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04); border-left: 4px solid #e0e6ef;
+    }
+    .inv-item-row.low-stock { border-left-color: #ff8c00; }
+    .inv-item-row.out-of-stock { border-left-color: var(--red); background: #fff5f5; }
+    .inv-item-emoji { font-size: 1.4rem; flex-shrink: 0; }
+    .inv-item-info { flex: 1; min-width: 0; }
+    .inv-item-name { font-size: 0.85rem; font-weight: 700; }
+    .inv-item-detail { font-size: 0.67rem; color: var(--gray); margin-top: 2px; }
+    .inv-item-stock { text-align: right; flex-shrink: 0; }
+    .inv-item-stock-num { font-size: 0.95rem; font-weight: 800; }
+    .inv-item-stock-num.low { color: #ff8c00; }
+    .inv-item-stock-num.out { color: var(--red); }
+    .inv-item-stock-label { font-size: 0.58rem; color: var(--gray); }
 
-        /* Cart modal specifics */
-        .cart-line {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 0; border-bottom: 1px solid #f0f0f0;
-        }
-        .cart-line:last-child { border-bottom: none; }
-        .cart-line-emoji { font-size: 1.2rem; flex-shrink: 0; }
-        .cart-line-name { flex: 1; font-size: 0.85rem; font-weight: 700; min-width: 0; }
-        .cart-line-price { font-size: 0.8rem; color: var(--gray); margin-top: 2px; }
-        .qty-ctrl { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .qty-btn {
-            width: 30px; height: 30px; border-radius: 50%; border: none;
-            font-size: 1.1rem; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.15s;
-        }
-        .qty-minus { background: #fee2e2; color: var(--red); }
-        .qty-minus:active { background: #fca5a5; }
-        .qty-plus { background: #d1fae5; color: var(--pos-green); }
-        .qty-plus:active { background: #6ee7b7; }
-        .qty-num { font-size: 0.95rem; font-weight: 800; min-width: 18px; text-align: center; }
-        .cart-total-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 14px 0 0; border-top: 2px solid var(--dark); margin-top: 4px;
-        }
-        .cart-total-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--gray); }
-        .cart-total-amount { font-size: 1.2rem; font-weight: 800; color: var(--pos-green); }
+    /* Cart modal specifics */
+    .cart-line {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 0; border-bottom: 1px solid #f0f0f0;
+    }
+    .cart-line:last-child { border-bottom: none; }
+    .cart-line-emoji { font-size: 1.2rem; flex-shrink: 0; }
+    .cart-line-name { flex: 1; font-size: 0.85rem; font-weight: 700; min-width: 0; }
+    .cart-line-price { font-size: 0.8rem; color: var(--gray); margin-top: 2px; }
+    .qty-ctrl { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .qty-btn {
+        width: 30px; height: 30px; border-radius: 50%; border: none;
+        font-size: 1.1rem; font-weight: 700; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s;
+    }
+    .qty-minus { background: #fee2e2; color: var(--red); }
+    .qty-minus:active { background: #fca5a5; }
+    .qty-plus { background: #d1fae5; color: var(--pos-green); }
+    .qty-plus:active { background: #6ee7b7; }
+    .qty-num { font-size: 0.95rem; font-weight: 800; min-width: 18px; text-align: center; }
+    .cart-total-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 14px 0 0; border-top: 2px solid var(--dark); margin-top: 4px;
+    }
+    .cart-total-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--gray); }
+    .cart-total-amount { font-size: 1.2rem; font-weight: 800; color: var(--pos-green); }
 
-        /* Add item form */
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-        .emoji-picker-row {
-            display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
-        }
-        .emoji-opt {
-            width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid #e0e6ef;
-            background: #fafbfc; font-size: 1.2rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.12s;
-        }
-        .emoji-opt.selected { border-color: var(--blue); background: #e8f0fe; }
-        .emoji-opt:active { transform: scale(0.9); }
+    /* Add item form */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .emoji-picker-row {
+        display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+    }
+    .emoji-opt {
+        width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid #e0e6ef;
+        background: #fafbfc; font-size: 1.2rem; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.12s;
+    }
+    .emoji-opt.selected { border-color: var(--blue); background: #e8f0fe; }
+    .emoji-opt:active { transform: scale(0.9); }
 
-        /* Restock modal */
-        .restock-info {
-            background: var(--pos-green-light); border: 1px solid #a7f3d0; border-radius: 12px;
-            padding: 12px 14px; margin-bottom: 16px; font-size: 0.8rem; color: #065f46;
-        }
+    /* Restock modal */
+    .restock-info {
+        background: var(--pos-green-light); border: 1px solid #a7f3d0; border-radius: 12px;
+        padding: 12px 14px; margin-bottom: 16px; font-size: 0.8rem; color: #065f46;
+    }
 
-        /* ── PWA: OFFLINE / SYNC / INSTALL ── */
-        #offlineBanner {
-            display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
-            background: #ff8c00; color: white; text-align: center;
-            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px;
-            padding: 8px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        #offlineBanner.show { display: block; }
-        #syncBanner {
-            display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
-            background: var(--pos-green); color: white; text-align: center;
-            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px;
-            padding: 8px 16px;
-        }
-        #syncBanner.show { display: block; }
-        #installBanner {
-            display: none; position: fixed; bottom: 80px; left: 12px; right: 12px; z-index: 2000;
-            background: var(--dark); color: white; border-radius: 18px;
-            padding: 16px 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.45);
-            border: 1px solid rgba(212,175,55,0.3);
-            animation: slideUp 0.3s ease;
-        }
-        #installBanner.show { display: flex; align-items: center; gap: 14px; }
-        .install-icon { font-size: 2rem; flex-shrink: 0; }
-        .install-text { flex: 1; }
-        .install-text strong { display: block; font-size: 0.85rem; margin-bottom: 2px; color: var(--gold); }
-        .install-text span { font-size: 0.72rem; color: rgba(255,255,255,0.6); }
-        .install-btn { background: var(--gold); color: var(--dark); border: none; border-radius: 10px; padding: 9px 16px; font-weight: 800; font-size: 0.78rem; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; }
-        .install-dismiss { background: none; border: none; color: rgba(255,255,255,0.35); font-size: 1.3rem; cursor: pointer; padding: 4px; flex-shrink: 0; }
-        #queueBadge {
-            display: none; position: fixed; bottom: 78px; right: 14px; z-index: 1100;
-            background: #ff8c00; color: white; border-radius: 10px;
-            font-size: 0.6rem; font-weight: 800; padding: 3px 7px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        #queueBadge.show { display: block; }
-        /* Safe area for notched phones */
-        .tab-nav { padding-bottom: env(safe-area-inset-bottom); }
-        #loginPage { padding-top: env(safe-area-inset-top); }
-    </style>
+    /* ── PWA: OFFLINE / SYNC / INSTALL ── */
+    #offlineBanner {
+        display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+        background: #ff8c00; color: white; text-align: center;
+        font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px;
+        padding: 8px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    #offlineBanner.show { display: block; }
+    #syncBanner {
+        display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+        background: var(--pos-green); color: white; text-align: center;
+        font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px;
+        padding: 8px 16px;
+    }
+    #syncBanner.show { display: block; }
+    #installBanner {
+        display: none; position: fixed; bottom: 80px; left: 12px; right: 12px; z-index: 2000;
+        background: var(--dark); color: white; border-radius: 18px;
+        padding: 16px 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+        border: 1px solid rgba(212,175,55,0.3);
+        animation: slideUp 0.3s ease;
+    }
+    #installBanner.show { display: flex; align-items: center; gap: 14px; }
+    .install-icon { font-size: 2rem; flex-shrink: 0; }
+    .install-text { flex: 1; }
+    .install-text strong { display: block; font-size: 0.85rem; margin-bottom: 2px; color: var(--gold); }
+    .install-text span { font-size: 0.72rem; color: rgba(255,255,255,0.6); }
+    .install-btn { background: var(--gold); color: var(--dark); border: none; border-radius: 10px; padding: 9px 16px; font-weight: 800; font-size: 0.78rem; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; }
+    .install-dismiss { background: none; border: none; color: rgba(255,255,255,0.35); font-size: 1.3rem; cursor: pointer; padding: 4px; flex-shrink: 0; }
+    #queueBadge {
+        display: none; position: fixed; bottom: 78px; right: 14px; z-index: 1100;
+        background: #ff8c00; color: white; border-radius: 10px;
+        font-size: 0.6rem; font-weight: 800; padding: 3px 7px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    #queueBadge.show { display: block; }
+    /* Safe area for notched phones */
+    .tab-nav { padding-bottom: env(safe-area-inset-bottom); }
+    #loginPage { padding-top: env(safe-area-inset-top); }
+</style>
+```
+
 </head>
 <body>
 
 <!-- PWA: Offline / Sync / Install banners -->
+
 <div id="offlineBanner">📵 You're offline — changes will sync when connected</div>
 <div id="syncBanner">✅ Back online — syncing saved changes...</div>
 <div id="installBanner">
@@ -500,6 +505,7 @@
 <div id="toast" class="toast"></div>
 
 <!-- ── LOGIN ── -->
+
 <div id="loginPage">
     <div id="loginInner">
         <div class="login-card">
@@ -523,215 +529,223 @@
 </div>
 
 <!-- ── MAIN APP ── -->
+
 <div id="mainApp">
 
-    <!-- TAB NAV -->
-    <div class="tab-nav">
-        <button class="tab-btn active" onclick="switchTab('dashboard')" id="tab-dashboard">
-            <span class="tab-icon">📊</span>Dashboard
-        </button>
-        <button class="tab-btn" onclick="switchTab('pos')" id="tab-pos">
-            <span class="tab-icon">🛒</span>Point of Sale
-        </button>
-        <button class="tab-btn" onclick="switchTab('inventory')" id="tab-inventory">
-            <span class="tab-icon">📦</span>Inventory
-        </button>
-    </div>
+```
+<!-- TAB NAV -->
+<div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('dashboard')" id="tab-dashboard">
+        <span class="tab-icon">📊</span>Dashboard
+    </button>
+    <button class="tab-btn" onclick="switchTab('pos')" id="tab-pos">
+        <span class="tab-icon">🛒</span>Point of Sale
+    </button>
+    <button class="tab-btn" onclick="switchTab('inventory')" id="tab-inventory">
+        <span class="tab-icon">📦</span>Inventory
+    </button>
+</div>
 
-    <!-- ════════════════════════════
-         TAB 1: DASHBOARD
-    ════════════════════════════ -->
-    <div class="tab-page active" id="page-dashboard">
-        <div class="header">
-            <div class="header-top">
-                <div class="header-logo">LA VIDA</div>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <span id="loggedInUser" style="font-size:0.65rem;color:rgba(255,255,255,0.55);letter-spacing:1px;text-transform:uppercase;"></span>
-                    <div class="header-date" id="headerDate"></div>
-                    <button onclick="forceUpdate()" id="updateBtn" title="Force update app" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.75rem;cursor:pointer;padding:2px 6px;border-radius:6px;">🔄</button>
-                    <button onclick="performLogout()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:0.7rem;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Logout">⏻</button>
-                </div>
-            </div>
-            <div class="today-panel">
-                <div class="today-stat">
-                    <h4>Today Sales</h4>
-                    <p id="daySales">— TZS</p>
-                    <div id="heroSalesTrend" style="margin-top:4px;"></div>
-                </div>
-                <div class="today-stat right role-admin">
-                    <h4>Cash Balance</h4>
-                    <p id="topBalance" style="color:var(--gold)">— TZS</p>
-                    <div id="heroBalanceTrend" style="margin-top:4px;"></div>
-                </div>
-            </div>
-            <div class="today-panel role-admin" style="margin-top:8px;">
-                <div class="today-stat">
-                    <h4>Total Banking</h4>
-                    <p id="heroTotalSavings" style="color:#4ade80">— TZS</p>
-                </div>
-                <div class="today-stat right">
-                    <h4>Today Banking</h4>
-                    <p id="heroDaySavings" style="color:#4ade80">— TZS</p>
-                </div>
+<!-- ════════════════════════════
+     TAB 1: DASHBOARD
+════════════════════════════ -->
+<div class="tab-page active" id="page-dashboard">
+    <div class="header">
+        <div class="header-top">
+            <div class="header-logo">LA VIDA</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span id="loggedInUser" style="font-size:0.65rem;color:rgba(255,255,255,0.55);letter-spacing:1px;text-transform:uppercase;"></span>
+                <div class="header-date" id="headerDate"></div>
+                <button onclick="forceUpdate()" id="updateBtn" title="Force update app" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.75rem;cursor:pointer;padding:2px 6px;border-radius:6px;">🔄</button>
+                <button onclick="performLogout()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:0.7rem;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Logout">⏻</button>
             </div>
         </div>
+        <div class="today-panel">
+            <div class="today-stat">
+                <h4>Today Sales</h4>
+                <p id="daySales">— TZS</p>
+                <div id="heroSalesTrend" style="margin-top:4px;"></div>
+            </div>
+            <div class="today-stat right role-admin">
+                <h4>Cash Balance</h4>
+                <p id="topBalance" style="color:var(--gold)">— TZS</p>
+                <div id="heroBalanceTrend" style="margin-top:4px;"></div>
+            </div>
+        </div>
+        <div class="today-panel role-admin" style="margin-top:8px;">
+            <div class="today-stat">
+                <h4>Total Banking</h4>
+                <p id="heroTotalSavings" style="color:#4ade80">— TZS</p>
+            </div>
+            <div class="today-stat right">
+                <h4>Today Banking</h4>
+                <p id="heroDaySavings" style="color:#4ade80">— TZS</p>
+            </div>
+        </div>
+    </div>
 
-        <div class="container">
-            <div class="role-admin" style="display:flex;gap:8px;margin-top:14px;">
-                <button class="primary-cta" onclick="openModal('entry')" style="flex:1;margin-top:0;">
-                    📒 ACCOUNTING
-                </button>
-                <button class="primary-cta" onclick="openModal('manualSale')" style="flex:1;margin-top:0;background:var(--pos-green);">
-                    🛒 MANUAL SALE
-                </button>
-            </div>
-            <div class="summary-grid role-admin">
-                <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
-                <div class="stat-card"><h4>Stocking Expenses</h4><p id="totalStock">...</p></div>
-                <div class="stat-card"><h4>Expenses</h4><p id="totalOther">...</p></div>
-                <div class="stat-card"><h4>Total Banking</h4><p id="totalSavings">...</p></div>
-            </div>
-            <div class="secondary-actions role-admin">
-                <button class="btn-sec" onclick="openModal('search')">🔍 FIND DATE</button>
-                <button class="btn-sec" onclick="openModal('report')">📄 REPORTS</button>
-            </div>
-            <button class="btn-sec role-admin" onclick="openCloseDay()" style="width:100%;margin-top:8px;border-color:#dc3545;color:#dc3545;">
-                🔒 CLOSE DAY
+    <div class="container">
+        <div class="role-admin" style="display:flex;gap:8px;margin-top:14px;">
+            <button class="primary-cta" onclick="openModal('entry')" style="flex:1;margin-top:0;">
+                📒 ACCOUNTING
             </button>
-            <span class="section-label role-admin">Transaction History</span>
-            <div id="entryList" class="role-admin"></div>
-            <button id="loadMoreBtn" class="btn-sec role-admin" style="width:100%; margin-top:4px; display:none;" onclick="loadMore()">VIEW MORE</button>
+            <button class="primary-cta" onclick="openModal('manualSale')" style="flex:1;margin-top:0;background:var(--pos-green);">
+                🛒 MANUAL SALE
+            </button>
         </div>
-
-        <button class="fab-ai role-admin" onclick="openModal('ai')" title="AI Analyst">✨</button>
+        <div class="summary-grid role-admin">
+            <div class="stat-card"><h4>Total Sales</h4><p id="totalSales">...</p></div>
+            <div class="stat-card"><h4>Stocking Expenses</h4><p id="totalStock">...</p></div>
+            <div class="stat-card"><h4>Expenses</h4><p id="totalOther">...</p></div>
+            <div class="stat-card"><h4>Total Banking</h4><p id="totalSavings">...</p></div>
+        </div>
+        <div class="secondary-actions role-admin">
+            <button class="btn-sec" onclick="openModal('search')">🔍 FIND DATE</button>
+            <button class="btn-sec" onclick="openModal('report')">📄 REPORTS</button>
+        </div>
+        <button class="btn-sec role-admin" onclick="openCloseDay()" style="width:100%;margin-top:8px;border-color:#dc3545;color:#dc3545;">
+            🔒 CLOSE DAY
+        </button>
+        <span class="section-label role-admin">Transaction History</span>
+        <div id="entryList" class="role-admin"></div>
+        <button id="loadMoreBtn" class="btn-sec role-admin" style="width:100%; margin-top:4px; display:none;" onclick="loadMore()">VIEW MORE</button>
     </div>
 
-    <!-- ════════════════════════════
-         TAB 2: POINT OF SALE
-    ════════════════════════════ -->
-    <div class="tab-page" id="page-pos">
-        <div class="pos-header">
-            <div class="pos-header-top">
-                <div class="pos-header-logo">POS</div>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <span id="posLoggedInUser" style="font-size:0.65rem;color:rgba(255,255,255,0.55);letter-spacing:1px;text-transform:uppercase;"></span>
-                    <div style="font-size:0.65rem; color:rgba(255,255,255,0.45); letter-spacing:0.5px;" id="posDate"></div>
-                    <button onclick="forceUpdate()" title="Force update" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.75rem;cursor:pointer;padding:2px 6px;border-radius:6px;">🔄</button>
-                    <button onclick="performLogout()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:0.7rem;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Logout">⏻</button>
-                </div>
-            </div>
-            <div class="pos-search-wrap">
-                <span class="pos-search-icon">🔍</span>
-                <input type="text" class="pos-search" id="posSearchInput" placeholder="Search items..." oninput="renderPOSItems()">
+    <button class="fab-ai role-admin" onclick="openModal('ai')" title="AI Analyst">✨</button>
+</div>
+
+<!-- ════════════════════════════
+     TAB 2: POINT OF SALE
+════════════════════════════ -->
+<div class="tab-page" id="page-pos">
+    <div class="pos-header">
+        <div class="pos-header-top">
+            <div class="pos-header-logo">POS</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span id="posLoggedInUser" style="font-size:0.65rem;color:rgba(255,255,255,0.55);letter-spacing:1px;text-transform:uppercase;"></span>
+                <div style="font-size:0.65rem; color:rgba(255,255,255,0.45); letter-spacing:0.5px;" id="posDate"></div>
+                <button onclick="forceUpdate()" title="Force update" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.75rem;cursor:pointer;padding:2px 6px;border-radius:6px;">🔄</button>
+                <button onclick="performLogout()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:0.7rem;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Logout">⏻</button>
             </div>
         </div>
-
-        <div class="cat-filter" id="catFilter"></div>
-
-        <div class="pos-items-container">
-            <div class="pos-grid" id="posGrid"></div>
-            <div id="posEmptyState" style="display:none;" class="empty-state">
-                <div class="icon">📦</div>
-                No items found.<br>
-                <span style="font-size:0.75rem;">Add inventory items first.</span>
-            </div>
-        </div>
-
-        <!-- Cart bar -->
-        <div class="cart-bar" id="cartBar" onclick="openModal('cart')">
-            <div class="cart-bar-inner">
-                <div class="cart-bar-left">
-                    <div class="cart-count-bubble" id="cartCountBubble">0</div>
-                    <div>
-                        <div class="cart-bar-label">View Cart</div>
-                        <div class="cart-bar-sublabel" id="cartItemsSummary">No items</div>
-                    </div>
-                </div>
-                <div class="cart-bar-total" id="cartBarTotal">0 TZS</div>
-            </div>
+        <div class="pos-search-wrap">
+            <span class="pos-search-icon">🔍</span>
+            <input type="text" class="pos-search" id="posSearchInput" placeholder="Search items..." oninput="renderPOSItems()">
         </div>
     </div>
 
-    <!-- ════════════════════════════
-         TAB 3: INVENTORY
-    ════════════════════════════ -->
-    <div class="tab-page" id="page-inventory">
-        <div class="inv-page-header">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div class="inv-page-logo">STOCK</div>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <button onclick="forceUpdate()" title="Force update" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.85rem;cursor:pointer;padding:4px 8px;border-radius:8px;">🔄</button>
-                    <button onclick="openModal('stocktake')" style="background:rgba(255,255,255,0.1); border:none; border-radius:10px; padding:8px 14px; font-size:0.72rem; font-weight:800; cursor:pointer; font-family:'DM Sans',sans-serif; letter-spacing:0.5px; color:white;">
-                        📋 STOCKTAKE
-                    </button>
-                    <button onclick="openModal('addItem')" style="background:var(--gold); border:none; border-radius:10px; padding:8px 14px; font-size:0.72rem; font-weight:800; cursor:pointer; font-family:'DM Sans',sans-serif; letter-spacing:0.5px;">
-                        + ADD ITEM
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="inv-summary-strip" id="invSummaryStrip"></div>
-        <div class="inv-list-container">
-            <div style="position:relative; margin-bottom:10px;">
-                <input type="text" id="invSearchInput" placeholder="🔍  Search items..."
-                    oninput="filterInventory(this.value)"
-                    style="width:100%; padding:11px 14px; border:2px solid rgba(255,255,255,0.15); border-radius:12px;
-                           background:rgba(0,0,0,0.35); color:white; font-size:0.85rem;
-                           font-family:'DM Sans',sans-serif; outline:none; box-sizing:border-box;
-                           -webkit-text-fill-color:white;">
-            </div>
-            <span class="section-label" style="color:rgba(255,255,255,0.4); margin-bottom:8px; display:block;" id="invListLabel">All Stock Items</span>
-            <div id="invList"></div>
+    <div class="cat-filter" id="catFilter"></div>
+
+    <div class="pos-items-container">
+        <div class="pos-grid" id="posGrid"></div>
+        <div id="posEmptyState" style="display:none;" class="empty-state">
+            <div class="icon">📦</div>
+            No items found.<br>
+            <span style="font-size:0.75rem;">Add inventory items first.</span>
         </div>
     </div>
+
+    <!-- Cart bar -->
+    <div class="cart-bar" id="cartBar" onclick="openModal('cart')">
+        <div class="cart-bar-inner">
+            <div class="cart-bar-left">
+                <div class="cart-count-bubble" id="cartCountBubble">0</div>
+                <div>
+                    <div class="cart-bar-label">View Cart</div>
+                    <div class="cart-bar-sublabel" id="cartItemsSummary">No items</div>
+                </div>
+            </div>
+            <div class="cart-bar-total" id="cartBarTotal">0 TZS</div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════
+     TAB 3: INVENTORY
+════════════════════════════ -->
+<div class="tab-page" id="page-inventory">
+    <div class="inv-page-header">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="inv-page-logo">STOCK</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button onclick="forceUpdate()" title="Force update" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.85rem;cursor:pointer;padding:4px 8px;border-radius:8px;">🔄</button>
+                <button onclick="openModal('stocktake')" style="background:rgba(255,255,255,0.1); border:none; border-radius:10px; padding:8px 14px; font-size:0.72rem; font-weight:800; cursor:pointer; font-family:'DM Sans',sans-serif; letter-spacing:0.5px; color:white;">
+                    📋 STOCKTAKE
+                </button>
+                <button onclick="openModal('addItem')" style="background:var(--gold); border:none; border-radius:10px; padding:8px 14px; font-size:0.72rem; font-weight:800; cursor:pointer; font-family:'DM Sans',sans-serif; letter-spacing:0.5px;">
+                    + ADD ITEM
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="inv-summary-strip" id="invSummaryStrip"></div>
+    <div class="inv-list-container">
+        <div style="position:relative; margin-bottom:10px;">
+            <input type="text" id="invSearchInput" placeholder="🔍  Search items..."
+                oninput="filterInventory(this.value)"
+                style="width:100%; padding:11px 14px; border:2px solid rgba(255,255,255,0.15); border-radius:12px;
+                       background:rgba(0,0,0,0.35); color:white; font-size:0.85rem;
+                       font-family:'DM Sans',sans-serif; outline:none; box-sizing:border-box;
+                       -webkit-text-fill-color:white;">
+        </div>
+        <span class="section-label" style="color:rgba(255,255,255,0.4); margin-bottom:8px; display:block;" id="invListLabel">All Stock Items</span>
+        <div id="invList"></div>
+    </div>
+</div>
+```
 
 </div>
 
 <!-- ════════════════ MODALS ════════════════ -->
 
 <!-- Close Day Modal -->
+
 <div class="modal-overlay" id="overlayCloseDay" onclick="overlayClose(event,'overlayCloseDay')">
     <div class="modal">
         <div class="modal-handle"></div>
         <div class="modal-title">🔒 Close Day</div>
 
-        <!-- Step 1: Confirmation -->
-        <div id="closeDayStep1">
-            <div style="background:#fff8e1;border-radius:14px;padding:16px;margin-bottom:16px;text-align:center;">
-                <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
-                <div style="font-weight:700;font-size:0.95rem;color:#001a33;margin-bottom:6px;">Close Day Summary</div>
-                <div style="font-size:0.78rem;color:var(--gray);">Select a date and enter end-of-day balances.</div>
-            </div>
-            <div class="field-group">
-                <span class="field-label">📅 Date</span>
-                <input type="date" id="closeDayDate">
-            </div>
-            <div class="field-group">
-                <span class="field-label">💵 Cash in Hand (TZS)</span>
-                <input type="number" id="closeCash" placeholder="Actual cash counted" inputmode="decimal">
-            </div>
-            <div class="field-group">
-                <span class="field-label">🏦 Bank Balance (TZS)</span>
-                <input type="number" id="closeBank" placeholder="Current bank / M-Pesa balance" inputmode="decimal">
-            </div>
-            <div class="save-bar" style="margin-top:8px;">
-                <button class="primary-cta" style="margin-bottom:10px;" onclick="confirmCloseDay()">✅ CONFIRM & VIEW SUMMARY</button>
-                <button class="btn-sec" style="width:100%;border:none;" onclick="closeModals()">CANCEL</button>
-            </div>
+```
+    <!-- Step 1: Confirmation -->
+    <div id="closeDayStep1">
+        <div style="background:#fff8e1;border-radius:14px;padding:16px;margin-bottom:16px;text-align:center;">
+            <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
+            <div style="font-weight:700;font-size:0.95rem;color:#001a33;margin-bottom:6px;">Close Day Summary</div>
+            <div style="font-size:0.78rem;color:var(--gray);">Select a date and enter end-of-day balances.</div>
         </div>
+        <div class="field-group">
+            <span class="field-label">📅 Date</span>
+            <input type="date" id="closeDayDate">
+        </div>
+        <div class="field-group">
+            <span class="field-label">💵 Cash in Hand (TZS)</span>
+            <input type="number" id="closeCash" placeholder="Actual cash counted" inputmode="decimal">
+        </div>
+        <div class="field-group">
+            <span class="field-label">🏦 Bank Balance (TZS)</span>
+            <input type="number" id="closeBank" placeholder="Current bank / M-Pesa balance" inputmode="decimal">
+        </div>
+        <div class="save-bar" style="margin-top:8px;">
+            <button class="primary-cta" style="margin-bottom:10px;" onclick="confirmCloseDay()">✅ CONFIRM & VIEW SUMMARY</button>
+            <button class="btn-sec" style="width:100%;border:none;" onclick="closeModals()">CANCEL</button>
+        </div>
+    </div>
 
-        <!-- Step 2: Summary + WhatsApp -->
-        <div id="closeDayStep2" style="display:none;">
-            <div id="closeDaySummary" style="margin-bottom:16px;"></div>
-            <div class="save-bar">
-                <div id="whatsappStatus" style="text-align:center;font-size:0.78rem;color:var(--gray);padding:8px 0;"></div>
-                <button class="btn-sec" style="width:100%;border:none;" onclick="closeModals()">CLOSE</button>
-            </div>
+    <!-- Step 2: Summary + WhatsApp -->
+    <div id="closeDayStep2" style="display:none;">
+        <div id="closeDaySummary" style="margin-bottom:16px;"></div>
+        <div class="save-bar">
+            <div id="whatsappStatus" style="text-align:center;font-size:0.78rem;color:var(--gray);padding:8px 0;"></div>
+            <button class="btn-sec" style="width:100%;border:none;" onclick="closeModals()">CLOSE</button>
         </div>
     </div>
 </div>
+```
+
+</div>
 
 <!-- AI Modal -->
+
 <div class="modal-overlay" id="overlayAI" onclick="overlayClose(event,'overlayAI')">
     <div class="modal" style="background:#fcfbfe;">
         <div class="modal-handle"></div>
@@ -742,6 +756,7 @@
 </div>
 
 <!-- Stocktake Modal -->
+
 <div class="modal-overlay" id="overlayStocktake" onclick="overlayClose(event,'overlayStocktake')">
     <div class="modal" style="max-height:92vh;">
         <div class="modal-handle"></div>
@@ -756,6 +771,7 @@
 </div>
 
 <!-- Entry Modal -->
+
 <div class="modal-overlay" id="overlayEntry" onclick="overlayClose(event,'overlayEntry')">
     <div class="modal">
         <div class="modal-handle"></div>
@@ -764,30 +780,34 @@
         <input type="hidden" id="sales" value="0">
         <input type="hidden" id="stock" value="0">
 
-        <div class="field-group">
-            <span class="field-label">Expense Category</span>
-            <select id="expenseCategory" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
-                <option value="">— No expense —</option>
-                <option value="Electricity">⚡ Electricity</option>
-                <option value="Transport">🚗 Transport</option>
-                <option value="Supplier">📦 Supplier / Restock</option>
-                <option value="Repairs">🔧 Repairs & Maintenance</option>
-                <option value="Rent">🏠 Rent</option>
-                <option value="Salaries">👷 Salaries / Labour</option>
-                <option value="Other">📝 Other</option>
-            </select>
-        </div>
-        <div class="field-group"><span class="field-label">Expense Amount (TZS)</span><input type="number" id="other" placeholder="0" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Banking (TZS)</span><input type="number" id="savings" placeholder="Amount banked or set aside today" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Note (optional)</span><textarea id="note" placeholder="e.g. public holiday, slow day..."></textarea></div>
-        <div class="save-bar">
-            <button class="primary-cta" style="margin-bottom:10px;" onclick="saveRecord()">SAVE RECORD</button>
-            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
-        </div>
+```
+    <div class="field-group">
+        <span class="field-label">Expense Category</span>
+        <select id="expenseCategory" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
+            <option value="">— No expense —</option>
+            <option value="Electricity">⚡ Electricity</option>
+            <option value="Transport">🚗 Transport</option>
+            <option value="Supplier">📦 Supplier / Restock</option>
+            <option value="Repairs">🔧 Repairs & Maintenance</option>
+            <option value="Rent">🏠 Rent</option>
+            <option value="Salaries">👷 Salaries / Labour</option>
+            <option value="Other">📝 Other</option>
+        </select>
     </div>
+    <div class="field-group"><span class="field-label">Expense Amount (TZS)</span><input type="number" id="other" placeholder="0" inputmode="decimal"></div>
+    <div class="field-group"><span class="field-label">Banking (TZS)</span><input type="number" id="savings" placeholder="Amount banked or set aside today" inputmode="decimal"></div>
+    <div class="field-group"><span class="field-label">Note (optional)</span><textarea id="note" placeholder="e.g. public holiday, slow day..."></textarea></div>
+    <div class="save-bar">
+        <button class="primary-cta" style="margin-bottom:10px;" onclick="saveRecord()">SAVE RECORD</button>
+        <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
+    </div>
+</div>
+```
+
 </div>
 
 <!-- Manual Sale Modal (Admin Only) -->
+
 <div class="modal-overlay" id="overlayManualSale" onclick="overlayClose(event,'overlayManualSale')">
     <div class="modal">
         <div class="modal-handle"></div>
@@ -812,6 +832,7 @@
 </div>
 
 <!-- Search Modal -->
+
 <div class="modal-overlay" id="overlaySearch" onclick="overlayClose(event,'overlaySearch')">
     <div class="modal">
         <div class="modal-handle"></div>
@@ -823,6 +844,7 @@
 </div>
 
 <!-- Report Modal -->
+
 <div class="modal-overlay" id="overlayReport" onclick="overlayClose(event,'overlayReport')">
     <div class="modal">
         <div class="modal-handle"></div>
@@ -837,6 +859,7 @@
 </div>
 
 <!-- Cart Modal -->
+
 <div class="modal-overlay" id="overlayCart" onclick="overlayClose(event,'overlayCart')">
     <div class="modal green-modal">
         <div class="modal-handle"></div>
@@ -856,52 +879,57 @@
 </div>
 
 <!-- Add Inventory Item Modal -->
+
 <div class="modal-overlay" id="overlayAddItem" onclick="overlayClose(event,'overlayAddItem')">
     <div class="modal">
         <div class="modal-handle"></div>
         <div class="modal-title" id="addItemTitle">Add New Item</div>
         <input type="hidden" id="editItemId">
 
-        <div class="field-group">
-            <span class="field-label">Emoji Icon</span>
-            <div class="emoji-picker-row" id="emojiPicker"></div>
+```
+    <div class="field-group">
+        <span class="field-label">Emoji Icon</span>
+        <div class="emoji-picker-row" id="emojiPicker"></div>
+    </div>
+    <div class="field-group">
+        <span class="field-label">Item Name</span>
+        <input type="text" id="itemName" placeholder="e.g. Bottled Water 500ml">
+    </div>
+    <div class="field-group">
+        <span class="field-label">Category</span>
+        <input type="text" id="itemCategory" placeholder="e.g. Drinks, Snacks, Bread...">
+    </div>
+    <div class="form-row">
+        <div class="field-group" style="margin-bottom:0;">
+            <span class="field-label">Sell Price / Unit (TZS)</span>
+            <input type="number" id="itemSellPrice" placeholder="0" inputmode="decimal">
         </div>
-        <div class="field-group">
-            <span class="field-label">Item Name</span>
-            <input type="text" id="itemName" placeholder="e.g. Bottled Water 500ml">
-        </div>
-        <div class="field-group">
-            <span class="field-label">Category</span>
-            <input type="text" id="itemCategory" placeholder="e.g. Drinks, Snacks, Bread...">
-        </div>
-        <div class="form-row">
-            <div class="field-group" style="margin-bottom:0;">
-                <span class="field-label">Sell Price / Unit (TZS)</span>
-                <input type="number" id="itemSellPrice" placeholder="0" inputmode="decimal">
-            </div>
-            <div class="field-group" style="margin-bottom:0;">
-                <span class="field-label" id="itemCostLabel">Cost / Unit (TZS)</span>
-                <input type="number" id="itemCostPrice" placeholder="0" inputmode="decimal">
-            </div>
-        </div>
-        <div class="form-row" style="margin-top:14px;">
-            <div class="field-group" style="margin-bottom:0;">
-                <span class="field-label">Current Stock (units)</span>
-                <input type="number" id="itemStock" placeholder="0" inputmode="decimal">
-            </div>
-            <div class="field-group" style="margin-bottom:0;">
-                <span class="field-label">Reorder Level</span>
-                <input type="number" id="itemReorder" placeholder="5" inputmode="decimal">
-            </div>
-        </div>
-        <div class="save-bar">
-            <button class="primary-cta" style="margin-bottom:10px;" onclick="saveInventoryItem()">SAVE ITEM</button>
-            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
+        <div class="field-group" style="margin-bottom:0;">
+            <span class="field-label" id="itemCostLabel">Cost / Unit (TZS)</span>
+            <input type="number" id="itemCostPrice" placeholder="0" inputmode="decimal">
         </div>
     </div>
+    <div class="form-row" style="margin-top:14px;">
+        <div class="field-group" style="margin-bottom:0;">
+            <span class="field-label">Current Stock (units)</span>
+            <input type="number" id="itemStock" placeholder="0" inputmode="decimal">
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+            <span class="field-label">Reorder Level</span>
+            <input type="number" id="itemReorder" placeholder="5" inputmode="decimal">
+        </div>
+    </div>
+    <div class="save-bar">
+        <button class="primary-cta" style="margin-bottom:10px;" onclick="saveInventoryItem()">SAVE ITEM</button>
+        <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
+    </div>
+</div>
+```
+
 </div>
 
 <!-- Restock Modal -->
+
 <div class="modal-overlay" id="overlayRestock" onclick="overlayClose(event,'overlayRestock')">
     <div class="modal green-modal">
         <div class="modal-handle"></div>
@@ -924,6 +952,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
@@ -1209,7 +1238,7 @@ function render() {
         const rowStock    = Number(row.stocking) || 0;
         const rowOther    = Number(row.other)    || 0;
         const rowSavings  = Number(row.savings)  || 0;
-        const net = rowSales - rowStock - rowOther; // banking is profit, not deducted
+        const net = rowSales - rowStock - rowOther - rowSavings; // cash balance after banking
         salesByDate[rowDate] = rowSales;
         totalSales   += rowSales; totalStock  += rowStock;
         totalOther   += rowOther; totalSavings += rowSavings;
@@ -1904,7 +1933,7 @@ function confirmCloseDay() {
     const sales     = Number(todayData?.sales)   || 0;
     const other     = Number(todayData?.other)   || 0;
     const savings   = Number(todayData?.savings) || 0;
-    const net       = sales - other; // banking = profit saved
+    const net       = sales - other - savings; // cash remaining after banking
 
     const dayLog  = (salesLog||[]).filter(r => (r.date||'').split('T')[0] === today);
     const txCount = new Set(dayLog.map(r => r.timestamp)).size;
@@ -1986,13 +2015,14 @@ function buildDailyMessage() {
 
     // Reconciliation — compare physical counts vs system running balance
     // System cash balance = all-time (sales - expenses - banking)
-    // System cash = sales - stocking - other (banking is NOT deducted — it is profit banked)
+    // System cash balance = sales - stocking - expenses - banking (what should be in the till)
     const sysCashBalance = data.reduce((t, r) => {
         const d   = (r.date||'').split('T')[0];
         const sal = (salesLog||[]).filter(x=>(x.date||'').split('T')[0]===d).reduce((s,x)=>s+(Number(x.subtotal)||0),0) || Number(r.sales)||0;
         const stk = Number(r.stocking)||0;
         const oth = Number(r.other)||0;
-        return t + sal - stk - oth;
+        const sav = Number(r.savings)||0;
+        return t + sal - stk - oth - sav;
     }, 0);
     const diffCash = s.cash > 0 ? (s.cash - sysCashBalance) : null;
     const diffBank = s.bank > 0 ? (s.bank - s.savings)      : null;
@@ -2006,6 +2036,7 @@ function buildDailyMessage() {
         ? `\n🏦 Bank Balance (Manual): ${s.bank.toLocaleString()} TZS\n   System Bank Balance: ${sysBankBalance.toLocaleString()} TZS\n   Difference: ${diffBankVsSys >= 0 ? '+' : ''}${diffBankVsSys.toLocaleString()} TZS`
         : '';
 
+    const grossProfit = s.sales - supplier - expenses;
     return `🏪 *LA VIDA MINIMART — Daily Close*
 📅 ${s.fmtDate}
 
@@ -2015,7 +2046,8 @@ function buildDailyMessage() {
 💸 Other Expenses: ${expenses.toLocaleString()} TZS
 🏦 Banked: ${s.savings.toLocaleString()} TZS
 ━━━━━━━━━━━━
-✅ Net: ${s.net >= 0 ? '+' : ''}${s.net.toLocaleString()} TZS
+📈 Net Profit: ${grossProfit.toLocaleString()} TZS
+💵 Cash Balance: ${s.net >= 0 ? '+' : ''}${s.net.toLocaleString()} TZS
 
 📊 RECONCILIATION${reconCash}${reconBank}
 
@@ -2144,7 +2176,7 @@ function executeSearch() {
     const sales   = Number(row.sales)   || 0;
     const other   = Number(row.other)   || 0;
     const savings = Number(row.savings) || 0;
-    const net     = sales - other; // banking is savings/profit, not an expense
+    const net     = sales - other - savings; // cash on hand after banking
 
     // ── Section label helper ──
     const sectionLabel = (txt) =>
@@ -2318,7 +2350,7 @@ function previewReport() {
         totSales += Number(r.sales)||0; totStock += Number(r.stocking)||0;
         totOther += Number(r.other)||0; totSav   += Number(r.savings)||0;
     });
-    const netProfit = totSales - totStock - totOther; // banking is profit, not expense
+    const netProfit = totSales - totStock - totOther - totSav; // cash balance after banking
     const margin = totSales > 0 ? ((netProfit/totSales)*100).toFixed(1) : 0;
 
     // Top 5 selling items from salesLog this month
@@ -2386,7 +2418,7 @@ function generatePDF() {
         if(s>(Number(bestDay.sales)||0)) bestDay=r;
         if(s<(Number(worstDay.sales)||0)) worstDay=r;
     });
-    const netProfit = totSales - totStock - totOther; // banking is profit, not expense
+    const netProfit = totSales - totStock - totOther - totSav; // cash balance after banking
     const margin = totSales>0?((netProfit/totSales)*100).toFixed(1):0;
     const avgDaily = filtered.length>0?(totSales/filtered.length).toFixed(0):0;
 
@@ -2557,6 +2589,7 @@ function generatePDF() {
 <!-- ═══════════════════════════════════════
      PWA: Service Worker + Offline Logic
 ═══════════════════════════════════════ -->
+
 <script>
 // ── Service Worker ──
 if ('serviceWorker' in navigator) {
@@ -2736,5 +2769,6 @@ setInterval(async () => {
     }
 }, 10000);
 </script>
+
 </body>
 </html>

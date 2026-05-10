@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>La Vida Minimart v2.5</title>
 
+```
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
@@ -179,8 +180,10 @@
         z-index: 1500; backdrop-filter: blur(3px); justify-content: center; align-items: flex-end;
     }
     .modal-overlay.active { display: flex; }
-    body.modal-open { overflow: hidden; }
+    body.modal-open { overflow: hidden; touch-action: none; }
     html.modal-open  { overflow: hidden; }
+    .modal-overlay.active { overscroll-behavior: contain; touch-action: none; }
+    .modal { overscroll-behavior: contain; touch-action: pan-y; }
     #invSearchInput::placeholder { color: rgba(255,255,255,0.45); }
     #invSearchInput:focus { border-color: var(--gold); background: rgba(0,0,0,0.5); }
     .modal {
@@ -477,6 +480,7 @@
     .tab-nav { padding-bottom: env(safe-area-inset-bottom); }
     #loginPage { padding-top: env(safe-area-inset-top); }
 </style>
+```
 
 </head>
 <body>
@@ -530,6 +534,7 @@
 
 <div id="mainApp">
 
+```
 <!-- TAB NAV -->
 <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('dashboard')" id="tab-dashboard">
@@ -689,6 +694,7 @@
         <div id="invList"></div>
     </div>
 </div>
+```
 
 </div>
 
@@ -701,6 +707,7 @@
         <div class="modal-handle"></div>
         <div class="modal-title">🔒 Close Day</div>
 
+```
     <!-- Step 1: Confirmation -->
     <div id="closeDayStep1">
         <div style="background:#fff8e1;border-radius:14px;padding:16px;margin-bottom:16px;text-align:center;">
@@ -735,6 +742,7 @@
         </div>
     </div>
 </div>
+```
 
 </div>
 
@@ -774,9 +782,10 @@
         <input type="hidden" id="sales" value="0">
         <input type="hidden" id="stock" value="0">
 
+```
     <div class="field-group">
         <span class="field-label">Expense Category</span>
-        <select id="expenseCategory" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
+        <select id="expenseCategory" onchange="this.style.borderColor=this.value?'#dde3ea':'#ff4444'" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
             <option value="">— No expense —</option>
             <option value="Electricity">⚡ Electricity</option>
             <option value="Transport">🚗 Transport</option>
@@ -795,6 +804,7 @@
         <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
     </div>
 </div>
+```
 
 </div>
 
@@ -878,6 +888,7 @@
         <div class="modal-title" id="addItemTitle">Add New Item</div>
         <input type="hidden" id="editItemId">
 
+```
     <div class="field-group">
         <span class="field-label">Emoji Icon</span>
         <div class="emoji-picker-row" id="emojiPicker"></div>
@@ -915,6 +926,7 @@
         <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
     </div>
 </div>
+```
 
 </div>
 
@@ -1814,6 +1826,29 @@ function closeModals() {
     document.body.classList.remove('modal-open'); document.documentElement.classList.remove('modal-open');
 }
 
+// ── Swipe down to close any active modal ──
+(function() {
+    let startY = 0, startX = 0;
+    document.addEventListener('touchstart', e => {
+        startY = e.touches[0].clientY;
+        startX = e.touches[0].clientX;
+    }, { passive: true });
+    document.addEventListener('touchend', e => {
+        const dy = e.changedTouches[0].clientY - startY;
+        const dx = Math.abs(e.changedTouches[0].clientX - startX);
+        // Swipe down > 80px, more vertical than horizontal, from top 40% of modal
+        if (dy > 80 && dx < 60) {
+            const activeOverlay = document.querySelector('.modal-overlay.active');
+            if (!activeOverlay) return;
+            const modal = activeOverlay.querySelector('.modal');
+            if (!modal) return;
+            const modalTop = modal.getBoundingClientRect().top;
+            // Only close if touch started near the top of the modal (handle area)
+            if (startY < modalTop + 80) closeModals();
+        }
+    }, { passive: true });
+})();
+
 // ════════════════════════════════════════════════
 //  FEATURE 1 — STOCKTAKE
 // ════════════════════════════════════════════════
@@ -2094,6 +2129,9 @@ async function saveRecord() {
     if (expAmt === 0 && bankAmt === 0) {
         showToast("⚠️ Enter at least one amount."); return;
     }
+    if (expAmt > 0 && !expCat) {
+        showToast("⚠️ Please select an Expense Category."); return;
+    }
 
     closeModals(); showLoader(true);
 
@@ -2340,8 +2378,9 @@ function previewReport() {
         totSales += Number(r.sales)||0; totStock += Number(r.stocking)||0;
         totOther += Number(r.other)||0; totSav   += Number(r.savings)||0;
     });
-    const netProfit = totSales - totStock - totOther - totSav; // cash balance after banking
-    const margin = totSales > 0 ? ((netProfit/totSales)*100).toFixed(1) : 0;
+    const grossProfit = totSales - totStock - totOther; // profit before banking
+    const netProfit   = grossProfit - totSav;             // cash balance after banking
+    const margin      = totSales > 0 ? ((grossProfit/totSales)*100).toFixed(1) : 0;
 
     // Top 5 selling items from salesLog this month
     const monthLog = (salesLog||[]).filter(r => (r.date||'').startsWith(m));
@@ -2365,9 +2404,12 @@ function previewReport() {
                 <span style="color:var(--gray);">💸 Expenses</span><strong style="color:var(--red);">${totOther.toLocaleString()} TZS</strong></div>
             <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
                 <span style="color:var(--gray);">🏦 Banking</span><strong style="color:var(--blue);">${totSav.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="color:var(--gray);">📈 Gross Profit</span>
+                <strong style="color:${grossProfit>=0?'var(--green)':'var(--red)'};">${grossProfit.toLocaleString()} TZS (${margin}%)</strong></div>
             <div style="display:flex;justify-content:space-between;padding:7px 0 0;">
-                <strong>Net Profit</strong>
-                <strong style="color:${netProfit>=0?'var(--green)':'var(--red)'};">${netProfit.toLocaleString()} TZS (${margin}%)</strong></div>
+                <strong>💵 Cash Balance</strong>
+                <strong style="color:${netProfit>=0?'var(--green)':'var(--red)'};">${netProfit.toLocaleString()} TZS</strong></div>
         </div>
         ${topItems.length > 0 ? `
         <div style="font-size:0.68rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Top Sellers This Month</div>
@@ -2408,8 +2450,9 @@ function generatePDF() {
         if(s>(Number(bestDay.sales)||0)) bestDay=r;
         if(s<(Number(worstDay.sales)||0)) worstDay=r;
     });
-    const netProfit = totSales - totStock - totOther - totSav; // cash balance after banking
-    const margin = totSales>0?((netProfit/totSales)*100).toFixed(1):0;
+    const grossProfit = totSales - totStock - totOther;
+    const netProfit   = grossProfit - totSav;
+    const margin      = totSales>0?((grossProfit/totSales)*100).toFixed(1):0;
     const avgDaily = filtered.length>0?(totSales/filtered.length).toFixed(0):0;
 
     // ── Summary boxes ──
@@ -2422,9 +2465,10 @@ function generatePDF() {
         {label:'Total Sales',    val:totSales.toLocaleString()+' TZS',   color:[40,167,69]},
         {label:'Stocking Cost',  val:totStock.toLocaleString()+' TZS',   color:[220,53,69]},
         {label:'Other Expenses', val:totOther.toLocaleString()+' TZS',   color:[220,53,69]},
-        {label:'Banking',        val:totSav.toLocaleString()+' TZS',     color:[0,64,133]},
-        {label:'Net Profit',     val:netProfit.toLocaleString()+' TZS',  color:netProfit>=0?[40,167,69]:[220,53,69]},
-        {label:'Profit Margin',  val:margin+'%',                          color:netProfit>=0?[40,167,69]:[220,53,69]},
+        {label:'Banking (Saved)',  val:totSav.toLocaleString()+' TZS',        color:[0,64,133]},
+        {label:'Gross Profit',    val:grossProfit.toLocaleString()+' TZS', color:grossProfit>=0?[40,167,69]:[220,53,69]},
+        {label:'Cash Balance',    val:netProfit.toLocaleString()+' TZS',   color:netProfit>=0?[40,167,69]:[220,53,69]},
+        {label:'Profit Margin',   val:margin+'%',                           color:grossProfit>=0?[40,167,69]:[220,53,69]},
         {label:'Avg Daily Sales',val:Number(avgDaily).toLocaleString()+' TZS', color:[0,26,51]},
         {label:'Days Recorded',  val:String(filtered.length)+' days',    color:[0,26,51]},
     ];

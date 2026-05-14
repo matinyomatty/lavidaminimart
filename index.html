@@ -757,34 +757,106 @@
     </div>
 </div>
 
-<!-- Entry Modal -->
+<!-- Entry Modal — Add new accounting entry -->
 <div class="modal-overlay" id="overlayEntry" onclick="overlayClose(event,'overlayEntry')">
     <div class="modal">
         <div class="modal-handle"></div>
-        <div class="modal-title" id="formTitle">📒 Accounting</div>
-        <div class="field-group"><span class="field-label">Date</span><input type="date" id="date"></div>
+        <div class="modal-title">📒 Add Accounting Entry</div>
         <input type="hidden" id="sales" value="0">
         <input type="hidden" id="stock" value="0">
 
-        <div class="field-group">
-            <span class="field-label">Expense Category</span>
-            <select id="expenseCategory" onchange="this.style.borderColor=this.value?'#dde3ea':'#ff4444'" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
-                <option value="">— No expense —</option>
-                <option value="Electricity">⚡ Electricity</option>
-                <option value="Transport">🚗 Transport</option>
-                <option value="Supplier">📦 Supplier / Restock</option>
-                <option value="Repairs">🔧 Repairs & Maintenance</option>
-                <option value="Rent">🏠 Rent</option>
-                <option value="Salaries">👷 Salaries / Labour</option>
-                <option value="Other">📝 Other</option>
-            </select>
+        <!-- Entry type tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <button id="tabExpense" onclick="switchEntryTab('expense')"
+                style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--gold);background:var(--gold);color:#001a33;font-weight:700;font-size:0.8rem;cursor:pointer;">
+                💸 Expense
+            </button>
+            <button id="tabBanking" onclick="switchEntryTab('banking')"
+                style="flex:1;padding:10px;border-radius:12px;border:2px solid #dde3ea;background:white;color:var(--gray);font-weight:700;font-size:0.8rem;cursor:pointer;">
+                🏦 Banking
+            </button>
         </div>
-        <div class="field-group"><span class="field-label">Expense Amount (TZS)</span><input type="number" id="other" placeholder="0" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Banking (TZS)</span><input type="number" id="savings" placeholder="Amount banked or set aside today" inputmode="decimal"></div>
-        <div class="field-group"><span class="field-label">Note (optional)</span><textarea id="note" placeholder="e.g. public holiday, slow day..."></textarea></div>
-        <div class="save-bar">
-            <button class="primary-cta" style="margin-bottom:10px;" onclick="saveRecord()">SAVE RECORD</button>
-            <button class="btn-sec" style="width:100%; border:none;" onclick="closeModals()">CANCEL</button>
+
+        <div class="field-group"><span class="field-label">📅 Date</span><input type="date" id="date" onchange="renderTodayEntries(this.value)"></div>
+
+        <!-- Expense fields -->
+        <div id="expenseFields">
+            <div class="field-group">
+                <span class="field-label">Category</span>
+                <select id="expenseCategory" onchange="this.style.borderColor=this.value?'#dde3ea':'#ff4444'"
+                    style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
+                    <option value="">— Select category —</option>
+                    <option value="Electricity">⚡ Electricity</option>
+                    <option value="Transport">🚗 Transport</option>
+                    <option value="Supplier">📦 Supplier / Restock</option>
+                    <option value="Repairs">🔧 Repairs & Maintenance</option>
+                    <option value="Rent">🏠 Rent</option>
+                    <option value="Salaries">👷 Salaries / Labour</option>
+                    <option value="Other">📝 Other</option>
+                </select>
+            </div>
+            <div class="field-group"><span class="field-label">Amount (TZS)</span>
+                <input type="number" id="other" placeholder="0" inputmode="decimal"></div>
+        </div>
+
+        <!-- Banking fields -->
+        <div id="bankingFields" style="display:none;">
+            <div class="field-group"><span class="field-label">Amount Banked (TZS)</span>
+                <input type="number" id="savings" placeholder="Amount banked or set aside" inputmode="decimal"></div>
+        </div>
+
+        <div class="field-group"><span class="field-label">Note (optional)</span>
+            <input type="text" id="note" placeholder="e.g. Luku, fuel, CRDB..."></div>
+
+        <div class="save-bar" style="margin-top:8px;">
+            <button class="primary-cta" style="margin-bottom:10px;" onclick="saveRecord()">➕ ADD ENTRY</button>
+            <button class="btn-sec" style="width:100%;border:none;" onclick="closeModals()">CLOSE</button>
+        </div>
+
+        <!-- Today's entries list -->
+        <div style="margin-top:16px;">
+            <div style="font-size:0.68rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">
+                📋 Today's Entries
+            </div>
+            <div id="todayEntriesList" style="max-height:200px;overflow-y:auto;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Single Entry Modal -->
+<div class="modal-overlay" id="overlayEditEntry" onclick="overlayClose(event,'overlayEditEntry')">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">✏️ Edit Entry</div>
+        <input type="hidden" id="editEntryId">
+        <input type="hidden" id="editEntryType">
+        <div class="field-group"><span class="field-label">📅 Date</span><input type="date" id="editEntryDate" readonly style="background:#f0f0f0;color:#999;"></div>
+        <div id="editExpenseFields">
+            <div class="field-group">
+                <span class="field-label">Category</span>
+                <select id="editExpenseCategory"
+                    style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
+                    <option value="Electricity">⚡ Electricity</option>
+                    <option value="Transport">🚗 Transport</option>
+                    <option value="Supplier">📦 Supplier / Restock</option>
+                    <option value="Repairs">🔧 Repairs & Maintenance</option>
+                    <option value="Rent">🏠 Rent</option>
+                    <option value="Salaries">👷 Salaries / Labour</option>
+                    <option value="Other">📝 Other</option>
+                </select>
+            </div>
+            <div class="field-group"><span class="field-label">Amount (TZS)</span>
+                <input type="number" id="editEntryAmount" placeholder="0" inputmode="decimal"></div>
+        </div>
+        <div id="editBankingFields" style="display:none;">
+            <div class="field-group"><span class="field-label">Amount Banked (TZS)</span>
+                <input type="number" id="editEntryAmount2" placeholder="0" inputmode="decimal"></div>
+        </div>
+        <div class="field-group"><span class="field-label">Note (optional)</span>
+            <input type="text" id="editEntryNote" placeholder="e.g. Luku, fuel..."></div>
+        <div class="save-bar" style="margin-top:8px;">
+            <button class="primary-cta" style="margin-bottom:10px;" onclick="saveEditEntry()">✅ SAVE CHANGES</button>
+            <button class="btn-sec" style="width:100%;border:none;" onclick="closeModals()">CANCEL</button>
         </div>
     </div>
 </div>
@@ -2090,72 +2162,190 @@ async function shareWhatsApp() {
 function overlayClose(e, id) { if (e.target.id === id) closeModals(); }
 
 // ════════════════════════════════════════════════
-//  SAVE / EDIT / DELETE TRANSACTION
+//  ACCOUNTING — ENTRY TAB SWITCHER
+// ════════════════════════════════════════════════
+function switchEntryTab(type) {
+    const isExpense = type === 'expense';
+    document.getElementById('expenseFields').style.display  = isExpense ? '' : 'none';
+    document.getElementById('bankingFields').style.display  = isExpense ? 'none' : '';
+    document.getElementById('tabExpense').style.background  = isExpense ? 'var(--gold)' : 'white';
+    document.getElementById('tabExpense').style.color       = isExpense ? '#001a33' : 'var(--gray)';
+    document.getElementById('tabExpense').style.borderColor = isExpense ? 'var(--gold)' : '#dde3ea';
+    document.getElementById('tabBanking').style.background  = isExpense ? 'white' : 'var(--blue)';
+    document.getElementById('tabBanking').style.color       = isExpense ? 'var(--gray)' : 'white';
+    document.getElementById('tabBanking').style.borderColor = isExpense ? '#dde3ea' : 'var(--blue)';
+    document.getElementById('overlayEntry').setAttribute('data-tab', type);
+}
+
+// ── Render today's entries list inside accounting modal ──
+function renderTodayEntries(dateStr) {
+    const list = document.getElementById('todayEntriesList');
+    if (!list) return;
+    const dayAcc = (accountingLog||[])
+        .filter(r => (r.date||'').split('T')[0] === dateStr)
+        .sort((a,b) => a.timestamp > b.timestamp ? 1 : -1);
+    if (dayAcc.length === 0) {
+        list.innerHTML = '<div style="font-size:0.75rem;color:var(--gray);text-align:center;padding:10px 0;">No entries yet for this date</div>';
+        return;
+    }
+    list.innerHTML = dayAcc.map(e => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;
+            background:${e.type==='banking'?'#eff6ff':'#fff9f0'};border-radius:10px;margin-bottom:6px;
+            border-left:3px solid ${e.type==='banking'?'var(--blue)':'var(--gold)'};">
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:0.75rem;font-weight:700;color:#001a33;">
+                    ${e.type==='banking'?'🏦 Banking':'💸 '+(e.category||'Expense')}
+                </div>
+                <div style="font-size:0.68rem;color:var(--gray);">
+                    ${e.timestamp ? new Date(e.timestamp).toLocaleTimeString('en-TZ',{hour:'2-digit',minute:'2-digit'}) : ''}
+                    ${e.note ? ' · ' + e.note : ''}
+                </div>
+            </div>
+            <div style="font-size:0.85rem;font-weight:800;color:${e.type==='banking'?'var(--blue)':'var(--red)'};margin:0 8px;">
+                ${(Number(e.amount)||0).toLocaleString()} TZS
+            </div>
+            <div style="display:flex;gap:4px;flex-shrink:0;">
+                <button onclick="openEditEntry('${e.id}')"
+                    style="background:none;border:1px solid #dde3ea;border-radius:8px;padding:4px 8px;font-size:0.7rem;cursor:pointer;">✏️</button>
+                <button onclick="quickDeleteEntry('${e.id}','${dateStr}')"
+                    style="background:none;border:1px solid #fca5a5;border-radius:8px;padding:4px 8px;font-size:0.7rem;cursor:pointer;color:var(--red);">🗑️</button>
+            </div>
+        </div>`).join('');
+}
+
+// ════════════════════════════════════════════════
+//  SAVE NEW ENTRY — always appends, never overwrites
 // ════════════════════════════════════════════════
 async function saveRecord() {
-    const dateVal    = document.getElementById('date').value;
+    const dateVal = document.getElementById('date').value;
     if (!dateVal) { showToast("⚠️ Please select a date."); return; }
-    const expCat     = document.getElementById('expenseCategory')?.value || '';
-    const expAmt     = parseFloat(document.getElementById('other').value)   || 0;
-    const bankAmt    = parseFloat(document.getElementById('savings').value) || 0;
-    const noteVal    = document.getElementById('note').value.trim();
-    if (expAmt === 0 && bankAmt === 0) {
-        showToast("⚠️ Enter at least one amount."); return;
-    }
-    if (expAmt > 0 && !expCat) {
-        showToast("⚠️ Please select an Expense Category."); return;
-    }
+    const tab    = document.getElementById('overlayEntry')?.getAttribute('data-tab') || 'expense';
+    const isExp  = tab === 'expense';
+    const expCat = document.getElementById('expenseCategory')?.value || '';
+    const expAmt = parseFloat(document.getElementById('other').value)   || 0;
+    const bankAmt= parseFloat(document.getElementById('savings').value) || 0;
+    const noteVal= document.getElementById('note').value.trim();
 
-    closeModals(); showLoader(true);
+    if (isExp && expAmt === 0)  { showToast("⚠️ Enter an expense amount."); return; }
+    if (isExp && !expCat) {
+        showToast("⚠️ Please select an expense category.");
+        document.getElementById('expenseCategory')?.focus(); return;
+    }
+    if (!isExp && bankAmt === 0) { showToast("⚠️ Enter a banking amount."); return; }
 
+    showLoader(true);
     try {
-        // If editing an existing date, delete all old accounting entries first
-        const editDate = document.getElementById('overlayEntry')?.getAttribute('data-edit-date');
-        if (editDate && editDate === dateVal) {
-            const oldEntries = (accountingLog||[]).filter(r => (r.date||'').split('T')[0] === editDate);
-            for (const entry of oldEntries) {
-                await fetch(SCRIPT_URL, {
-                    method: "POST", mode: "no-cors",
-                    body: JSON.stringify({ action: "deleteAccountingEntry", entryId: entry.id, date: editDate })
-                });
-            }
-            await new Promise(r => setTimeout(r, 1000)); // small wait for deletes
-        }
-        document.getElementById('overlayEntry')?.removeAttribute('data-edit-date');
-
         await fetch(SCRIPT_URL, {
             method: "POST", mode: "no-cors",
             body: JSON.stringify({
                 action:   "saveTransaction",
                 date:     dateVal,
-                other:    expAmt,
-                savings:  bankAmt,
+                other:    isExp ? expAmt : 0,
+                savings:  isExp ? 0 : bankAmt,
                 category: expCat,
                 note:     noteVal
             })
         });
-        showToast("✅ Entry saved!"); navigator.vibrate?.(50);
+        showToast("✅ Entry added!"); navigator.vibrate?.(50);
+        // Clear amounts, keep date and tab for next entry
+        document.getElementById('other').value   = '';
+        document.getElementById('savings').value = '';
+        document.getElementById('note').value    = '';
+        document.getElementById('expenseCategory').value = '';
+        // Refresh list after backend saves
+        setTimeout(() => {
+            loadLogsInBackground().then(() => renderTodayEntries(dateVal));
+        }, 4000);
     } catch(e) {
         showToast("⚠️ Save may have failed.");
     }
-    setTimeout(fetchAll, 4000);
+    showLoader(false);
 }
 
-function editRow(date) {
-    // Get current accounting totals for this date from accountingLog
-    const dayAcc = (accountingLog||[]).filter(r => (r.date||'').split('T')[0] === date);
-    const curOther   = dayAcc.filter(r=>r.type==='expense').reduce((s,r)=>s+(Number(r.amount)||0),0);
-    const curSavings = dayAcc.filter(r=>r.type==='banking').reduce((s,r)=>s+(Number(r.amount)||0),0);
-    const curNote    = dayAcc.find(r=>r.note)?.note || '';
-
-    document.getElementById('formTitle').innerText = "✏️ Edit: " + date;
-    document.getElementById('date').value    = date;
-    document.getElementById('other').value   = curOther   || '';
-    document.getElementById('savings').value = curSavings || '';
-    document.getElementById('note').value    = curNote;
-    document.getElementById('overlayEntry').setAttribute('data-edit-date', date);
-    document.getElementById('overlayEntry').classList.add('active');
+// ── Open edit modal for a specific single entry ──
+function openEditEntry(entryId) {
+    const entry = (accountingLog||[]).find(e => e.id === entryId);
+    if (!entry) { showToast("Entry not found."); return; }
+    document.getElementById('editEntryId').value   = entryId;
+    document.getElementById('editEntryType').value = entry.type;
+    document.getElementById('editEntryDate').value = (entry.date||'').split('T')[0];
+    document.getElementById('editEntryNote').value = entry.note || '';
+    const isExp = entry.type === 'expense';
+    document.getElementById('editExpenseFields').style.display = isExp ? '' : 'none';
+    document.getElementById('editBankingFields').style.display = isExp ? 'none' : '';
+    if (isExp) {
+        document.getElementById('editExpenseCategory').value = entry.category || '';
+        document.getElementById('editEntryAmount').value     = entry.amount   || '';
+    } else {
+        document.getElementById('editEntryAmount2').value    = entry.amount   || '';
+    }
+    document.getElementById('overlayEditEntry').classList.add('active');
     document.body.classList.add('modal-open'); document.documentElement.classList.add('modal-open');
+}
+
+// ── Save edited single entry ──
+async function saveEditEntry() {
+    const entryId = document.getElementById('editEntryId').value;
+    const type    = document.getElementById('editEntryType').value;
+    const dateVal = document.getElementById('editEntryDate').value;
+    const noteVal = document.getElementById('editEntryNote').value.trim();
+    const isExp   = type === 'expense';
+    const cat     = isExp ? document.getElementById('editExpenseCategory').value : 'Banking';
+    const amt     = parseFloat(isExp
+        ? document.getElementById('editEntryAmount').value
+        : document.getElementById('editEntryAmount2').value) || 0;
+
+    if (amt <= 0) { showToast("⚠️ Enter a valid amount."); return; }
+    if (isExp && !cat) { showToast("⚠️ Select a category."); return; }
+
+    closeModals(); showLoader(true);
+    try {
+        await fetch(SCRIPT_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ action: "deleteAccountingEntry", entryId, date: dateVal })
+        });
+        await new Promise(r => setTimeout(r, 600));
+        await fetch(SCRIPT_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({
+                action:   "saveTransaction",
+                date:     dateVal,
+                other:    isExp ? amt : 0,
+                savings:  isExp ? 0   : amt,
+                category: cat,
+                note:     noteVal
+            })
+        });
+        showToast("✅ Entry updated!");
+    } catch(e) { showToast("⚠️ Update may have failed."); }
+    setTimeout(fetchAll, 4000);
+    showLoader(false);
+}
+
+// ── Quick delete from today's list ──
+async function quickDeleteEntry(entryId, dateStr) {
+    if (!confirm("Delete this entry?")) return;
+    showLoader(true);
+    try {
+        await fetch(SCRIPT_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ action: "deleteAccountingEntry", entryId, date: dateStr })
+        });
+        setTimeout(() => {
+            loadLogsInBackground().then(() => renderTodayEntries(dateStr));
+            showToast("🗑️ Entry deleted.");
+            showLoader(false);
+        }, 4000);
+    } catch(e) { showLoader(false); }
+}
+
+// Legacy editRow — opens accounting modal on that date
+function editRow(date) {
+    openModal('entry');
+    setTimeout(() => {
+        document.getElementById('date').value = date;
+        renderTodayEntries(date);
+    }, 150);
 }
 
 function executeSearch() {

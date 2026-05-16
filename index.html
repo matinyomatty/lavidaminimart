@@ -1412,7 +1412,9 @@ function renderPOSItems() {
 
     let filtered = inventory.filter(item => {
         const matchCat = activeCat === 'All' || (item.category || 'Other') === activeCat;
-        const matchSearch = !searchVal || item.name.toLowerCase().includes(searchVal);
+        const searchWords  = searchVal ? searchVal.split(/\s+/).filter(Boolean) : [];
+        const posSearchable = [(item.name||''), (item.category||''), String(item.sellPrice||'')].join(' ').toLowerCase().replace(/[()&]/g,' ');
+        const matchSearch  = !searchVal || searchWords.every(w => posSearchable.includes(w));
         return matchCat && matchSearch;
     });
 
@@ -1604,10 +1606,51 @@ function renderInvList(items) {
 }
 
 function filterInventory(query) {
-    const q = (query || '').toLowerCase().trim();
+    const raw = (query || '').trim();
+    const q   = raw.toLowerCase();
     const label = document.getElementById('invListLabel');
-    const filtered = q ? inventory.filter(i => i.name.toLowerCase().includes(q) || (i.category||'').toLowerCase().includes(q)) : [...inventory].sort((a,b)=>(a.stock||0)-(b.stock||0));
-    if (label) label.innerText = q ? `Results for "${query}" (${filtered.length})` : 'All Stock Items';
+
+    if (!q) {
+        if (label) label.innerText = 'All Stock Items';
+        renderInvList([...inventory].sort((a,b) => (a.stock||0) - (b.stock||0)));
+        return;
+    }
+
+    // Split query into words — all words must match somewhere
+    const words = q.split(/\s+/).filter(Boolean);
+
+    const filtered = inventory.filter(item => {
+        // Build a searchable string from all relevant fields
+        const searchable = [
+            item.name        || '',
+            item.category    || '',
+            item.id          || '',
+            item.emoji       || '',
+            String(item.sellPrice  || ''),
+            String(item.costPrice  || ''),
+            String(item.stock      || ''),
+        ].join(' ').toLowerCase()
+         // Normalize common variations
+         .replace(/[()&]/g, ' ')
+         .replace(/\s+/g, ' ');
+
+        // Every word in query must appear somewhere in the searchable string
+        return words.every(w => searchable.includes(w));
+    });
+
+    // Sort: exact name match first, then partial, then rest
+    filtered.sort((a, b) => {
+        const an = (a.name||'').toLowerCase();
+        const bn = (b.name||'').toLowerCase();
+        const aExact = an.startsWith(q) ? 0 : an.includes(q) ? 1 : 2;
+        const bExact = bn.startsWith(q) ? 0 : bn.includes(q) ? 1 : 2;
+        return aExact - bExact || an.localeCompare(bn);
+    });
+
+    if (label) label.innerText = filtered.length > 0
+        ? `"${raw}" — ${filtered.length} item${filtered.length>1?'s':''}`
+        : `No items found for "${raw}"`;
+
     renderInvList(filtered);
 }
 

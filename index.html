@@ -1035,7 +1035,7 @@ const CALLMEBOT_RECIPIENTS = [
     { phone: "255676221903", apikey: "1530037",  name: "Vida" },
 ];
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxGYxbx3DHMr0VdRJFOba5sCgZs5_7teWNZZn4ST84hhosgK35v8a6YW6UHHteX0Xed/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzR_ZI9aunlM3ZXQ2koQR7Lqsjo2dONGk_R0LNcljJyINm0RsJeOTBBEYgs4dANOfr-/exec";
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
@@ -2231,33 +2231,25 @@ async function shareWhatsApp() {
     const s = window._closeDaySummary;
     if (!s) return;
 
-    const msg = buildDailyMessage();
-    const btn = document.getElementById('whatsappBtn');
+    const msg    = buildDailyMessage();
+    const status = document.getElementById('whatsappStatus');
+    if (status) status.innerHTML = '⏳ Sending to WhatsApp...';
 
-    // Try CallMeBot auto-send first
     try {
-        if (btn) { btn.innerText = '⏳ Sending...'; btn.disabled = true; }
-
         const encoded = encodeURIComponent(msg);
-        const url = `https://api.callmebot.com/whatsapp.php?phone=${CALLMEBOT_PHONE}&text=${encoded}&apikey=${CALLMEBOT_APIKEY}`;
-
-        // CallMeBot doesn't support CORS so we use no-cors fetch
-        await fetch(url, { method: 'GET', mode: 'no-cors' });
-
-        if (btn) { btn.innerText = '✅ Sent!'; }
-        showToast('✅ Daily summary sent to WhatsApp!');
+        // Send to ALL recipients in parallel
+        await Promise.all(CALLMEBOT_RECIPIENTS.map(r =>
+            fetch(`https://api.callmebot.com/whatsapp.php?phone=${r.phone}&text=${encoded}&apikey=${r.apikey}`, {
+                method: 'GET', mode: 'no-cors'
+            })
+        ));
+        const names = CALLMEBOT_RECIPIENTS.map(r => r.name).join(' & ');
+        if (status) status.innerHTML = `✅ Sent to ${names}!`;
+        showToast(`✅ Summary sent to ${names}!`);
         navigator.vibrate?.([100, 50, 100]);
-
-        setTimeout(() => {
-            if (btn) { btn.innerText = '📲 SHARE ON WHATSAPP'; btn.disabled = false; }
-        }, 3000);
-
     } catch(e) {
-        // Fallback: open wa.me with pre-filled message
-        if (btn) { btn.innerText = '📲 SHARE ON WHATSAPP'; btn.disabled = false; }
         const encoded = encodeURIComponent(msg);
-        window.open(`https://wa.me/?text=${encoded}`, '_blank');
-        showToast('Opening WhatsApp...');
+        if (status) status.innerHTML = '⚠️ Auto-send failed. <a href="https://wa.me/?text=' + encoded + '" target="_blank" style="color:var(--blue);">Open WhatsApp</a>';
     }
 }
 function overlayClose(e, id) { if (e.target.id === id) closeModals(); }
@@ -2564,7 +2556,7 @@ function executeSearch() {
             </div>`).join('')}
             ${actionBtns(
                 `editSaleEntry('${d}', ${si})`,
-                `deleteSaleEntry('${d}', ${si}, ${sale.total})`,
+                `deleteSaleEntry('${d}', ${si}, ${sale.total}, '${sale.timestamp}')`,
                 '✏️ Edit',
                 '🗑️ Delete'
             )}

@@ -515,13 +515,14 @@
                     <option value="vida">Vida</option>
                     <option value="shop">Shop</option>
                 </select>
-                <input type="tel" id="passInput" inputmode="numeric"
+                <input type="password" id="passInput" inputmode="numeric"
                     class="pass-input" placeholder="Enter PIN"
-                    style="margin-bottom:0;letter-spacing:4px;-webkit-text-security:disc;text-security:disc;"
+                    style="margin-bottom:0;"
                     onkeydown="if(event.key==='Enter') checkLogin()"
-                    autocomplete="off" autocorrect="off" autocapitalize="off">
+                    autocomplete="current-password">
             </div>
-            <button class="primary-cta" style="margin-bottom:0;width:100%;min-height:52px;font-size:1rem;" onclick="checkLogin()">UNLOCK</button>
+            <button class="primary-cta" style="margin-bottom:0;width:100%;min-height:52px;font-size:1rem;border:none;" 
+                onclick="checkLogin()" ontouchend="event.preventDefault();checkLogin()">UNLOCK</button>
             <div id="pinError"></div>
         </div>
     </div>
@@ -1134,16 +1135,24 @@ function checkLogin() {
         return;
     }
     const user = USERS[userKey];
-    if (!user || entered !== user.pin) {
-        err.innerText = "Incorrect PIN. Try again.";
-        document.getElementById('passInput').value = '';
+    if (!user) {
+        err.innerText = "Unknown user. Try again.";
         setTimeout(() => err.innerText = '', 2000);
         return;
     }
+    // Strip everything except digits — handles Android tel/autofill quirks
+    const enteredClean = entered.replace(/\D/g, '');
+    const pinClean     = String(user.pin).replace(/\D/g, '');
+    if (enteredClean !== pinClean) {
+        err.innerText = "Incorrect PIN. Try again.";
+        document.getElementById('passInput').value = '';
+        setTimeout(() => err.innerText = '', 3000);
+        return;
+    }
     currentUser = { name: user.name, role: user.role };
-    sSet('laVidaLoggedIn','true');
-    sSet('laVidaUser',userKey);
-    sSet('laVidaLastActivity',Date.now());
+    sSet('laVidaLoggedIn', 'true');
+    sSet('laVidaUser', userKey);
+    sSet('laVidaLastActivity', String(Date.now()));
     document.getElementById('passInput').value = '';
     document.getElementById('userSelect').value = '';
     unlockUI();

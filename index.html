@@ -65,16 +65,6 @@
         /* ── MAIN APP ── */
         #mainApp {
             display: none;
-            height: 100dvh;
-            overflow: hidden;
-            flex-direction: column;
-            padding-top: env(safe-area-inset-top);
-        }
-        .tab-pages-container {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
         }
 
         /* ── TAB NAVIGATION ── */
@@ -83,16 +73,7 @@
             background: var(--dark);
             display: flex; border-bottom: 3px solid var(--gold);
         }
-        /* Spacer that pushes content below Dynamic Island / status bar */
-        .tab-nav::before {
-            content: '';
-            display: block;
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: env(safe-area-inset-top);
-            background: var(--dark);
-            z-index: 601;
-        }
+
 
         .tab-btn {
             flex: 1; padding: 0; border: none; background: transparent; cursor: pointer;
@@ -108,7 +89,12 @@
 
         /* ── TAB PAGES ── */
         .tab-page { display: none; padding-bottom: 90px; }
-        .tab-page.active { display: block; }
+        .tab-page.active {
+            display: block;
+            height: calc(100dvh - env(safe-area-inset-top) - 48px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
 
         /* ── DASHBOARD HEADER ── */
         .header {
@@ -557,6 +543,9 @@
 
 <!-- ── MAIN APP ── -->
 <div id="mainApp">
+
+    <!-- Safe area spacer for Dynamic Island -->
+    <div style="height:env(safe-area-inset-top);background:var(--dark);position:sticky;top:0;z-index:601;"></div>
 
     <!-- TAB NAV -->
     <div class="tab-nav">
@@ -1130,7 +1119,7 @@ function performLogout() {
     sDel('laVidaLoggedIn');
     sDel('laVidaUser');
     currentUser = null;
-    document.getElementById('loginPage').style.display = '';
+    document.getElementById('loginPage').style.display = 'flex';
     document.getElementById('mainApp').style.display = 'none';
     document.body.classList.remove('unlocked');
     showToast("🔒 Logged out");
@@ -1211,7 +1200,7 @@ function unlockUI() {
         }
     }
     document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'flex';
+    document.getElementById('mainApp').style.display = 'block';
     document.body.classList.add('unlocked');
     applyRole();
     setHeaderDate();
@@ -1228,9 +1217,14 @@ function applyRole() {
     // If shop, switch to POS tab
     if (isShop) switchTab('pos');
 
-    // Hide savings & balance panels on dashboard
+    // Hide/show admin-only elements based on role
     document.querySelectorAll('.role-admin').forEach(el => {
-        el.style.display = isShop ? 'none' : '';
+        if (isShop) {
+            el.style.display = 'none';
+        } else {
+            // Restore correct display — check data-display attr or use natural value
+            el.style.display = el.dataset.display || '';
+        }
     });
 
     // Show logged-in user name

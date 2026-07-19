@@ -770,14 +770,18 @@
         <input type="hidden" id="stock" value="0">
 
         <!-- Entry type tabs -->
-        <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <div style="display:flex;gap:6px;margin-bottom:16px;">
             <button id="tabExpense" onclick="switchEntryTab('expense')"
-                style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--gold);background:var(--gold);color:#001a33;font-weight:700;font-size:0.8rem;cursor:pointer;">
+                style="flex:1;padding:9px 4px;border-radius:12px;border:2px solid var(--gold);background:var(--gold);color:#001a33;font-weight:700;font-size:0.72rem;cursor:pointer;">
                 💸 Expense
             </button>
             <button id="tabBanking" onclick="switchEntryTab('banking')"
-                style="flex:1;padding:10px;border-radius:12px;border:2px solid #dde3ea;background:white;color:var(--gray);font-weight:700;font-size:0.8rem;cursor:pointer;">
-                🏦 Banking
+                style="flex:1;padding:9px 4px;border-radius:12px;border:2px solid #dde3ea;background:white;color:var(--gray);font-weight:700;font-size:0.72rem;cursor:pointer;">
+                🏦 Bank In
+            </button>
+            <button id="tabWithdrawal" onclick="switchEntryTab('withdrawal')"
+                style="flex:1;padding:9px 4px;border-radius:12px;border:2px solid #dde3ea;background:white;color:var(--gray);font-weight:700;font-size:0.72rem;cursor:pointer;">
+                💳 Bank Out
             </button>
         </div>
 
@@ -805,8 +809,20 @@
 
         <!-- Banking fields -->
         <div id="bankingFields" style="display:none;">
-            <div class="field-group"><span class="field-label">Amount Banked (TZS)</span>
-                <input type="number" id="savings" placeholder="Amount banked or set aside" inputmode="decimal"></div>
+            <div style="background:#eff6ff;border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:0.75rem;color:#1d4ed8;">
+                💡 Cash → Bank. Increases bank balance, reduces cash on hand.
+            </div>
+            <div class="field-group"><span class="field-label">Amount to Bank (TZS)</span>
+                <input type="number" id="savings" placeholder="Amount going to bank" inputmode="decimal"></div>
+        </div>
+
+        <!-- Withdrawal fields -->
+        <div id="withdrawalFields" style="display:none;">
+            <div style="background:#fef9c3;border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:0.75rem;color:#854d0e;">
+                💡 Bank → Cash. Reduces bank balance, increases cash on hand.
+            </div>
+            <div class="field-group"><span class="field-label">Amount Withdrawn (TZS)</span>
+                <input type="number" id="withdrawal" placeholder="Amount taken from bank" inputmode="decimal"></div>
         </div>
 
         <div class="field-group"><span class="field-label">Note (optional)</span>
@@ -1039,7 +1055,7 @@ const CALLMEBOT_RECIPIENTS = [
     { phone: "255676221903", apikey: "1530037",  name: "Vida" },
 ];
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzR_ZI9aunlM3ZXQ2koQR7Lqsjo2dONGk_R0LNcljJyINm0RsJeOTBBEYgs4dANOfr-/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhMiM7uMx0bWkzbY9oCa8hbzPzm-ZYtaXw-NeEf_tfGQ74jF4z0dScvrVjnCHTLnot/exec";
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
@@ -1902,8 +1918,9 @@ function openModal(type) {
     closeModals();
     if (type === 'entry') {
         // Reset all fields
-        document.getElementById('other').value   = '';
-        document.getElementById('savings').value = '';
+        document.getElementById('other').value      = '';
+        document.getElementById('savings').value   = '';
+        if(document.getElementById('withdrawal')) document.getElementById('withdrawal').value = '';
         document.getElementById('note').value    = '';
         if (document.getElementById('expenseCategory'))
             document.getElementById('expenseCategory').value = '';
@@ -2270,15 +2287,25 @@ function overlayClose(e, id) { if (e.target.id === id) closeModals(); }
 //  ACCOUNTING — ENTRY TAB SWITCHER
 // ════════════════════════════════════════════════
 function switchEntryTab(type) {
-    const isExpense = type === 'expense';
-    document.getElementById('expenseFields').style.display  = isExpense ? '' : 'none';
-    document.getElementById('bankingFields').style.display  = isExpense ? 'none' : '';
-    document.getElementById('tabExpense').style.background  = isExpense ? 'var(--gold)' : 'white';
-    document.getElementById('tabExpense').style.color       = isExpense ? '#001a33' : 'var(--gray)';
-    document.getElementById('tabExpense').style.borderColor = isExpense ? 'var(--gold)' : '#dde3ea';
-    document.getElementById('tabBanking').style.background  = isExpense ? 'white' : 'var(--blue)';
-    document.getElementById('tabBanking').style.color       = isExpense ? 'var(--gray)' : 'white';
-    document.getElementById('tabBanking').style.borderColor = isExpense ? '#dde3ea' : 'var(--blue)';
+    const tabs = { expense: 'tabExpense', banking: 'tabBanking', withdrawal: 'tabWithdrawal' };
+    const colors = {
+        expense:    { bg: 'var(--gold)', color: '#001a33', border: 'var(--gold)' },
+        banking:    { bg: 'var(--blue)', color: 'white',   border: 'var(--blue)' },
+        withdrawal: { bg: '#854d0e',     color: 'white',   border: '#854d0e' },
+    };
+    // Reset all tabs
+    Object.entries(tabs).forEach(([t, id]) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        const active = t === type;
+        btn.style.background  = active ? colors[t].bg    : 'white';
+        btn.style.color       = active ? colors[t].color : 'var(--gray)';
+        btn.style.borderColor = active ? colors[t].border : '#dde3ea';
+    });
+    // Show/hide fields
+    document.getElementById('expenseFields').style.display   = type === 'expense'    ? '' : 'none';
+    document.getElementById('bankingFields').style.display   = type === 'banking'    ? '' : 'none';
+    document.getElementById('withdrawalFields').style.display= type === 'withdrawal' ? '' : 'none';
     document.getElementById('overlayEntry').setAttribute('data-tab', type);
 }
 
@@ -2295,18 +2322,18 @@ function renderTodayEntries(dateStr) {
     }
     list.innerHTML = dayAcc.map(e => `
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;
-            background:${e.type==='banking'?'#eff6ff':'#fff9f0'};border-radius:10px;margin-bottom:6px;
-            border-left:3px solid ${e.type==='banking'?'var(--blue)':'var(--gold)'};">
+            background:${e.type==='withdrawal'?'#fefce8':e.type==='banking'?'#eff6ff':'#fff9f0'};border-radius:10px;margin-bottom:6px;
+            border-left:3px solid ${e.type==='withdrawal'?'#854d0e':e.type==='banking'?'var(--blue)':'var(--gold)'};">
             <div style="flex:1;min-width:0;">
                 <div style="font-size:0.75rem;font-weight:700;color:#001a33;">
-                    ${e.type==='banking'?'🏦 Banking':'💸 '+(e.category||'Expense')}
+                    ${e.type==='withdrawal'?'💳 Bank Withdrawal':e.type==='banking'?'🏦 Banking':'💸 '+(e.category||'Expense')}
                 </div>
                 <div style="font-size:0.68rem;color:var(--gray);">
                     ${e.timestamp ? new Date(e.timestamp).toLocaleTimeString('en-TZ',{hour:'2-digit',minute:'2-digit'}) : ''}
                     ${e.note ? ' · ' + e.note : ''}
                 </div>
             </div>
-            <div style="font-size:0.85rem;font-weight:800;color:${e.type==='banking'?'var(--blue)':'var(--red)'};margin:0 8px;">
+            <div style="font-size:0.85rem;font-weight:800;color:${e.type==='withdrawal'?'#854d0e':e.type==='banking'?'var(--blue)':'var(--red)'};margin:0 8px;">
                 ${(Number(e.amount)||0).toLocaleString()} TZS
             </div>
             <div style="display:flex;gap:4px;flex-shrink:0;">
@@ -2331,30 +2358,36 @@ async function saveRecord() {
     const bankAmt= parseFloat(document.getElementById('savings').value) || 0;
     const noteVal= document.getElementById('note').value.trim();
 
-    if (isExp && expAmt === 0)  { showToast("⚠️ Enter an expense amount."); return; }
+    const withdrawalAmt = parseFloat(document.getElementById('withdrawal')?.value) || 0;
+    const isWithdrawal  = tab === 'withdrawal';
+
+    if (isExp && expAmt === 0)        { showToast("⚠️ Enter an expense amount."); return; }
     if (isExp && !expCat) {
         showToast("⚠️ Please select an expense category.");
         document.getElementById('expenseCategory')?.focus(); return;
     }
-    if (!isExp && bankAmt === 0) { showToast("⚠️ Enter a banking amount."); return; }
+    if (!isExp && !isWithdrawal && bankAmt === 0)   { showToast("⚠️ Enter a banking amount."); return; }
+    if (isWithdrawal && withdrawalAmt === 0) { showToast("⚠️ Enter withdrawal amount."); return; }
 
     showLoader(true);
     try {
         await fetch(SCRIPT_URL, {
             method: "POST", mode: "no-cors",
             body: JSON.stringify({
-                action:   "saveTransaction",
-                date:     dateVal,
-                other:    isExp ? expAmt : 0,
-                savings:  isExp ? 0 : bankAmt,
-                category: expCat,
-                note:     noteVal
+                action:    "saveTransaction",
+                date:      dateVal,
+                other:     isExp ? expAmt : 0,
+                savings:   isExp ? 0 : isWithdrawal ? -withdrawalAmt : bankAmt,
+                category:  isWithdrawal ? 'Withdrawal' : expCat,
+                note:      noteVal,
+                type:      isWithdrawal ? 'withdrawal' : isExp ? 'expense' : 'banking'
             })
         });
         showToast("✅ Entry added!"); navigator.vibrate?.(50);
         // Clear amounts, keep date and tab for next entry
-        document.getElementById('other').value   = '';
-        document.getElementById('savings').value = '';
+        document.getElementById('other').value      = '';
+        document.getElementById('savings').value   = '';
+        if(document.getElementById('withdrawal')) document.getElementById('withdrawal').value = '';
         document.getElementById('note').value    = '';
         document.getElementById('expenseCategory').value = '';
         // Refresh list after backend saves

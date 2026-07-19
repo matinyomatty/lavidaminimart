@@ -67,10 +67,9 @@
             display: none;
             height: 100dvh;
             overflow: hidden;
-            display: flex;
             flex-direction: column;
+            padding-top: env(safe-area-inset-top);
         }
-        #mainApp.visible { display: flex; }
         .tab-pages-container {
             flex: 1;
             overflow-y: auto;
@@ -94,9 +93,7 @@
             background: var(--dark);
             z-index: 601;
         }
-        #mainApp {
-            padding-top: env(safe-area-inset-top);
-        }
+
         .tab-btn {
             flex: 1; padding: 0; border: none; background: transparent; cursor: pointer;
             font-family: 'DM Sans', sans-serif; font-size: 0.62rem; font-weight: 700;
@@ -1214,7 +1211,7 @@ function unlockUI() {
         }
     }
     document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('mainApp').style.display = 'flex';
     document.body.classList.add('unlocked');
     applyRole();
     setHeaderDate();

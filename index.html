@@ -1342,12 +1342,28 @@ function render() {
     data.sort((a, b) => new Date(a.date) - new Date(b.date));
     const salesByDate = {};
 
+    const hasAccLog = Array.isArray(accountingLog) && accountingLog.length > 0;
     data.forEach(row => {
         const rowDate = (row.date || '').split('T')[0];
         const rowSales    = Number(row.sales)    || 0;
-        const rowStock    = Number(row.stocking) || 0;
-        const rowOther    = Number(row.other)    || 0;
-        const rowSavings  = Number(row.savings)  || 0;
+        // Prefer live Accounting_Log sums (handles withdrawals) over sheet summary
+        let rowStock, rowOther, rowSavings;
+        if (hasAccLog) {
+            const dayAcc = accountingLog.filter(r => (r.date||'').split('T')[0] === rowDate);
+            rowStock   = dayAcc.filter(r => r.type==='expense' && (r.category||'').toLowerCase()==='supplier')
+                               .reduce((s,r) => s + (Number(r.amount)||0), 0);
+            rowOther   = dayAcc.filter(r => r.type==='expense' && (r.category||'').toLowerCase()!=='supplier')
+                               .reduce((s,r) => s + (Number(r.amount)||0), 0);
+            const bankIn  = dayAcc.filter(r => r.type==='banking')
+                               .reduce((s,r) => s + (Number(r.amount)||0), 0);
+            const bankOut = dayAcc.filter(r => r.type==='withdrawal')
+                               .reduce((s,r) => s + (Number(r.amount)||0), 0);
+            rowSavings = bankIn - bankOut; // withdrawal returns cash to hand
+        } else {
+            rowStock   = Number(row.stocking) || 0;
+            rowOther   = Number(row.other)    || 0;
+            rowSavings = Number(row.savings)  || 0;
+        }
         const net = rowSales - rowStock - rowOther - rowSavings; // cash balance after banking
         salesByDate[rowDate] = rowSales;
         totalSales   += rowSales; totalStock  += rowStock;
@@ -1404,6 +1420,10 @@ function render() {
             const sales   = Number(row.sales) || 0;
             const stk     = Number(row.stocking) || 0;
             const oth     = Number(row.other) || 0;
+            // Banking in/out for this date from Accounting_Log
+            const hAcc    = (accountingLog||[]).filter(r => (r.date||'').split('T')[0] === rowDate);
+            const bankIn  = hAcc.filter(r=>r.type==='banking').reduce((s,r)=>s+(Number(r.amount)||0),0);
+            const bankOut = hAcc.filter(r=>r.type==='withdrawal').reduce((s,r)=>s+(Number(r.amount)||0),0);
             const prev    = new Date(rowDate); prev.setDate(prev.getDate() - 1);
             const prevStr = getLocalDateStr(prev);
             const prevSales = salesByDate[prevStr];
@@ -1420,6 +1440,7 @@ function render() {
                 <div style="min-width:0; flex:1;">
                     <div class="entry-date">${rowDate}${isToday ? '<span class="tag-today">TODAY</span>' : ''}</div>
                     <div class="entry-meta">${sales > 0 ? `🛒 Sales: ${sales.toLocaleString()} TZS &nbsp;` : ''}${(stk+oth) > 0 ? `Exp: ${(stk+oth).toLocaleString()} TZS` : ''}${oth > 0 && stk === 0 ? ` (other)` : ''}</div>
+                    ${bankIn > 0 || bankOut > 0 ? `<div class="entry-meta">${bankIn > 0 ? `🏦 Banked: ${bankIn.toLocaleString()} TZS&nbsp;` : ''}${bankOut > 0 ? `<span style="color:#854d0e;">💳 Bank Out: ${bankOut.toLocaleString()} TZS</span>` : ''}</div>` : ''}
                     ${trendHtml}
                     ${row.note ? `<div class="entry-note">"${row.note}"</div>` : ''}
                 </div>

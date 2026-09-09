@@ -577,6 +577,16 @@
             </div>
             <div class="today-panel role-admin" style="margin-top:8px;">
                 <div class="today-stat">
+                    <h4>📱 Mobile Money</h4>
+                    <p id="topMobileBalance" style="color:#22c55e">— TZS</p>
+                </div>
+                <div class="today-stat right">
+                    <h4>🏦 Bank Balance</h4>
+                    <p id="topBankBalance" style="color:#60a5fa">— TZS</p>
+                </div>
+            </div>
+            <div class="today-panel role-admin" style="margin-top:8px;">
+                <div class="today-stat">
                     <h4>Total Banking</h4>
                     <p id="heroTotalSavings" style="color:#4ade80">— TZS</p>
                 </div>
@@ -722,8 +732,12 @@
                 <input type="number" id="closeCash" placeholder="Actual cash counted" inputmode="decimal">
             </div>
             <div class="field-group">
+                <span class="field-label">📱 Mobile Money Balance (TZS)</span>
+                <input type="number" id="closeMobile" placeholder="Lipa kwa Simu wallet balance" inputmode="decimal">
+            </div>
+            <div class="field-group">
                 <span class="field-label">🏦 Bank Balance (TZS)</span>
-                <input type="number" id="closeBank" placeholder="Current bank / M-Pesa balance" inputmode="decimal">
+                <input type="number" id="closeBank" placeholder="Current bank balance" inputmode="decimal">
             </div>
             <div class="save-bar" style="margin-top:8px;">
                 <button class="primary-cta" style="margin-bottom:10px;" onclick="confirmCloseDay()">✅ CONFIRM & VIEW SUMMARY</button>
@@ -775,18 +789,22 @@
         <input type="hidden" id="stock" value="0">
 
         <!-- Entry type tabs -->
-        <div style="display:flex;gap:6px;margin-bottom:16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;">
             <button id="tabExpense" onclick="switchEntryTab('expense')"
-                style="flex:1;padding:9px 4px;border-radius:12px;border:2px solid var(--gold);background:var(--gold);color:#001a33;font-weight:700;font-size:0.72rem;cursor:pointer;">
+                style="padding:9px 4px;border-radius:12px;border:2px solid var(--gold);background:var(--gold);color:#001a33;font-weight:700;font-size:0.72rem;cursor:pointer;">
                 💸 Expense
             </button>
             <button id="tabBanking" onclick="switchEntryTab('banking')"
-                style="flex:1;padding:9px 4px;border-radius:12px;border:2px solid #dde3ea;background:white;color:var(--gray);font-weight:700;font-size:0.72rem;cursor:pointer;">
+                style="padding:9px 4px;border-radius:12px;border:2px solid #dde3ea;background:white;color:var(--gray);font-weight:700;font-size:0.72rem;cursor:pointer;">
                 🏦 Bank In
             </button>
             <button id="tabWithdrawal" onclick="switchEntryTab('withdrawal')"
-                style="flex:1;padding:9px 4px;border-radius:12px;border:2px solid #dde3ea;background:white;color:var(--gray);font-weight:700;font-size:0.72rem;cursor:pointer;">
+                style="padding:9px 4px;border-radius:12px;border:2px solid #dde3ea;background:white;color:var(--gray);font-weight:700;font-size:0.72rem;cursor:pointer;">
                 💳 Bank Out
+            </button>
+            <button id="tabTransfer" onclick="switchEntryTab('transfer')"
+                style="padding:9px 4px;border-radius:12px;border:2px solid #dde3ea;background:white;color:var(--gray);font-weight:700;font-size:0.72rem;cursor:pointer;">
+                🔄 Transfer
             </button>
         </div>
 
@@ -808,6 +826,11 @@
                     <option value="Other">📝 Other</option>
                 </select>
             </div>
+            <div class="field-group"><span class="field-label">Paid From</span>
+                <select id="expenseAccount" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
+                    <option value="cash">💵 Cash</option>
+                    <option value="mobile">📱 Lipa kwa Simu</option>
+                </select></div>
             <div class="field-group"><span class="field-label">Amount (TZS)</span>
                 <input type="number" id="other" placeholder="0" inputmode="decimal"></div>
         </div>
@@ -815,8 +838,13 @@
         <!-- Banking fields -->
         <div id="bankingFields" style="display:none;">
             <div style="background:#eff6ff;border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:0.75rem;color:#1d4ed8;">
-                💡 Cash → Bank. Increases bank balance, reduces cash on hand.
+                💡 Moves money into the Bank. Reduces the source account below.
             </div>
+            <div class="field-group"><span class="field-label">From</span>
+                <select id="bankingAccount" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
+                    <option value="cash">💵 Cash</option>
+                    <option value="mobile">📱 Lipa kwa Simu</option>
+                </select></div>
             <div class="field-group"><span class="field-label">Amount to Bank (TZS)</span>
                 <input type="number" id="savings" placeholder="Amount going to bank" inputmode="decimal"></div>
         </div>
@@ -824,10 +852,29 @@
         <!-- Withdrawal fields -->
         <div id="withdrawalFields" style="display:none;">
             <div style="background:#fef9c3;border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:0.75rem;color:#854d0e;">
-                💡 Bank → Cash. Reduces bank balance, increases cash on hand.
+                💡 Moves money out of the Bank into the account below.
             </div>
+            <div class="field-group"><span class="field-label">To</span>
+                <select id="withdrawalAccount" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
+                    <option value="cash">💵 Cash</option>
+                    <option value="mobile">📱 Lipa kwa Simu</option>
+                </select></div>
             <div class="field-group"><span class="field-label">Amount Withdrawn (TZS)</span>
                 <input type="number" id="withdrawal" placeholder="Amount taken from bank" inputmode="decimal"></div>
+        </div>
+
+        <!-- Transfer fields (Cash <-> Mobile Money, no bank involved) -->
+        <div id="transferFields" style="display:none;">
+            <div style="background:#f3e8ff;border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:0.75rem;color:#6b21a8;">
+                💡 Move money directly between Cash and Lipa kwa Simu — e.g. cashing out mobile money, or topping up your mobile float from the till.
+            </div>
+            <div class="field-group"><span class="field-label">Direction</span>
+                <select id="transferDirection" style="width:100%;padding:13px 14px;border:2px solid #dde3ea;border-radius:14px;font-size:0.9rem;font-family:DM Sans,sans-serif;background:#f8fafc;color:#001a33;outline:none;">
+                    <option value="cashToMobile">💵 Cash → 📱 Lipa kwa Simu</option>
+                    <option value="mobileToCash">📱 Lipa kwa Simu → 💵 Cash</option>
+                </select></div>
+            <div class="field-group"><span class="field-label">Amount (TZS)</span>
+                <input type="number" id="transferAmount" placeholder="0" inputmode="decimal"></div>
         </div>
 
         <div class="field-group"><span class="field-label">Note (optional)</span>
@@ -921,9 +968,14 @@
             <input type="date" id="manualSaleDate">
         </div>
         <div class="field-group">
-            <span class="field-label">💵 Sale Amount (TZS)</span>
-            <input type="number" id="manualSaleAmount" placeholder="e.g., 25000" inputmode="decimal">
+            <span class="field-label">💵 Cash Amount (TZS)</span>
+            <input type="number" id="manualSaleCash" placeholder="0" inputmode="decimal" oninput="updateManualSaleTotal()">
         </div>
+        <div class="field-group">
+            <span class="field-label">📱 Lipa kwa Simu Amount (TZS)</span>
+            <input type="number" id="manualSaleMobile" placeholder="0" inputmode="decimal" oninput="updateManualSaleTotal()">
+        </div>
+        <div style="text-align:center;font-size:0.8rem;color:var(--gray);margin-bottom:14px;">Total: <strong id="manualSaleTotalDisplay">0 TZS</strong></div>
         <div class="field-group">
             <span class="field-label">📝 Note (Reason / Customer)</span>
             <textarea id="manualSaleDesc" placeholder="e.g., Cash walk-in, Bulk discount, Credit sale..." style="height:80px;"></textarea>
@@ -969,6 +1021,24 @@
         <div class="cart-total-row">
             <div class="cart-total-label">Total</div>
             <div class="cart-total-amount" id="cartModalTotal">0 TZS</div>
+        </div>
+        <div class="field-group" style="margin-top:14px;">
+            <span class="field-label">💳 Payment Method</span>
+            <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <button type="button" class="btn-sec" onclick="setCartPayment('cash')" style="flex:1;">💵 All Cash</button>
+                <button type="button" class="btn-sec" onclick="setCartPayment('mobile')" style="flex:1;">📱 All Lipa kwa Simu</button>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <div style="flex:1;">
+                    <span class="field-label" style="font-size:0.6rem;">💵 Cash (TZS)</span>
+                    <input type="number" id="cartCashAmount" inputmode="decimal" oninput="syncCartPayment()">
+                </div>
+                <div style="flex:1;">
+                    <span class="field-label" style="font-size:0.6rem;">📱 Lipa kwa Simu (TZS)</span>
+                    <input type="number" id="cartMobileAmount" inputmode="decimal" oninput="syncCartPayment()">
+                </div>
+            </div>
+            <div id="cartPaymentWarn" style="font-size:0.7rem;color:var(--red);margin-top:6px;display:none;">⚠️ Cash + Mobile must add up to the total.</div>
         </div>
         <div class="save-bar">
             <button class="primary-cta green-cta" style="margin-bottom:10px;" onclick="confirmSale()">
@@ -1060,7 +1130,7 @@ const CALLMEBOT_RECIPIENTS = [
     { phone: "255676221903", apikey: "1530037",  name: "Vida" },
 ];
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhMiM7uMx0bWkzbY9oCa8hbzPzm-ZYtaXw-NeEf_tfGQ74jF4z0dScvrVjnCHTLnot/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbFZIguYCGGRrBN1VnOUoIKmjOxqIFdWi4dWVhcLB63asou3DvVnwl5nkgFPc_mTnT/exec";
 const USERS = {
     matt:  { pin: "112511", role: "admin",  name: "Matt" },
     vida:  { pin: "112511", role: "admin",  name: "Vida" },
@@ -1331,6 +1401,51 @@ async function fetchInventory() {
 }
 
 // ════════════════════════════════════════════════
+//  ACCOUNT BALANCES — Cash / Mobile Money / Bank
+//  dateFilter: null = all-time running total, or a 'YYYY-MM-DD' string
+// ════════════════════════════════════════════════
+function computeAccountBalances(dateFilter) {
+    let cash = 0, mobile = 0, bank = 0;
+
+    (salesLog||[]).forEach(r => {
+        const rd = (r.date||'').split('T')[0];
+        if (dateFilter && rd !== dateFilter) return;
+        const cashAmt = (r.cashAmount !== undefined && r.cashAmount !== '') ? Number(r.cashAmount) : (Number(r.subtotal)||0);
+        const mobileAmt = Number(r.mobileAmount) || 0;
+        cash += cashAmt; mobile += mobileAmt;
+    });
+
+    (accountingLog||[]).forEach(r => {
+        const rd = (r.date||'').split('T')[0];
+        if (dateFilter && rd !== dateFilter) return;
+        const type = String(r.type||'').toLowerCase();
+        const amt  = Number(r.amount)||0;
+        let from = String(r.fromAccount||'').toLowerCase();
+        let to   = String(r.toAccount||'').toLowerCase();
+        // Backward-compat defaults for rows saved before account tracking existed
+        if (!from && !to) {
+            if (type === 'banking')         { from = 'cash'; to = 'bank'; }
+            else if (type === 'withdrawal') { from = 'bank'; to = 'cash'; }
+            else if (type === 'expense')    { from = 'cash'; to = ''; }
+        }
+        if (type === 'expense') {
+            if (from === 'mobile') mobile -= amt; else cash -= amt;
+        } else if (type === 'banking') {
+            if (from === 'mobile') mobile -= amt; else cash -= amt;
+            bank += amt;
+        } else if (type === 'withdrawal') {
+            bank -= amt;
+            if (to === 'mobile') mobile += amt; else cash += amt;
+        } else if (type === 'transfer') {
+            if (from === 'mobile') mobile -= amt; else cash -= amt;
+            if (to === 'mobile') mobile += amt; else cash += amt;
+        }
+    });
+
+    return { cash, mobile, bank };
+}
+
+// ════════════════════════════════════════════════
 //  RENDER — DASHBOARD
 // ════════════════════════════════════════════════
 function render() {
@@ -1408,8 +1523,11 @@ function render() {
     const showAcc = (id, val) => {
         document.getElementById(id).innerText = logsLoaded ? fmt(val) : wait;
     };
-    document.getElementById('topBalance').innerText = logsLoaded ? fmt(runningBalance) : wait;
-    document.getElementById('heroBalanceTrend').innerHTML = logsLoaded ? getTrendMarkup(runningBalance, yesterdayBalance) : '';
+    const bal = computeAccountBalances(null);
+    document.getElementById('topBalance').innerText = logsLoaded ? fmt(bal.cash) : wait;
+    document.getElementById('topMobileBalance').innerText = logsLoaded ? fmt(bal.mobile) : wait;
+    document.getElementById('topBankBalance').innerText = logsLoaded ? fmt(bal.bank) : wait;
+    document.getElementById('heroBalanceTrend').innerHTML = '';
     showAcc('heroTotalSavings', totalSavings);
     document.getElementById('heroDaySavings').innerText = !logsLoaded ? wait : (dayS !== null ? fmt(daySavings) : '— TZS');
     document.getElementById('totalSales').innerText   = fmt(totalSales); // sales come from Phase-1 too, fine
@@ -1575,6 +1693,8 @@ function updateCartBar() {
     bar.classList.toggle('has-items', count > 0);
 }
 
+let cartPaymentTouched = false;
+
 function renderCartModal() {
     const lines = document.getElementById('cartLines');
     const entries = Object.entries(cart);
@@ -1600,7 +1720,44 @@ function renderCartModal() {
             </div>
         </div>`;
     }).join('');
-    document.getElementById('cartModalTotal').innerText = getCartTotal().toLocaleString() + ' TZS';
+    const total = getCartTotal();
+    document.getElementById('cartModalTotal').innerText = total.toLocaleString() + ' TZS';
+    // Default payment split to all-cash unless the user has already edited it
+    if (!cartPaymentTouched) {
+        const cashEl = document.getElementById('cartCashAmount');
+        const mobEl  = document.getElementById('cartMobileAmount');
+        if (cashEl) cashEl.value = total;
+        if (mobEl)  mobEl.value  = 0;
+    }
+    validateCartPayment();
+}
+
+function setCartPayment(mode) {
+    const total = getCartTotal();
+    if (mode === 'cash') {
+        document.getElementById('cartCashAmount').value = total;
+        document.getElementById('cartMobileAmount').value = 0;
+    } else {
+        document.getElementById('cartCashAmount').value = 0;
+        document.getElementById('cartMobileAmount').value = total;
+    }
+    cartPaymentTouched = true;
+    validateCartPayment();
+}
+
+function syncCartPayment() {
+    cartPaymentTouched = true;
+    validateCartPayment();
+}
+
+function validateCartPayment() {
+    const total  = getCartTotal();
+    const cash   = parseFloat(document.getElementById('cartCashAmount')?.value) || 0;
+    const mobile = parseFloat(document.getElementById('cartMobileAmount')?.value) || 0;
+    const warn   = document.getElementById('cartPaymentWarn');
+    const ok = Math.abs((cash + mobile) - total) < 1;
+    if (warn) warn.style.display = ok ? 'none' : 'block';
+    return ok;
 }
 
 // ════════════════════════════════════════════════
@@ -1610,6 +1767,9 @@ async function confirmSale() {
     const cartEntries = Object.entries(cart);
     if (cartEntries.length === 0) { showToast("Cart is empty!"); return; }
     const total = getCartTotal();
+    if (!validateCartPayment()) { showToast("⚠️ Cash + Mobile must add up to the total."); return; }
+    const cashAmount   = parseFloat(document.getElementById('cartCashAmount').value) || 0;
+    const mobileAmount = parseFloat(document.getElementById('cartMobileAmount').value) || 0;
     const items = cartEntries.map(([id, qty]) => {
         const item = inventory.find(i => i.id === id);
         return { id, name: item?.name, qty, unitPrice: item?.sellPrice || 0, subtotal: (item?.sellPrice || 0) * qty };
@@ -1617,11 +1777,12 @@ async function confirmSale() {
 
     closeModals();
     showLoader(true);
+    cartPaymentTouched = false;
 
     const salePayload = {
         action: "recordSale",
         date: getLocalDateStr(),
-        total,
+        total, cashAmount, mobileAmount,
         items
     };
 
@@ -1988,16 +2149,19 @@ function openModal(type) {
         document.getElementById('aiOutput').innerHTML = `<div style="text-align:center; padding:20px; color:var(--gray);">Gathering insights...</div>`;
         setTimeout(generateAIReport, 400);
     } else if (type === 'cart') {
+        cartPaymentTouched = false;
         renderCartModal();
         document.getElementById('overlayCart').classList.add('active');
     } else if (type === 'manualSale') {
         if (!currentUser || currentUser.role !== 'admin') { showToast("⚠️ Admin access only."); return; }
         document.getElementById('manualSaleDate').value = getLocalDateStr();
-        document.getElementById('manualSaleAmount').value = '';
+        document.getElementById('manualSaleCash').value = '';
+        document.getElementById('manualSaleMobile').value = '';
+        document.getElementById('manualSaleTotalDisplay').innerText = '0 TZS';
         document.getElementById('manualSaleDesc').value = '';
         document.getElementById('overlayManualSale').classList.add('active');
         document.body.classList.add('modal-open'); document.documentElement.classList.add('modal-open');
-        setTimeout(() => document.getElementById('manualSaleAmount').focus(), 300);
+        setTimeout(() => document.getElementById('manualSaleCash').focus(), 300);
         return;
     } else if (type === 'stocktake') {
         openStocktake(); return; // handles its own overlay
@@ -2131,9 +2295,17 @@ async function confirmStocktake() {
 // ════════════════════════════════════════════════
 //  MANUAL SALE (Admin only)
 // ════════════════════════════════════════════════
+function updateManualSaleTotal() {
+    const cash   = parseFloat(document.getElementById('manualSaleCash').value)   || 0;
+    const mobile = parseFloat(document.getElementById('manualSaleMobile').value) || 0;
+    document.getElementById('manualSaleTotalDisplay').innerText = fmt(cash + mobile);
+}
+
 async function saveManualSale() {
     const dateVal = document.getElementById('manualSaleDate').value;
-    const amount  = parseFloat(document.getElementById('manualSaleAmount').value) || 0;
+    const cashAmount   = parseFloat(document.getElementById('manualSaleCash').value)   || 0;
+    const mobileAmount = parseFloat(document.getElementById('manualSaleMobile').value) || 0;
+    const amount  = cashAmount + mobileAmount;
     const desc    = document.getElementById('manualSaleDesc').value.trim() || 'Manual sale';
 
     if (!dateVal) { showToast("⚠️ Select a date."); return; }
@@ -2143,7 +2315,7 @@ async function saveManualSale() {
     try {
         await fetch(SCRIPT_URL, {
             method: "POST", mode: "no-cors",
-            body: JSON.stringify({ action: "recordManualSale", date: dateVal, amount, note: desc })
+            body: JSON.stringify({ action: "recordManualSale", date: dateVal, amount, cashAmount, mobileAmount, note: desc })
         });
         showToast("✅ Manual sale of " + fmt(amount) + " recorded!");
         navigator.vibrate?.(80);
@@ -2159,6 +2331,7 @@ function openCloseDay() {
     document.getElementById('closeDayStep1').style.display = '';
     document.getElementById('closeDayStep2').style.display = 'none';
     document.getElementById('closeCash').value = '';
+    document.getElementById('closeMobile').value = '';
     document.getElementById('closeBank').value = '';
     document.getElementById('overlayCloseDay').classList.add('active');
     document.body.classList.add('modal-open'); document.documentElement.classList.add('modal-open');
@@ -2166,8 +2339,9 @@ function openCloseDay() {
 }
 
 function confirmCloseDay() {
-    const cash = parseFloat(document.getElementById('closeCash').value) || 0;
-    const bank = parseFloat(document.getElementById('closeBank').value) || 0;
+    const cash   = parseFloat(document.getElementById('closeCash').value) || 0;
+    const mobile = parseFloat(document.getElementById('closeMobile').value) || 0;
+    const bank   = parseFloat(document.getElementById('closeBank').value) || 0;
 
     const today     = document.getElementById('closeDayDate')?.value || getLocalDateStr();
     const todayData = data.find(r => (r.date||'').split('T')[0] === today);
@@ -2185,18 +2359,29 @@ function confirmCloseDay() {
     const bankOut = dAcc.filter(r=>r.type==='withdrawal')
                         .reduce((s,r)=>s+(Number(r.amount)||0),0);
     const savings = bankIn - bankOut;                       // net to bank today
-    const net     = sales - supplier - other - savings;     // cash left in till
+
+    // Cash / Mobile split for today, and the net change to each account today
+    const dayBal   = computeAccountBalances(today);
+    const cashNet  = dayBal.cash;
+    const mobileNet= dayBal.mobile;
 
     const dayLog  = (salesLog||[]).filter(r => (r.date||'').split('T')[0] === today);
     const txCount = new Set(dayLog.map(r => r.timestamp)).size;
+    const daySalesCash   = dayLog.reduce((s,r) => s + ((r.cashAmount !== undefined && r.cashAmount !== '') ? Number(r.cashAmount) : Number(r.subtotal)||0), 0);
+    const daySalesMobile = dayLog.reduce((s,r) => s + (Number(r.mobileAmount)||0), 0);
     const fmtDate = new Date(today + 'T12:00:00').toLocaleDateString('en-TZ',
         {weekday:'long', day:'numeric', month:'long', year:'numeric'});
 
     const lowItems = inventory.filter(i => (i.stock||0) <= (i.reorderLevel||5) && (i.stock||0) > 0);
     const outItems = inventory.filter(i => (i.stock||0) <= 0);
 
+    // All-time system balances, for reconciliation against counted figures
+    const allBal = computeAccountBalances(null);
+
     // Store for WhatsApp message
-    window._closeDaySummary = { fmtDate, sales, supplier, other, savings, bankIn, bankOut, net, txCount, outItems, lowItems, todayData, cash, bank };
+    window._closeDaySummary = { fmtDate, sales, supplier, other, savings, bankIn, bankOut,
+        daySalesCash, daySalesMobile, cashNet, mobileNet, txCount, outItems, lowItems, todayData,
+        cash, mobile, bank, allBal };
 
     document.getElementById('closeDaySummary').innerHTML = `
         <div style="font-size:0.7rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">${fmtDate}</div>
@@ -2204,6 +2389,9 @@ function confirmCloseDay() {
             <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
                 <span style="font-size:0.8rem;color:var(--gray);">🛒 Total Sales</span>
                 <strong style="color:var(--green);">+${sales.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;padding-left:10px;">
+                <span style="font-size:0.72rem;color:var(--gray);">💵 Cash / 📱 Mobile</span>
+                <span style="font-size:0.72rem;color:var(--gray);">${daySalesCash.toLocaleString()} / ${daySalesMobile.toLocaleString()}</span></div>
             <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
                 <span style="font-size:0.8rem;color:var(--gray);">📦 Supplier</span>
                 <strong style="color:var(--red);">-${supplier.toLocaleString()} TZS</strong></div>
@@ -2217,14 +2405,21 @@ function confirmCloseDay() {
                 <span style="font-size:0.8rem;color:var(--gray);">🏦 Banked In</span>
                 <strong style="color:var(--blue);">-${bankIn.toLocaleString()} TZS</strong></div>
             <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;border-top:2px solid #eee;margin-top:4px;">
-                <strong style="font-size:0.85rem;">Net Balance</strong>
-                <strong style="font-size:1rem;color:${net>=0?'var(--green)':'var(--red)'};">${net>=0?'+':''}${net.toLocaleString()} TZS</strong>
+                <strong style="font-size:0.85rem;">💵 Cash Net Today</strong>
+                <strong style="font-size:0.95rem;color:${cashNet>=0?'var(--green)':'var(--red)'};">${cashNet>=0?'+':''}${cashNet.toLocaleString()} TZS</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">
+                <strong style="font-size:0.85rem;">📱 Mobile Net Today</strong>
+                <strong style="font-size:0.95rem;color:${mobileNet>=0?'var(--green)':'var(--red)'};">${mobileNet>=0?'+':''}${mobileNet.toLocaleString()} TZS</strong>
             </div>
             <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;margin-top:4px;">
-                <span style="font-size:0.8rem;color:var(--gray);">💵 Cash in Hand</span>
+                <span style="font-size:0.8rem;color:var(--gray);">💵 Cash in Hand (counted)</span>
                 <strong style="color:#7c3aed;">${cash.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
+                <span style="font-size:0.8rem;color:var(--gray);">📱 Mobile Money (counted)</span>
+                <strong style="color:#22c55e;">${mobile.toLocaleString()} TZS</strong></div>
             <div style="display:flex;justify-content:space-between;padding:5px 0;">
-                <span style="font-size:0.8rem;color:var(--gray);">🏦 Bank Balance</span>
+                <span style="font-size:0.8rem;color:var(--gray);">🏦 Bank Balance (counted)</span>
                 <strong style="color:#0284c7;">${bank.toLocaleString()} TZS</strong></div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:10px;">
@@ -2260,39 +2455,19 @@ function buildDailyMessage() {
     const fmt0 = n => (Number(n)||0).toLocaleString();
     const gross = s.sales - s.supplier - s.other;   // today's profit before banking
 
-    // ---- Cumulative (all-time) balances for reconciliation ----
-    // All-time cash in till = every day's (sales - supplier - other - bankIn + bankOut)
-    let allCash = 0;
-    const byDate = {};
-    (salesLog||[]).forEach(r => {
-        const d = (r.date||'').split('T')[0];
-        byDate[d] = byDate[d] || { sales:0, sup:0, oth:0, bin:0, bout:0 };
-        byDate[d].sales += Number(r.subtotal)||0;
-    });
-    (accountingLog||[]).forEach(r => {
-        const d = (r.date||'').split('T')[0];
-        byDate[d] = byDate[d] || { sales:0, sup:0, oth:0, bin:0, bout:0 };
-        const amt = Number(r.amount)||0;
-        if (r.type==='expense' && (r.category||'').toLowerCase()==='supplier') byDate[d].sup += amt;
-        else if (r.type==='expense') byDate[d].oth += amt;
-        else if (r.type==='banking') byDate[d].bin += amt;
-        else if (r.type==='withdrawal') byDate[d].bout += amt;
-    });
-    let allBank = 0;
-    Object.values(byDate).forEach(v => {
-        allCash += v.sales - v.sup - v.oth - v.bin + v.bout;
-        allBank += v.bin - v.bout;
-    });
-
-    // ---- Reconciliation (only if a figure was entered) ----
+    // ---- Reconciliation vs all-time system balances (only if a figure was entered) ----
     let recon = '';
     if (s.cash > 0) {
-        const d = s.cash - allCash;
-        recon += `\n💵 Cash counted: ${fmt0(s.cash)} vs system ${fmt0(allCash)} → ${d>=0?'+':''}${fmt0(d)}`;
+        const d = s.cash - s.allBal.cash;
+        recon += `\n💵 Cash counted: ${fmt0(s.cash)} vs system ${fmt0(s.allBal.cash)} → ${d>=0?'+':''}${fmt0(d)}`;
+    }
+    if (s.mobile > 0) {
+        const d = s.mobile - s.allBal.mobile;
+        recon += `\n📱 Mobile counted: ${fmt0(s.mobile)} vs system ${fmt0(s.allBal.mobile)} → ${d>=0?'+':''}${fmt0(d)}`;
     }
     if (s.bank > 0) {
-        const d = s.bank - allBank;
-        recon += `\n🏦 Bank stated: ${fmt0(s.bank)} vs system ${fmt0(allBank)} → ${d>=0?'+':''}${fmt0(d)}`;
+        const d = s.bank - s.allBal.bank;
+        recon += `\n🏦 Bank stated: ${fmt0(s.bank)} vs system ${fmt0(s.allBal.bank)} → ${d>=0?'+':''}${fmt0(d)}`;
     }
 
     const bankLine = s.bankOut > 0
@@ -2303,12 +2478,13 @@ function buildDailyMessage() {
 
     return `🏪 *LA VIDA* — ${s.fmtDate}
 
-🛒 Sales: ${fmt0(s.sales)}
+🛒 Sales: ${fmt0(s.sales)} (💵 ${fmt0(s.daySalesCash)} / 📱 ${fmt0(s.daySalesMobile)})
 📦 Supplier: ${fmt0(s.supplier)}
 💸 Expenses: ${fmt0(s.other)}${bankLine}
 ━━━━━━━━━━
 📈 Day Profit: ${fmt0(gross)}
-💵 Day Cash: ${fmt0(s.net)}${recon}
+💵 Cash Net: ${fmt0(s.cashNet)}
+📱 Mobile Net: ${fmt0(s.mobileNet)}${recon}
 
 🧾 ${s.txCount} POS sales${alerts}`;
 }
@@ -2344,11 +2520,12 @@ function overlayClose(e, id) { if (e.target.id === id) closeModals(); }
 //  ACCOUNTING — ENTRY TAB SWITCHER
 // ════════════════════════════════════════════════
 function switchEntryTab(type) {
-    const tabs = { expense: 'tabExpense', banking: 'tabBanking', withdrawal: 'tabWithdrawal' };
+    const tabs = { expense: 'tabExpense', banking: 'tabBanking', withdrawal: 'tabWithdrawal', transfer: 'tabTransfer' };
     const colors = {
         expense:    { bg: 'var(--gold)', color: '#001a33', border: 'var(--gold)' },
         banking:    { bg: 'var(--blue)', color: 'white',   border: 'var(--blue)' },
         withdrawal: { bg: '#854d0e',     color: 'white',   border: '#854d0e' },
+        transfer:   { bg: '#7c3aed',     color: 'white',   border: '#7c3aed' },
     };
     // Reset all tabs
     Object.entries(tabs).forEach(([t, id]) => {
@@ -2363,6 +2540,7 @@ function switchEntryTab(type) {
     document.getElementById('expenseFields').style.display   = type === 'expense'    ? '' : 'none';
     document.getElementById('bankingFields').style.display   = type === 'banking'    ? '' : 'none';
     document.getElementById('withdrawalFields').style.display= type === 'withdrawal' ? '' : 'none';
+    document.getElementById('transferFields').style.display  = type === 'transfer'   ? '' : 'none';
     document.getElementById('overlayEntry').setAttribute('data-tab', type);
 }
 
@@ -2377,20 +2555,30 @@ function renderTodayEntries(dateStr) {
         list.innerHTML = '<div style="font-size:0.75rem;color:var(--gray);text-align:center;padding:10px 0;">No entries yet for this date</div>';
         return;
     }
-    list.innerHTML = dayAcc.map(e => `
+    const acctLabel = a => a === 'mobile' ? '📱 Mobile' : a === 'bank' ? '🏦 Bank' : '💵 Cash';
+    const entryBg    = { withdrawal:'#fefce8', banking:'#eff6ff', transfer:'#f3e8ff' };
+    const entryBar   = { withdrawal:'#854d0e', banking:'var(--blue)', transfer:'#7c3aed' };
+    const entryColor = { withdrawal:'#854d0e', banking:'var(--blue)', transfer:'#7c3aed' };
+    list.innerHTML = dayAcc.map(e => {
+        const type = e.type || 'expense';
+        const label = type === 'withdrawal' ? `💳 Withdrawal → ${acctLabel(e.toAccount)}`
+                    : type === 'banking'    ? `🏦 Banking ← ${acctLabel(e.fromAccount)}`
+                    : type === 'transfer'   ? `🔄 ${acctLabel(e.fromAccount)} → ${acctLabel(e.toAccount)}`
+                    : `💸 ${e.category||'Expense'} (${acctLabel(e.fromAccount)})`;
+        return `
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;
-            background:${e.type==='withdrawal'?'#fefce8':e.type==='banking'?'#eff6ff':'#fff9f0'};border-radius:10px;margin-bottom:6px;
-            border-left:3px solid ${e.type==='withdrawal'?'#854d0e':e.type==='banking'?'var(--blue)':'var(--gold)'};">
+            background:${entryBg[type]||'#fff9f0'};border-radius:10px;margin-bottom:6px;
+            border-left:3px solid ${entryBar[type]||'var(--gold)'};">
             <div style="flex:1;min-width:0;">
                 <div style="font-size:0.75rem;font-weight:700;color:#001a33;">
-                    ${e.type==='withdrawal'?'💳 Bank Withdrawal':e.type==='banking'?'🏦 Banking':'💸 '+(e.category||'Expense')}
+                    ${label}
                 </div>
                 <div style="font-size:0.68rem;color:var(--gray);">
                     ${e.timestamp ? new Date(e.timestamp).toLocaleTimeString('en-TZ',{hour:'2-digit',minute:'2-digit'}) : ''}
                     ${e.note ? ' · ' + e.note : ''}
                 </div>
             </div>
-            <div style="font-size:0.85rem;font-weight:800;color:${e.type==='withdrawal'?'#854d0e':e.type==='banking'?'var(--blue)':'var(--red)'};margin:0 8px;">
+            <div style="font-size:0.85rem;font-weight:800;color:${entryColor[type]||'var(--red)'};margin:0 8px;">
                 ${(Number(e.amount)||0).toLocaleString()} TZS
             </div>
             <div style="display:flex;gap:4px;flex-shrink:0;">
@@ -2399,7 +2587,8 @@ function renderTodayEntries(dateStr) {
                 <button onclick="event.stopPropagation();quickDeleteEntry('${e.id}','${dateStr}')"
                     style="background:none;border:1px solid #fca5a5;border-radius:8px;padding:4px 8px;font-size:0.7rem;cursor:pointer;color:var(--red);">🗑️</button>
             </div>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 }
 
 // ════════════════════════════════════════════════
@@ -2409,11 +2598,17 @@ async function saveRecord() {
     const dateVal = document.getElementById('date').value;
     if (!dateVal) { showToast("⚠️ Please select a date."); return; }
     const tab    = document.getElementById('overlayEntry')?.getAttribute('data-tab') || 'expense';
+
+    if (tab === 'transfer') { await saveTransfer(dateVal); return; }
+
     const isExp  = tab === 'expense';
     const expCat = document.getElementById('expenseCategory')?.value || '';
     const expAmt = parseFloat(document.getElementById('other').value)   || 0;
     const bankAmt= parseFloat(document.getElementById('savings').value) || 0;
     const noteVal= document.getElementById('note').value.trim();
+    const expAccount     = document.getElementById('expenseAccount')?.value || 'cash';
+    const bankingAccount = document.getElementById('bankingAccount')?.value || 'cash';
+    const withdrawalAccount = document.getElementById('withdrawalAccount')?.value || 'cash';
 
     const withdrawalAmt = parseFloat(document.getElementById('withdrawal')?.value) || 0;
     const isWithdrawal  = tab === 'withdrawal';
@@ -2426,6 +2621,8 @@ async function saveRecord() {
     if (!isExp && !isWithdrawal && bankAmt === 0)   { showToast("⚠️ Enter a banking amount."); return; }
     if (isWithdrawal && withdrawalAmt === 0) { showToast("⚠️ Enter withdrawal amount."); return; }
 
+    const account = isExp ? expAccount : isWithdrawal ? withdrawalAccount : bankingAccount;
+
     showLoader(true);
     try {
         await fetch(SCRIPT_URL, {
@@ -2437,7 +2634,8 @@ async function saveRecord() {
                 savings:   isExp ? 0 : isWithdrawal ? -withdrawalAmt : bankAmt,
                 category:  isWithdrawal ? 'Withdrawal' : expCat,
                 note:      noteVal,
-                type:      isWithdrawal ? 'withdrawal' : isExp ? 'expense' : 'banking'
+                type:      isWithdrawal ? 'withdrawal' : isExp ? 'expense' : 'banking',
+                account:   account
             })
         });
         showToast("✅ Entry added!"); navigator.vibrate?.(50);
@@ -2448,6 +2646,38 @@ async function saveRecord() {
         document.getElementById('note').value    = '';
         document.getElementById('expenseCategory').value = '';
         // Refresh list after backend saves
+        setTimeout(async () => {
+            await loadLogsInBackground();
+            renderTodayEntries(dateVal);
+        }, 4000);
+    } catch(e) {
+        showToast("⚠️ Save may have failed.");
+    }
+    showLoader(false);
+}
+
+// ── Save a Cash <-> Mobile Money transfer ──
+async function saveTransfer(dateVal) {
+    const direction = document.getElementById('transferDirection')?.value || 'cashToMobile';
+    const amount    = parseFloat(document.getElementById('transferAmount')?.value) || 0;
+    const noteVal   = document.getElementById('note').value.trim();
+
+    if (amount === 0) { showToast("⚠️ Enter a transfer amount."); return; }
+
+    showLoader(true);
+    try {
+        await fetch(SCRIPT_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({
+                action: "recordTransfer",
+                date: dateVal,
+                direction, amount,
+                note: noteVal
+            })
+        });
+        showToast("✅ Transfer recorded!"); navigator.vibrate?.(50);
+        document.getElementById('transferAmount').value = '';
+        document.getElementById('note').value = '';
         setTimeout(async () => {
             await loadLogsInBackground();
             renderTodayEntries(dateVal);
@@ -2571,7 +2801,11 @@ function executeSearch() {
     const sales   = Number(row.sales)   || 0;
     const other   = Number(row.other)   || 0;
     const savings = Number(row.savings) || 0;
-    const net     = sales - other - savings; // cash on hand after banking
+    const net     = sales - other - savings; // cash on hand after banking, combined-account view
+
+    const dayLogForSplit = (salesLog||[]).filter(r => (r.date||'').split('T')[0] === d);
+    const salesCash   = dayLogForSplit.reduce((s,r) => s + ((r.cashAmount !== undefined && r.cashAmount !== '') ? Number(r.cashAmount) : Number(r.subtotal)||0), 0);
+    const salesMobile = dayLogForSplit.reduce((s,r) => s + (Number(r.mobileAmount)||0), 0);
 
     // ── Section label helper ──
     const sectionLabel = (txt) =>
@@ -2591,41 +2825,52 @@ function executeSearch() {
         <div style="background:#f8fafc;border-radius:14px;padding:14px;">
             ${sales > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
                 <span style="font-size:0.8rem;color:var(--gray);">🛒 Total Sales</span>
-                <strong style="color:var(--green);">+${sales.toLocaleString()} TZS</strong></div>` : ''}
+                <strong style="color:var(--green);">+${sales.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:0 0 5px;border-bottom:1px solid #eee;">
+                <span style="font-size:0.68rem;color:var(--gray);">💵 Cash / 📱 Mobile</span>
+                <span style="font-size:0.68rem;color:var(--gray);">${salesCash.toLocaleString()} / ${salesMobile.toLocaleString()}</span></div>` : ''}
             ${other > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
                 <span style="font-size:0.8rem;color:var(--gray);">💸 Expenses</span>
                 <strong style="color:var(--red);">-${other.toLocaleString()} TZS</strong></div>` : ''}
             ${savings > 0 ? `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
                 <span style="font-size:0.8rem;color:var(--gray);">🏦 Banking</span>
-                <strong style="color:var(--blue);">-${bankIn.toLocaleString()} TZS</strong></div>` : ''}
+                <strong style="color:var(--blue);">-${savings.toLocaleString()} TZS</strong></div>` : ''}
             <div style="display:flex;justify-content:space-between;padding:8px 0 0;">
-                <span style="font-size:0.85rem;font-weight:700;">Net Balance</span>
+                <span style="font-size:0.85rem;font-weight:700;">Net (combined)</span>
                 <strong style="font-size:0.95rem;color:${net>=0?'var(--green)':'var(--red)'};">${net>=0?'+':''}${net.toLocaleString()} TZS</strong>
             </div>
         </div>`;
 
-    // ── 2. Accounting entries (Expenses & Banking) — each editable individually ──
-    // Individual accounting entries from accountingLog
+    // ── 2. Accounting entries (Expenses, Banking, Withdrawals, Transfers) — each editable individually ──
     const dayAccEntries = (accountingLog||[]).filter(r => (r.date||'').split('T')[0] === d)
         .sort((a,b) => a.timestamp > b.timestamp ? 1 : -1);
     const hasAccounting = dayAccEntries.length > 0;
+    const acctLabel  = a => a === 'mobile' ? '📱 Mobile' : a === 'bank' ? '🏦 Bank' : '💵 Cash';
+    const entryBar   = { withdrawal:'#854d0e', banking:'var(--blue)', transfer:'#7c3aed' };
+    const entryColor = { withdrawal:'#854d0e', banking:'var(--blue)', transfer:'#7c3aed' };
     const accountingHtml = hasAccounting ? `
         ${sectionLabel(`📒 Accounting Entries (${dayAccEntries.length})`)}
-        ${dayAccEntries.map(entry => `
-        <div style="background:#fffbeb;border-radius:12px;padding:10px 14px;margin-bottom:8px;border-left:3px solid ${entry.type==='banking'?'var(--blue)':'var(--gold)'};">
+        ${dayAccEntries.map(entry => {
+            const type = entry.type || 'expense';
+            const label = type === 'withdrawal' ? `💳 Withdrawal → ${acctLabel(entry.toAccount)}`
+                        : type === 'banking'    ? `🏦 Banking ← ${acctLabel(entry.fromAccount)}`
+                        : type === 'transfer'   ? `🔄 ${acctLabel(entry.fromAccount)} → ${acctLabel(entry.toAccount)}`
+                        : `💸 ${entry.category||'Expense'} (${acctLabel(entry.fromAccount)})`;
+            return `
+        <div style="background:#fffbeb;border-radius:12px;padding:10px 14px;margin-bottom:8px;border-left:3px solid ${entryBar[type]||'var(--gold)'};">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
                 <span style="font-size:0.72rem;color:var(--gray);font-weight:600;">
-                    ${entry.type==='banking'?'🏦 Banking':'💸 '+( entry.category||'Expense')}
+                    ${label}
                     · ${entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('en-TZ',{hour:'2-digit',minute:'2-digit'}) : ''}
                 </span>
-                <strong style="color:${entry.type==='banking'?'var(--blue)':'var(--red)'};">${(Number(entry.amount)||0).toLocaleString()} TZS</strong>
+                <strong style="color:${entryColor[type]||'var(--red)'};">${(Number(entry.amount)||0).toLocaleString()} TZS</strong>
             </div>
             ${entry.note ? `<div style="font-size:0.72rem;color:var(--gray);font-style:italic;">"${entry.note}"</div>` : ''}
             <div style="display:flex;justify-content:flex-end;margin-top:6px;">
                 <button class="btn-sec" style="font-size:0.68rem;padding:5px 12px;color:var(--red);"
                     onclick="deleteAccountingEntry('${entry.id}', '${d}')">🗑️ Delete</button>
             </div>
-        </div>`).join('')}` : '';
+        </div>`;}).join('')}` : '';
 
     // ── 3. POS Sales — each sale transaction individually editable ──
     const dayLog = (salesLog || []).filter(r => (r.date || '').split('T')[0] === d);
@@ -2641,6 +2886,11 @@ function executeSearch() {
         ${sectionLabel(`🛒 POS Sales — ${salesEntries.length} transaction${salesEntries.length>1?'s':''}`)}
         ${salesEntries.map((sale, si) => {
             const isManual = sale.items.some(i => i.itemId === 'manual_sale');
+            const first = sale.items[0] || {};
+            const cashPart   = (first.cashAmount !== undefined && first.cashAmount !== '') ? Number(first.cashAmount) : sale.total;
+            const mobilePart = Number(first.mobileAmount) || 0;
+            const payLabel = mobilePart > 0 && cashPart > 0 ? `💵${cashPart.toLocaleString()} / 📱${mobilePart.toLocaleString()}`
+                            : mobilePart > 0 ? '📱 Lipa kwa Simu' : '💵 Cash';
             return `
         <div style="background:${isManual?'#fefce8':'#f0fdf4'};border-radius:12px;padding:10px 12px;margin-bottom:8px;
             border-left:3px solid ${isManual?'var(--gold)':'var(--pos-green)'};">
@@ -2648,6 +2898,7 @@ function executeSearch() {
                 <span style="font-size:0.72rem;color:var(--gray);font-weight:600;">
                     ${isManual ? '✍️ Manual' : '🛒 Sale #'+(si+1)}
                     ${sale.timestamp ? ' · ' + new Date(sale.timestamp).toLocaleTimeString('en-TZ',{hour:'2-digit',minute:'2-digit'}) : ''}
+                    <br><span style="font-size:0.65rem;">${payLabel}</span>
                 </span>
                 <strong style="color:${isManual?'var(--gold)':'var(--pos-green)'};font-size:0.85rem;">${sale.total.toLocaleString()} TZS</strong>
             </div>
@@ -2763,6 +3014,13 @@ function previewReport() {
     });
     const topItems = Object.entries(itemTotals).sort((a,b)=>b[1]-a[1]).slice(0,5);
 
+    // Cash vs Mobile Money split for the month
+    let cashSales = 0, mobileSales = 0;
+    monthLog.forEach(r => {
+        cashSales   += (r.cashAmount !== undefined && r.cashAmount !== '') ? Number(r.cashAmount) : Number(r.subtotal)||0;
+        mobileSales += Number(r.mobileAmount)||0;
+    });
+
     preview.innerHTML = `
         <div style="font-size:0.75rem;color:var(--gray);text-align:center;margin-bottom:12px;">
             Report for <strong>${monthLabel}</strong> · ${filtered.length} days recorded
@@ -2770,6 +3028,9 @@ function previewReport() {
         <div style="background:#f8fafc;border-radius:14px;padding:14px;font-size:0.8rem;margin-bottom:10px;">
             <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
                 <span style="color:var(--gray);">🛒 Total Sales</span><strong style="color:var(--green);">${totSales.toLocaleString()} TZS</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:0 0 5px;border-bottom:1px solid #eee;">
+                <span style="font-size:0.68rem;color:var(--gray);">💵 Cash / 📱 Mobile</span>
+                <span style="font-size:0.68rem;color:var(--gray);">${cashSales.toLocaleString()} / ${mobileSales.toLocaleString()}</span></div>
             <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
                 <span style="color:var(--gray);">📦 Stocking Cost</span><strong style="color:var(--red);">${totStock.toLocaleString()} TZS</strong></div>
             <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
@@ -2827,6 +3088,14 @@ function generatePDF() {
     const margin      = totSales>0?((grossProfit/totSales)*100).toFixed(1):0;
     const avgDaily = filtered.length>0?(totSales/filtered.length).toFixed(0):0;
 
+    // ── Cash vs Mobile Money split from Sales_Log ──
+    const monthLogPdf = (salesLog||[]).filter(r => (r.date||'').startsWith(m));
+    let cashSalesPdf = 0, mobileSalesPdf = 0;
+    monthLogPdf.forEach(r => {
+        cashSalesPdf   += (r.cashAmount !== undefined && r.cashAmount !== '') ? Number(r.cashAmount) : Number(r.subtotal)||0;
+        mobileSalesPdf += Number(r.mobileAmount)||0;
+    });
+
     // ── Summary boxes ──
     let y = 40;
     doc.setTextColor(...dark);
@@ -2835,6 +3104,8 @@ function generatePDF() {
 
     const boxes = [
         {label:'Total Sales',    val:totSales.toLocaleString()+' TZS',   color:[40,167,69]},
+        {label:'Cash Sales',     val:cashSalesPdf.toLocaleString()+' TZS', color:[124,58,237]},
+        {label:'Mobile Sales',   val:mobileSalesPdf.toLocaleString()+' TZS', color:[34,197,94]},
         {label:'Stocking Cost',  val:totStock.toLocaleString()+' TZS',   color:[220,53,69]},
         {label:'Other Expenses', val:totOther.toLocaleString()+' TZS',   color:[220,53,69]},
         {label:'Banking (Saved)',  val:totSav.toLocaleString()+' TZS',        color:[0,64,133]},

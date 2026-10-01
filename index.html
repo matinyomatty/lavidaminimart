@@ -6,7 +6,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual">
-    <title>La Vida Minimart v2.6</title>
+    <title>La Vida Minimart v2.7</title>
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
@@ -587,7 +587,7 @@
             </div>
             <div class="today-panel role-admin" style="margin-top:8px;">
                 <div class="today-stat">
-                    <h4>Total Banking</h4>
+                    <h4>Banked · This Month</h4>
                     <p id="heroTotalSavings" style="color:#4ade80">— TZS</p>
                 </div>
                 <div class="today-stat right">
@@ -606,6 +606,8 @@
                     🛒 MANUAL SALE
                 </button>
             </div>
+            <!-- Month banner: current month + last month's close status -->
+            <div id="monthBanner" class="role-admin"></div>
             <!-- Month-to-date cards: these restart from zero each new month -->
             <div class="summary-grid role-admin">
                 <div class="stat-card"><h4>Sales · This Month</h4><p id="totalSales">...</p></div>
@@ -623,7 +625,10 @@
             <button class="btn-sec role-admin" onclick="openModal('month')" style="width:100%;margin-top:8px;margin-bottom:18px;border-color:var(--blue);color:var(--blue);">
                 📅 MONTHLY PROFIT & CLOSE MONTH
             </button>
-            <span class="section-label role-admin">Transaction History</span>
+            <div class="role-admin" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <span class="section-label" id="historyLabel" style="margin-bottom:0;">Transaction History</span>
+                <button id="historyToggle" onclick="toggleHistoryScope()" style="background:none;border:none;color:var(--blue);font-size:0.68rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Show all months</button>
+            </div>
             <div id="entryList" class="role-admin"></div>
             <button id="loadMoreBtn" class="btn-sec role-admin" style="width:100%; margin-top:4px; display:none;" onclick="loadMore()">VIEW MORE</button>
         </div>
@@ -1555,11 +1560,18 @@ function render() {
     // Summary cards now show THIS MONTH only (restart each month)
     renderMonthCards();
 
-    const sorted = [...data].reverse();
+    const curMonth = todayStr.slice(0, 7);
+    const sorted = [...data].reverse().filter(r => showAllHistory || mcKey(r.date) === curMonth);
     const visible = sorted.slice(0, displayLimit);
+    const hl = document.getElementById('historyLabel');
+    const ht = document.getElementById('historyToggle');
+    if (hl) hl.innerText = showAllHistory ? 'Transaction History · All Months' : 'Transactions · ' + mcName(curMonth);
+    if (ht) ht.innerText = showAllHistory ? 'This month only' : 'Show all months';
 
     if (visible.length === 0) {
-        list.innerHTML = `<div class="empty-state"><div class="icon">📋</div>No records yet.<br>Tap ADD DAILY ENTRY to get started.</div>`;
+        list.innerHTML = showAllHistory
+            ? `<div class="empty-state"><div class="icon">📋</div>No records yet.<br>Tap ACCOUNTING to get started.</div>`
+            : `<div class="empty-state"><div class="icon">🗓️</div>New month — nothing recorded in ${mcName(curMonth)} yet.<br><span style="font-size:0.75rem;">Tap "Show all months" to see older entries.</span></div>`;
     } else {
         const frag = document.createDocumentFragment();
         visible.forEach(row => {
@@ -1600,9 +1612,11 @@ function render() {
         });
         list.appendChild(frag);
     }
-    document.getElementById('loadMoreBtn').style.display = data.length > displayLimit ? 'block' : 'none';
+    document.getElementById('loadMoreBtn').style.display = sorted.length > displayLimit ? 'block' : 'none';
 }
 function loadMore() { displayLimit += 5; render(); }
+let showAllHistory = false;
+function toggleHistoryScope() { showAllHistory = !showAllHistory; displayLimit = 5; render(); }
 
 // ════════════════════════════════════════════════
 //  MONTHLY PROFIT — helpers
@@ -1665,6 +1679,73 @@ function renderMonthCards() {
     set('monthProfit', 'Profit · ' + mon,   logsLoaded ? fmt(f.profit) : wait);
     const p = document.getElementById('monthProfit');
     if (p) p.style.color = !logsLoaded ? '' : (f.profit >= 0 ? 'var(--green)' : 'var(--red)');
+
+    // Header: banking for this month only
+    const hb = document.getElementById('heroTotalSavings');
+    if (hb) {
+        hb.previousElementSibling.innerText = 'Banked · ' + mon;
+        hb.innerText = logsLoaded ? fmt(f.bankIn - f.bankOut) : wait;
+    }
+
+    renderMonthBanner();
+}
+
+// Has a month been closed? Closing writes a Bank In entry whose note carries
+// the month name, so every phone sees it. A close with 0 saved is kept on this phone.
+function mcClosedInfo(m) {
+    const name = mcName(m);
+    const entries = (accountingLog || []).filter(r => {
+        const n = String(r.note || '');
+        return n.includes('Month close – ' + name) || n.includes('Month-end savings – ' + name);
+    });
+    const saved = entries.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const local = sGet('laVidaClosed_' + m) === '1';
+    return { closed: entries.length > 0 || local, saved };
+}
+
+function renderMonthBanner() {
+    const el = document.getElementById('monthBanner');
+    if (!el) return;
+    const today = new Date();
+    const m = getLocalDateStr().slice(0, 7);
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const f = mcFigures(m);
+    const pm = mcPrev(m);
+    const pf = mcFigures(pm);
+    const prevHasData = pf.sales || pf.stock || pf.other;
+
+    let prevStrip = '';
+    if (logsLoaded && prevHasData) {
+        const ci = mcClosedInfo(pm);
+        prevStrip = ci.closed
+            ? `<div onclick="openModal('month')" style="cursor:pointer;margin-top:10px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.35);border-radius:12px;padding:9px 12px;font-size:0.74rem;color:#bbf7d0;">
+                   ✅ <strong>${mcName(pm)} closed</strong> · Profit ${pf.profit.toLocaleString()} · Saved ${ci.saved.toLocaleString()} TZS
+               </div>`
+            : `<div onclick="openModal('month')" style="cursor:pointer;margin-top:10px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.5);border-radius:12px;padding:9px 12px;font-size:0.74rem;color:#fde68a;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                   <span>⚠️ <strong>${mcName(pm)} not closed</strong> · Profit ${pf.profit.toLocaleString()} TZS</span>
+                   <span style="background:#f59e0b;color:#001a33;font-weight:800;border-radius:8px;padding:4px 9px;white-space:nowrap;">CLOSE ›</span>
+               </div>`;
+    }
+
+    el.innerHTML = `
+        <div style="background:var(--dark);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 6px 18px rgba(0,26,51,0.25);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                    <div style="font-family:'Syne',sans-serif;font-size:1.15rem;color:var(--gold);letter-spacing:1px;">${mcName(m).toUpperCase()}</div>
+                    <div style="font-size:0.68rem;color:rgba(255,255,255,0.5);margin-top:2px;">Day ${today.getDate()} of ${daysInMonth}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:0.55rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.8px;">Profit so far</div>
+                    <div style="font-size:1.25rem;font-weight:800;color:${!logsLoaded ? 'white' : f.profit >= 0 ? '#4ade80' : '#f87171'};">
+                        ${logsLoaded ? f.profit.toLocaleString() : '···'} <span style="font-size:0.65rem;">TZS</span>
+                    </div>
+                </div>
+            </div>
+            <div style="height:5px;background:rgba(255,255,255,0.1);border-radius:3px;margin-top:12px;overflow:hidden;">
+                <div style="height:100%;width:${Math.round(today.getDate() / daysInMonth * 100)}%;background:var(--gold);"></div>
+            </div>
+            ${prevStrip}
+        </div>`;
 }
 
 // ════════════════════════════════════════════════
@@ -2630,7 +2711,13 @@ function mcRenderHistory() {
             <div class="entry-item" style="cursor:pointer;padding:10px 14px;"
                  onclick="document.getElementById('mcPick').value='${m}';mcRenderClose()">
                 <div>
-                    <div class="entry-date">${mcName(m)}</div>
+                    <div class="entry-date">${mcName(m)}
+                        ${m === getLocalDateStr().slice(0, 7)
+                            ? '<span style="font-size:0.55rem;background:#e0e7ff;color:#3730a3;padding:2px 6px;border-radius:5px;margin-left:4px;">IN PROGRESS</span>'
+                            : mcClosedInfo(m).closed
+                                ? '<span style="font-size:0.55rem;background:#dcfce7;color:#166534;padding:2px 6px;border-radius:5px;margin-left:4px;">✅ CLOSED</span>'
+                                : '<span style="font-size:0.55rem;background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:5px;margin-left:4px;">NOT CLOSED</span>'}
+                    </div>
                     <div class="entry-meta">Sales ${f.sales.toLocaleString()} · Spent ${(f.stock + f.other).toLocaleString()}</div>
                 </div>
                 <div style="text-align:right;font-weight:800;color:${f.profit >= 0 ? 'var(--green)' : 'var(--red)'};">
@@ -2650,7 +2737,8 @@ function mcRenderClose() {
     const close = mcBalancesUpTo(mcLastDay(m));
     const now   = computeAccountBalances(null);
     const isCurrent = m === getLocalDateStr().slice(0, 7);
-    window._mcClose = { m, f, open, close };
+    const ci = mcClosedInfo(m);
+    window._mcClose = { m, f, open, close, ci };
 
     const row = (l, v, c) => `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;">
         <span style="font-size:0.8rem;color:var(--gray);">${l}</span><strong style="color:${c || 'inherit'};">${v}</strong></div>`;
@@ -2676,9 +2764,19 @@ function mcRenderClose() {
             ${balRow('🏦 Bank', open.bank, close.bank)}
         </div>
 
-        <span class="section-label">Move to savings</span>
+        ${ci.closed ? `
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:14px;padding:14px;margin-bottom:10px;text-align:center;">
+            <div style="font-size:1.6rem;">✅</div>
+            <div style="font-weight:800;color:#166534;margin-top:4px;">${mcName(m)} is closed</div>
+            <div style="font-size:0.75rem;color:#166534;margin-top:2px;">Saved to bank: ${ci.saved.toLocaleString()} TZS</div>
+        </div>` : isCurrent ? `
+        <div style="font-size:0.75rem;color:var(--gray);text-align:center;padding:6px 0 12px;">
+            You can close ${mcName(m)} once the month has ended.
+        </div>` : `
+        <span class="section-label">Close ${mcName(m)}</span>
         <div style="font-size:0.72rem;color:var(--gray);margin-bottom:8px;">
-            Records a Bank In entry dated today. Available now: 💵 ${now.cash.toLocaleString()} · 📱 ${now.mobile.toLocaleString()}
+            How much of the profit goes to savings? It moves to the Bank as a Bank In entry.
+            Leave 0 to close without saving.<br>Available now: 💵 ${now.cash.toLocaleString()} · 📱 ${now.mobile.toLocaleString()}
         </div>
         <div style="display:flex;gap:8px;margin-bottom:10px;">
             <input type="number" id="mcSaveAmt" inputmode="decimal" value="${Math.max(0, f.profit)}" style="flex:1;">
@@ -2687,20 +2785,29 @@ function mcRenderClose() {
                 <option value="mobile">📱 From Mobile</option>
             </select>
         </div>
-        <button class="primary-cta" style="margin-bottom:8px;" onclick="mcMoveToSavings()">🏦 MOVE TO SAVINGS</button>
+        <button class="primary-cta" style="margin-bottom:8px;background:#dc3545;box-shadow:0 8px 20px rgba(220,53,69,0.25);" onclick="mcCloseMonth()">🔒 CLOSE ${mcName(m).toUpperCase()}</button>`}
         <button class="primary-cta green-cta" onclick="mcSendSummary()">📲 SEND MONTH SUMMARY</button>`;
 }
 
-async function mcMoveToSavings() {
+async function mcCloseMonth() {
     const s = window._mcClose; if (!s) return;
     const amt  = parseFloat(document.getElementById('mcSaveAmt').value) || 0;
     const from = document.getElementById('mcSaveFrom').value;
-    if (amt <= 0) { showToast('⚠️ Enter an amount.'); return; }
+    if (amt < 0) { showToast('⚠️ Amount cannot be negative.'); return; }
 
-    const ok = await showConfirm(
-        `Move ${fmt(amt)} from ${from === 'mobile' ? 'Lipa kwa Simu' : 'Cash'} to the bank as ${mcName(s.m)} savings?`,
-        'Confirm', 'var(--blue)');
+    const msg = amt > 0
+        ? `Close ${mcName(s.m)} and move ${fmt(amt)} from ${from === 'mobile' ? 'Lipa kwa Simu' : 'Cash'} to savings?`
+        : `Close ${mcName(s.m)} without saving anything?`;
+    const ok = await showConfirm(msg, 'Close Month', 'var(--blue)');
     if (!ok) return;
+
+    if (amt === 0) {
+        // Nothing to record on the server — remember the close on this phone
+        sSet('laVidaClosed_' + s.m, '1');
+        showToast(`🔒 ${mcName(s.m)} closed`);
+        mcRenderHistory(); mcRenderClose(); render();
+        return;
+    }
 
     showLoader(true);
     try {
@@ -2709,14 +2816,19 @@ async function mcMoveToSavings() {
             body: JSON.stringify({
                 action: 'saveTransaction', date: getLocalDateStr(),
                 other: 0, savings: amt, category: '',
-                note: `Month-end savings – ${mcName(s.m)}`,
+                note: `Month close – ${mcName(s.m)} (savings)`,
                 type: 'banking', account: from
             })
         });
-        showToast(`✅ ${fmt(amt)} moved to savings`);
-        navigator.vibrate?.(50);
-        setTimeout(async () => { await loadLogsInBackground(); mcRenderHistory(); mcRenderClose(); }, 4000);
-    } catch (e) { showToast('⚠️ Save may have failed.'); }
+        sSet('laVidaClosed_' + s.m, '1');
+        showToast(`🔒 ${mcName(s.m)} closed · ${fmt(amt)} saved`);
+        navigator.vibrate?.([100, 50, 100]);
+        setTimeout(async () => {
+            await loadLogsInBackground();
+            mcRenderHistory(); mcRenderClose();
+            mcSendSummary();   // send the month summary to WhatsApp automatically
+        }, 4000);
+    } catch (e) { showToast('⚠️ Close may have failed — check connection.'); }
     showLoader(false);
 }
 

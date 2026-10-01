@@ -6,7 +6,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual">
-    <title>La Vida Minimart v2.7</title>
+    <title>La Vida Minimart v2.8</title>
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
@@ -563,6 +563,8 @@
                     <button onclick="performLogout()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:0.7rem;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Logout">⏻</button>
                 </div>
             </div>
+            <!-- Month banner: current month + last month's close status -->
+            <div id="monthBanner" class="role-admin" style="margin-bottom:8px;"></div>
             <div class="today-panel">
                 <div class="today-stat">
                     <h4>Today Sales</h4>
@@ -575,14 +577,18 @@
                     <div id="heroBalanceTrend" style="margin-top:4px;"></div>
                 </div>
             </div>
-            <div class="today-panel role-admin" style="margin-top:8px;">
+            <div class="today-panel role-admin" style="margin-top:8px;grid-template-columns:1fr 1fr 1fr;">
                 <div class="today-stat">
-                    <h4>📱 Mobile Money</h4>
+                    <h4>📱 Mobile</h4>
                     <p id="topMobileBalance" style="color:#22c55e">— TZS</p>
                 </div>
-                <div class="today-stat right">
-                    <h4>🏦 Bank Balance</h4>
+                <div class="today-stat" style="text-align:center;">
+                    <h4>🏦 Bank</h4>
                     <p id="topBankBalance" style="color:#60a5fa">— TZS</p>
+                </div>
+                <div class="today-stat right">
+                    <h4>💰 Savings</h4>
+                    <p id="topSavingsBalance" style="color:var(--gold)">— TZS</p>
                 </div>
             </div>
             <div class="today-panel role-admin" style="margin-top:8px;">
@@ -606,8 +612,6 @@
                     🛒 MANUAL SALE
                 </button>
             </div>
-            <!-- Month banner: current month + last month's close status -->
-            <div id="monthBanner" class="role-admin"></div>
             <!-- Month-to-date cards: these restart from zero each new month -->
             <div class="summary-grid role-admin">
                 <div class="stat-card"><h4>Sales · This Month</h4><p id="totalSales">...</p></div>
@@ -1430,8 +1434,15 @@ async function fetchInventory() {
 //  ACCOUNT BALANCES — Cash / Mobile Money / Bank
 //  dateFilter: null = all-time running total, or a 'YYYY-MM-DD' string
 // ════════════════════════════════════════════════
+// Entries that move money into SAVINGS (written by Close Month).
+// Marked in the note so no Apps Script change is needed.
+function isSavingsEntry(r) {
+    const n = String(r.note || '');
+    return n.includes('[SAVINGS]') || n.startsWith('Month close –') || n.startsWith('Month-end savings –');
+}
+
 function computeAccountBalances(dateFilter) {
-    let cash = 0, mobile = 0, bank = 0;
+    let cash = 0, mobile = 0, bank = 0, savings = 0;
 
     (salesLog||[]).forEach(r => {
         const rd = (r.date||'').split('T')[0];
@@ -1454,7 +1465,13 @@ function computeAccountBalances(dateFilter) {
             else if (type === 'withdrawal') { from = 'bank'; to = 'cash'; }
             else if (type === 'expense')    { from = 'cash'; to = ''; }
         }
-        if (type === 'expense') {
+        if (isSavingsEntry(r) && (type === 'banking' || type === 'withdrawal')) {
+            // banking + marker   = Cash/Mobile -> Savings
+            // withdrawal + marker = Bank -> Savings
+            if (type === 'banking') { if (from === 'mobile') mobile -= amt; else cash -= amt; }
+            else bank -= amt;
+            savings += amt;
+        } else if (type === 'expense') {
             if (from === 'mobile') mobile -= amt; else cash -= amt;
         } else if (type === 'banking') {
             if (from === 'mobile') mobile -= amt; else cash -= amt;
@@ -1468,7 +1485,7 @@ function computeAccountBalances(dateFilter) {
         }
     });
 
-    return { cash, mobile, bank };
+    return { cash, mobile, bank, savings };
 }
 
 // ════════════════════════════════════════════════
@@ -1498,9 +1515,9 @@ function render() {
                                .reduce((s,r) => s + (Number(r.amount)||0), 0);
             rowOther   = dayAcc.filter(r => r.type==='expense' && (r.category||'').toLowerCase()!=='supplier')
                                .reduce((s,r) => s + (Number(r.amount)||0), 0);
-            const bankIn  = dayAcc.filter(r => r.type==='banking')
+            const bankIn  = dayAcc.filter(r => r.type==='banking' && !isSavingsEntry(r))
                                .reduce((s,r) => s + (Number(r.amount)||0), 0);
-            const bankOut = dayAcc.filter(r => r.type==='withdrawal')
+            const bankOut = dayAcc.filter(r => r.type==='withdrawal' && !isSavingsEntry(r))
                                .reduce((s,r) => s + (Number(r.amount)||0), 0);
             rowSavings = bankIn - bankOut; // withdrawal returns cash to hand
         } else {
@@ -1553,6 +1570,7 @@ function render() {
     document.getElementById('topBalance').innerText = logsLoaded ? fmt(bal.cash) : wait;
     document.getElementById('topMobileBalance').innerText = logsLoaded ? fmt(bal.mobile) : wait;
     document.getElementById('topBankBalance').innerText = logsLoaded ? fmt(bal.bank) : wait;
+    document.getElementById('topSavingsBalance').innerText = logsLoaded ? fmt(bal.savings) : wait;
     document.getElementById('heroBalanceTrend').innerHTML = '';
     showAcc('heroTotalSavings', totalSavings);
     document.getElementById('heroDaySavings').innerText = !logsLoaded ? wait : (dayS !== null ? fmt(daySavings) : '— TZS');
@@ -1582,8 +1600,9 @@ function render() {
             const oth     = Number(row.other) || 0;
             // Banking in/out for this date from Accounting_Log
             const hAcc    = (accountingLog||[]).filter(r => (r.date||'').split('T')[0] === rowDate);
-            const bankIn  = hAcc.filter(r=>r.type==='banking').reduce((s,r)=>s+(Number(r.amount)||0),0);
-            const bankOut = hAcc.filter(r=>r.type==='withdrawal').reduce((s,r)=>s+(Number(r.amount)||0),0);
+            const bankIn  = hAcc.filter(r=>r.type==='banking' && !isSavingsEntry(r)).reduce((s,r)=>s+(Number(r.amount)||0),0);
+            const bankOut = hAcc.filter(r=>r.type==='withdrawal' && !isSavingsEntry(r)).reduce((s,r)=>s+(Number(r.amount)||0),0);
+            const toSav   = hAcc.filter(r=>isSavingsEntry(r)).reduce((s,r)=>s+(Number(r.amount)||0),0);
             const prev    = new Date(rowDate); prev.setDate(prev.getDate() - 1);
             const prevStr = getLocalDateStr(prev);
             const prevSales = salesByDate[prevStr];
@@ -1601,6 +1620,7 @@ function render() {
                     <div class="entry-date">${rowDate}${isToday ? '<span class="tag-today">TODAY</span>' : ''}</div>
                     <div class="entry-meta">${sales > 0 ? `🛒 Sales: ${sales.toLocaleString()} TZS &nbsp;` : ''}${(stk+oth) > 0 ? `Exp: ${(stk+oth).toLocaleString()} TZS` : ''}${oth > 0 && stk === 0 ? ` (other)` : ''}</div>
                     ${bankIn > 0 || bankOut > 0 ? `<div class="entry-meta">${bankIn > 0 ? `🏦 Banked: ${bankIn.toLocaleString()} TZS&nbsp;` : ''}${bankOut > 0 ? `<span style="color:#854d0e;">💳 Bank Out: ${bankOut.toLocaleString()} TZS</span>` : ''}</div>` : ''}
+                    ${toSav > 0 ? `<div class="entry-meta" style="color:#a16207;font-weight:700;">💰 To Savings (month close): ${toSav.toLocaleString()} TZS</div>` : ''}
                     ${trendHtml}
                     ${row.note ? `<div class="entry-note">"${row.note}"</div>` : ''}
                 </div>
@@ -1635,6 +1655,7 @@ function mcFigures(m) {
         (accountingLog || []).filter(inM).forEach(r => {
             const a = Number(r.amount) || 0, t = String(r.type || '').toLowerCase();
             if (t === 'expense') { if (String(r.category || '').toLowerCase() === 'supplier') stock += a; else other += a; }
+            else if (isSavingsEntry(r)) return;
             else if (t === 'banking')    bankIn  += a;
             else if (t === 'withdrawal') bankOut += a;
         });
@@ -1718,30 +1739,30 @@ function renderMonthBanner() {
     if (logsLoaded && prevHasData) {
         const ci = mcClosedInfo(pm);
         prevStrip = ci.closed
-            ? `<div onclick="openModal('month')" style="cursor:pointer;margin-top:10px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.35);border-radius:12px;padding:9px 12px;font-size:0.74rem;color:#bbf7d0;">
+            ? `<div onclick="openModal('month')" style="cursor:pointer;margin-top:8px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.35);border-radius:12px;padding:9px 12px;font-size:0.74rem;color:#bbf7d0;">
                    ✅ <strong>${mcName(pm)} closed</strong> · Profit ${pf.profit.toLocaleString()} · Saved ${ci.saved.toLocaleString()} TZS
                </div>`
-            : `<div onclick="openModal('month')" style="cursor:pointer;margin-top:10px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.5);border-radius:12px;padding:9px 12px;font-size:0.74rem;color:#fde68a;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            : `<div onclick="openModal('month')" style="cursor:pointer;margin-top:8px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.5);border-radius:12px;padding:9px 12px;font-size:0.74rem;color:#fde68a;display:flex;justify-content:space-between;align-items:center;gap:8px;">
                    <span>⚠️ <strong>${mcName(pm)} not closed</strong> · Profit ${pf.profit.toLocaleString()} TZS</span>
                    <span style="background:#f59e0b;color:#001a33;font-weight:800;border-radius:8px;padding:4px 9px;white-space:nowrap;">CLOSE ›</span>
                </div>`;
     }
 
     el.innerHTML = `
-        <div style="background:var(--dark);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 6px 18px rgba(0,26,51,0.25);">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div style="background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.35);border-radius:14px;padding:10px 12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                    <div style="font-family:'Syne',sans-serif;font-size:1.15rem;color:var(--gold);letter-spacing:1px;">${mcName(m).toUpperCase()}</div>
-                    <div style="font-size:0.68rem;color:rgba(255,255,255,0.5);margin-top:2px;">Day ${today.getDate()} of ${daysInMonth}</div>
+                    <div style="font-family:'Syne',sans-serif;font-size:0.95rem;color:var(--gold);letter-spacing:1px;">${mcName(m).toUpperCase()}</div>
+                    <div style="font-size:0.6rem;color:rgba(255,255,255,0.5);margin-top:1px;">Day ${today.getDate()} of ${daysInMonth}</div>
                 </div>
                 <div style="text-align:right;">
-                    <div style="font-size:0.55rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.8px;">Profit so far</div>
-                    <div style="font-size:1.25rem;font-weight:800;color:${!logsLoaded ? 'white' : f.profit >= 0 ? '#4ade80' : '#f87171'};">
-                        ${logsLoaded ? f.profit.toLocaleString() : '···'} <span style="font-size:0.65rem;">TZS</span>
+                    <div style="font-size:0.5rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;">Profit so far</div>
+                    <div style="font-size:1.05rem;font-weight:800;color:${!logsLoaded ? 'white' : f.profit >= 0 ? '#4ade80' : '#f87171'};">
+                        ${logsLoaded ? f.profit.toLocaleString() : '···'} <span style="font-size:0.6rem;">TZS</span>
                     </div>
                 </div>
             </div>
-            <div style="height:5px;background:rgba(255,255,255,0.1);border-radius:3px;margin-top:12px;overflow:hidden;">
+            <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:3px;margin-top:8px;overflow:hidden;">
                 <div style="height:100%;width:${Math.round(today.getDate() / daysInMonth * 100)}%;background:var(--gold);"></div>
             </div>
             ${prevStrip}
@@ -2762,46 +2783,85 @@ function mcRenderClose() {
             ${balRow('💵 Cash', open.cash, close.cash)}
             ${balRow('📱 Lipa kwa Simu', open.mobile, close.mobile)}
             ${balRow('🏦 Bank', open.bank, close.bank)}
+            ${balRow('💰 Savings', open.savings, close.savings)}
         </div>
 
         ${ci.closed ? `
         <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:14px;padding:14px;margin-bottom:10px;text-align:center;">
             <div style="font-size:1.6rem;">✅</div>
             <div style="font-weight:800;color:#166534;margin-top:4px;">${mcName(m)} is closed</div>
-            <div style="font-size:0.75rem;color:#166534;margin-top:2px;">Saved to bank: ${ci.saved.toLocaleString()} TZS</div>
-        </div>` : isCurrent ? `
+            <div style="font-size:0.75rem;color:#166534;margin-top:2px;">Moved to savings: ${ci.saved.toLocaleString()} TZS</div>
+        </div>` : ''}
+        ${isCurrent && !ci.closed ? `
         <div style="font-size:0.75rem;color:var(--gray);text-align:center;padding:6px 0 12px;">
             You can close ${mcName(m)} once the month has ended.
         </div>` : `
-        <span class="section-label">Close ${mcName(m)}</span>
-        <div style="font-size:0.72rem;color:var(--gray);margin-bottom:8px;">
-            How much of the profit goes to savings? It moves to the Bank as a Bank In entry.
-            Leave 0 to close without saving.<br>Available now: 💵 ${now.cash.toLocaleString()} · 📱 ${now.mobile.toLocaleString()}
+        <span class="section-label">${ci.closed ? 'Move more to savings' : 'Close ' + mcName(m) + ' → Savings'}</span>
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:14px;padding:12px;margin-bottom:10px;">
+            <button type="button" onclick="mcFillFull()" style="width:100%;padding:11px;border-radius:12px;border:none;background:var(--gold);color:#001a33;font-weight:800;font-size:0.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:12px;">
+                💯 FULL SAVING — move the whole bank balance (${now.bank.toLocaleString()} TZS)
+            </button>
+            <span class="field-label">🏦 From Bank → Savings (TZS)</span>
+            <input type="number" id="mcBankAmt" inputmode="decimal" value="${ci.closed ? 0 : Math.max(0, now.bank)}" oninput="mcUpdateTotal()" style="margin-bottom:10px;">
+            <span class="field-label">💵 / 📱 Extra from Cash or Mobile (TZS)</span>
+            <div style="display:flex;gap:8px;">
+                <input type="number" id="mcSaveAmt" inputmode="decimal" value="0" oninput="mcUpdateTotal()" style="flex:1;">
+                <select id="mcSaveFrom" style="flex:1;padding:13px;border:2px solid #dde3ea;border-radius:12px;font-family:DM Sans,sans-serif;background:#f8fafc;">
+                    <option value="cash">💵 Cash (${now.cash.toLocaleString()})</option>
+                    <option value="mobile">📱 Mobile (${now.mobile.toLocaleString()})</option>
+                </select>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px dashed #fcd34d;">
+                <strong style="font-size:0.85rem;">💰 Total to Savings</strong>
+                <strong id="mcTotalSave" style="font-size:1rem;color:#a16207;">0 TZS</strong>
+            </div>
         </div>
-        <div style="display:flex;gap:8px;margin-bottom:10px;">
-            <input type="number" id="mcSaveAmt" inputmode="decimal" value="${Math.max(0, f.profit)}" style="flex:1;">
-            <select id="mcSaveFrom" style="flex:1;padding:13px;border:2px solid #dde3ea;border-radius:12px;font-family:DM Sans,sans-serif;background:#f8fafc;">
-                <option value="cash">💵 From Cash</option>
-                <option value="mobile">📱 From Mobile</option>
-            </select>
-        </div>
-        <button class="primary-cta" style="margin-bottom:8px;background:#dc3545;box-shadow:0 8px 20px rgba(220,53,69,0.25);" onclick="mcCloseMonth()">🔒 CLOSE ${mcName(m).toUpperCase()}</button>`}
+        <button class="primary-cta" style="margin-bottom:8px;${ci.closed ? '' : 'background:#dc3545;box-shadow:0 8px 20px rgba(220,53,69,0.25);'}" onclick="mcCloseMonth()">
+            ${ci.closed ? '💰 MOVE TO SAVINGS' : '🔒 CLOSE ' + mcName(m).toUpperCase() + ' & SAVE'}
+        </button>`}
         <button class="primary-cta green-cta" onclick="mcSendSummary()">📲 SEND MONTH SUMMARY</button>`;
+    mcUpdateTotal();
+}
+
+function mcFillFull() {
+    const now = computeAccountBalances(null);
+    document.getElementById('mcBankAmt').value = Math.max(0, now.bank);
+    mcUpdateTotal();
+}
+
+function mcUpdateTotal() {
+    const t = document.getElementById('mcTotalSave');
+    if (!t) return;
+    const bankAmt = parseFloat(document.getElementById('mcBankAmt')?.value) || 0;
+    const extra   = parseFloat(document.getElementById('mcSaveAmt')?.value) || 0;
+    t.innerText = fmt(bankAmt + extra);
 }
 
 async function mcCloseMonth() {
     const s = window._mcClose; if (!s) return;
-    const amt  = parseFloat(document.getElementById('mcSaveAmt').value) || 0;
-    const from = document.getElementById('mcSaveFrom').value;
-    if (amt < 0) { showToast('⚠️ Amount cannot be negative.'); return; }
+    const now     = computeAccountBalances(null);
+    const bankAmt = parseFloat(document.getElementById('mcBankAmt').value) || 0;
+    const extra   = parseFloat(document.getElementById('mcSaveAmt').value) || 0;
+    const from    = document.getElementById('mcSaveFrom').value;
+    const fromBal = from === 'mobile' ? now.mobile : now.cash;
+    const already = s.ci && s.ci.closed;
 
-    const msg = amt > 0
-        ? `Close ${mcName(s.m)} and move ${fmt(amt)} from ${from === 'mobile' ? 'Lipa kwa Simu' : 'Cash'} to savings?`
+    if (bankAmt < 0 || extra < 0) { showToast('⚠️ Amounts cannot be negative.'); return; }
+    if (bankAmt > now.bank + 1)   { showToast(`⚠️ Bank only has ${fmt(now.bank)}.`); return; }
+    if (extra > fromBal + 1)      { showToast(`⚠️ ${from === 'mobile' ? 'Mobile' : 'Cash'} only has ${fmt(fromBal)}.`); return; }
+    if (already && bankAmt + extra === 0) { showToast('⚠️ Enter an amount to move.'); return; }
+
+    const total = bankAmt + extra;
+    const lines = [];
+    if (bankAmt > 0) lines.push(`🏦 Bank → Savings: ${fmt(bankAmt)}`);
+    if (extra > 0)   lines.push(`${from === 'mobile' ? '📱 Mobile' : '💵 Cash'} → Savings: ${fmt(extra)}`);
+    const msg = total > 0
+        ? `${already ? 'Move to savings' : 'Close ' + mcName(s.m)}?<br><br>${lines.join('<br>')}<br><strong>Total: ${fmt(total)}</strong>`
         : `Close ${mcName(s.m)} without saving anything?`;
-    const ok = await showConfirm(msg, 'Close Month', 'var(--blue)');
+    const ok = await showConfirm(msg, already ? 'Move' : 'Close Month', 'var(--blue)');
     if (!ok) return;
 
-    if (amt === 0) {
+    if (total === 0) {
         // Nothing to record on the server — remember the close on this phone
         sSet('laVidaClosed_' + s.m, '1');
         showToast(`🔒 ${mcName(s.m)} closed`);
@@ -2809,26 +2869,43 @@ async function mcCloseMonth() {
         return;
     }
 
+    const note = `Month close – ${mcName(s.m)} [SAVINGS]`;
+    const date = getLocalDateStr();
     showLoader(true);
     try {
-        await fetch(SCRIPT_URL, {
-            method: 'POST', mode: 'no-cors',
-            body: JSON.stringify({
-                action: 'saveTransaction', date: getLocalDateStr(),
-                other: 0, savings: amt, category: '',
-                note: `Month close – ${mcName(s.m)} (savings)`,
-                type: 'banking', account: from
-            })
-        });
+        if (bankAmt > 0) {
+            // Bank -> Savings (recorded as a marked withdrawal)
+            await fetch(SCRIPT_URL, {
+                method: 'POST', mode: 'no-cors',
+                body: JSON.stringify({
+                    action: 'saveTransaction', date,
+                    other: 0, savings: -bankAmt, category: 'Withdrawal',
+                    note: note + ' from Bank', type: 'withdrawal', account: 'cash'
+                })
+            });
+            if (extra > 0) await new Promise(r => setTimeout(r, 800));
+        }
+        if (extra > 0) {
+            // Cash/Mobile -> Savings (recorded as a marked bank-in)
+            await fetch(SCRIPT_URL, {
+                method: 'POST', mode: 'no-cors',
+                body: JSON.stringify({
+                    action: 'saveTransaction', date,
+                    other: 0, savings: extra, category: '',
+                    note: note + ' from ' + (from === 'mobile' ? 'Mobile' : 'Cash'),
+                    type: 'banking', account: from
+                })
+            });
+        }
         sSet('laVidaClosed_' + s.m, '1');
-        showToast(`🔒 ${mcName(s.m)} closed · ${fmt(amt)} saved`);
+        showToast(`💰 ${fmt(total)} moved to savings`);
         navigator.vibrate?.([100, 50, 100]);
         setTimeout(async () => {
             await loadLogsInBackground();
             mcRenderHistory(); mcRenderClose();
-            mcSendSummary();   // send the month summary to WhatsApp automatically
+            if (!already) mcSendSummary();   // send the month summary on first close
         }, 4000);
-    } catch (e) { showToast('⚠️ Close may have failed — check connection.'); }
+    } catch (e) { showToast('⚠️ Save may have failed — check connection.'); }
     showLoader(false);
 }
 
@@ -2848,7 +2925,8 @@ function mcMessage() {
 Closing balances
 💵 Cash: ${n(s.close.cash)}
 📱 Mobile: ${n(s.close.mobile)}
-🏦 Bank: ${n(s.close.bank)}`;
+🏦 Bank: ${n(s.close.bank)}
+💰 Savings: ${n(s.close.savings)}`;
 }
 
 async function mcSendSummary() {
